@@ -1,0 +1,73 @@
+name: Enterprise inquiry / design partnership
+description: Sponsorship, design partnership, or paid-support inquiries
+title: "[enterprise] "
+labels: [enterprise]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for considering Relay for production use.
+
+        Use this template for any of:
+
+        - **Design partnership** — free in exchange for product feedback
+        - **Sponsorship** — public sponsor on the README
+        - **Paid support contract** — SLA, custom features, VPC deployment
+        - **Enterprise procurement** — SOC 2 attestation, BAA, DPA
+
+        For private conversations (you don't want this issue public), email
+        **engineering@ai5labs.com** instead with the same details.
+
+  - type: input
+    id: company
+    attributes:
+      label: Company / organization
+    validations:
+      required: true
+
+  - type: input
+    id: contact
+    attributes:
+      label: Contact email
+      description: We'll only use this to follow up on this inquiry.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: track
+    attributes:
+      label: What are you interested in?
+      options:
+        - Design partnership (free, exchange for feedback)
+        - GitHub Sponsorship (public listing)
+        - Paid support contract (SLA, custom features)
+        - Enterprise procurement (SOC 2, BAA, DPA paperwork)
+        - Custom integration / consulting
+        - Just talking — exploring fit
+    validations:
+      required: true
+
+  - type: textarea
+    id: usecase
+    attributes:
+      label: Use case
+      description: |
+        What are you building, what providers / models are you using today,
+        what's the rough volume? More detail helps us route you fast.
+    validations:
+      required: true
+
+  - type: textarea
+    id: requirements
+    attributes:
+      label: Specific requirements (if any)
+      description: |
+        Compliance regimes you operate under (HIPAA, PCI, SOC 2, ISO, GDPR),
+        deployment constraints (must be in our VPC, EU data residency),
+        SLA expectations (99.9 vs 99.99), custom features you need, etc.
+
+  - type: input
+    id: timeline
+    attributes:
+      label: Timeline
+      placeholder: e.g. "exploring now, decision in 6 weeks"

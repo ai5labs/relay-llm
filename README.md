@@ -5,6 +5,7 @@
 [![CI](https://github.com/ai5labs/relay-llm/actions/workflows/ci.yml/badge.svg)](https://github.com/ai5labs/relay-llm/actions/workflows/ci.yml)
 [![Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://python.org)
+[![Sponsor](https://img.shields.io/github/sponsors/ai5labs?label=sponsor&logo=GitHub&color=ea4aaa)](https://github.com/sponsors/ai5labs)
 
 A Python library that gives you one interface to every major LLM — chat, streaming, tool calls, structured output, batch, MCP — defined in a YAML file you check into your repo. Production-grade, enterprise-ready, OSS.
 
@@ -218,6 +219,25 @@ uv run pyright
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). Please read [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before opening a PR.
 
+## Support &amp; sponsorship
+
+Relay is free, Apache-2.0, and actively maintained by [ai5labs Research OPC Pvt Ltd](https://ai5labs.com). If your team uses it in production, please consider:
+
+- ⭐ **[Star the repo](https://github.com/ai5labs/relay-llm)** — actually helps a lot at this stage
+- 💖 **[Sponsor on GitHub](https://github.com/sponsors/ai5labs)** — pays for maintainer time, contract-test budgets, and CI compute
+- 🤝 **[Become a design partner](SUPPORT.md#3-become-a-design-partner)** — direct line to maintainers, roadmap influence, free for the program duration
+- 🏢 **Enterprise support** — SLAs, custom features, VPC deployment, SOC 2, BAA/DPA. Email **engineering@ai5labs.com**
+
+See [SUPPORT.md](SUPPORT.md) for full details.
+
+### Sponsors
+
+*This space is for our sponsors — be the first.*
+
+### Design partners
+
+*This space is for our design partners — currently accepting our first cohort.*
+
 ## License
 
-Apache-2.0. See [LICENSE](LICENSE).
+Apache-2.0. See [LICENSE](LICENSE). Copyright © 2026 ai5labs Research OPC Pvt Ltd.

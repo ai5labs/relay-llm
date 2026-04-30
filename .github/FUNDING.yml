@@ -1,0 +1,20 @@
+# GitHub Sponsors button config.
+# Each entry surfaces a "Sponsor" button at the top of the repo.
+# Uncomment + fill in the IDs you actually have set up. Anything left commented
+# out is hidden — GitHub never errors on missing-but-unconfigured channels.
+
+# Native GitHub Sponsors — recommended primary. Set up at:
+#   https://github.com/sponsors/ai5labs/dashboard
+github: [ai5labs]
+
+# Open Collective — public ledger, good for transparency. Create at:
+#   https://opencollective.com/create
+# open_collective: relay-llm
+
+# Polar.sh — issue-funding + monthly support. Sign up at https://polar.sh
+# polar: ai5labs
+
+# Generic links (any URL — invoice page, contact form, etc.)
+custom:
+  - "https://ai5labs.com/relay-llm/sponsor"
+  - "https://ai5labs.com/relay-llm/enterprise"
