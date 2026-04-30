@@ -39,6 +39,12 @@ import orjson
 CATALOG_PATH = Path(__file__).parent.parent / "src" / "relay" / "catalog" / "data" / "models.json"
 CURATED_PATH = Path(__file__).parent / "curated.json"
 
+# Artificial Analysis API — opt-in via AA_API_KEY env var. Their data is
+# proprietary; redistribution may require a commercial license. Scores fetched
+# here are merged into the catalog at refresh time but the resulting
+# ``models.json`` should not be republished as your own.
+AA_BASE = "https://artificialanalysis.ai/api/v2"
+
 
 # ---------------------------------------------------------------------------
 # OpenRouter — primary source for prices
@@ -78,12 +84,17 @@ async def fetch_openrouter() -> dict[str, dict[str, Any]]:
         modalities = m.get("architecture", {}).get("input_modalities") or ["text"]
         if "image" in modalities:
             caps.append("vision")
+        # OpenRouter uses negative sentinels (e.g. -1) to mean "variable /
+        # dynamic" for routed-meta models like ``openrouter/auto``. Skip
+        # those so the catalog stays sane.
+        in_1m = in_per_token * 1_000_000 if in_per_token > 0 else None
+        out_1m = out_per_token * 1_000_000 if out_per_token > 0 else None
         out[slug] = {
             "provider": _normalize_provider_id(provider),
             "model_id": model_id,
             "context_window": ctx,
-            "input_per_1m": (in_per_token * 1_000_000) if in_per_token else None,
-            "output_per_1m": (out_per_token * 1_000_000) if out_per_token else None,
+            "input_per_1m": in_1m,
+            "output_per_1m": out_1m,
             "capabilities": caps,
             "modalities_in": modalities,
         }
@@ -123,6 +134,70 @@ def load_curated() -> dict[str, dict[str, Any]]:
     raw = json.loads(CURATED_PATH.read_text(encoding="utf-8"))
     # Strip top-level metadata keys (``_comment`` etc.); keep only slug→dict.
     return {k: v for k, v in raw.items() if isinstance(v, dict)}
+
+
+# ---------------------------------------------------------------------------
+# Artificial Analysis — opt-in benchmark scores
+# ---------------------------------------------------------------------------
+
+
+async def fetch_artificial_analysis() -> dict[str, dict[str, Any]]:
+    """Fetch quality_index + speed_tps from Artificial Analysis.
+
+    Requires ``AA_API_KEY`` env var. Returns ``{}`` (silent skip) if not set
+    or if the API call fails — the curated/snapshot tier will fill in.
+
+    AA's slug format differs from ours (they use names like ``"gpt-4o"``
+    or ``"claude-3-5-sonnet"`` without the provider prefix). We do a
+    best-effort substring match against our known providers.
+    """
+    import os
+
+    api_key = os.environ.get("AA_API_KEY")
+    if not api_key:
+        return {}
+
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            resp = await client.get(
+                f"{AA_BASE}/data/llms/models",
+                headers={"x-api-key": api_key},
+            )
+            resp.raise_for_status()
+            data = orjson.loads(resp.content)
+    except Exception as e:
+        print(f"  Artificial Analysis fetch failed: {e}", file=sys.stderr)
+        return {}
+
+    out: dict[str, dict[str, Any]] = {}
+    # AA's response shape (subject to change without notice — verify if it breaks):
+    # { "data": [ { "slug": "gpt-4o", "creator": {"slug": "openai"},
+    #              "quality_index": 71, "median_output_tokens_per_second": 110, ... } ] }
+    for item in data.get("data") or []:
+        creator = (item.get("creator") or {}).get("slug") or item.get("provider")
+        model_slug = item.get("slug") or item.get("name")
+        if not creator or not model_slug:
+            continue
+        relay_slug = f"{creator}/{model_slug}"
+        bench: dict[str, Any] = {}
+        if "quality_index" in item:
+            bench["quality_index"] = item["quality_index"]
+        if "mmlu_score" in item:
+            bench["mmlu"] = item["mmlu_score"]
+        if "gpqa_score" in item:
+            bench["gpqa"] = item["gpqa_score"]
+        if "humaneval_score" in item:
+            bench["humaneval"] = item["humaneval_score"]
+        if "math_score" in item:
+            bench["math"] = item["math_score"]
+        if bench:
+            bench["sources"] = ["artificial-analysis"]
+
+        out[relay_slug] = {
+            "speed_tps": item.get("median_output_tokens_per_second"),
+            "benchmarks": bench if bench else None,
+        }
+    return out
 
 
 # ---------------------------------------------------------------------------
@@ -227,6 +302,13 @@ async def main() -> int:
         return 1
     print(f"  → {len(or_index)} models", file=sys.stderr)
 
+    print("fetching Artificial Analysis (opt-in) ...", file=sys.stderr)
+    aa_index = await fetch_artificial_analysis()
+    if aa_index:
+        print(f"  → {len(aa_index)} AA rows", file=sys.stderr)
+    else:
+        print("  → skipped (AA_API_KEY not set, or fetch failed)", file=sys.stderr)
+
     print("loading curated overrides ...", file=sys.stderr)
     curated = load_curated()
     print(f"  → {len(curated)} curated rows", file=sys.stderr)
@@ -235,7 +317,8 @@ async def main() -> int:
     existing = load_existing()
     print(f"  → {len(existing)} existing rows", file=sys.stderr)
 
-    rows = merge(existing, or_index, curated)
+    # AA is layered between OpenRouter and curated — curated wins on conflicts.
+    rows = merge(existing, or_index, {**aa_index, **curated})
     print(f"merged: {len(rows)} rows", file=sys.stderr)
 
     if args.dry_run:

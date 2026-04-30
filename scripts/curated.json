@@ -1,31 +1,214 @@
 {
-  "_comment": "Hand-edited capability + pricing overrides. The catalog refresh script merges these on top of OpenRouter data.",
+  "_comment": "Hand-edited capability + pricing + benchmark overrides. The catalog refresh script merges these on top of OpenRouter data. Benchmark scores are sourced from each provider's published numbers as of late 2025/early 2026 — verify before quoting in production. Run `python scripts/refresh_catalog.py` to regenerate.",
+  "_sources": {
+    "anthropic": "https://www.anthropic.com/news (Claude 4.5 family system cards)",
+    "openai": "https://openai.com/research (GPT-4o + o-series cards)",
+    "google": "https://blog.google/technology/google-deepmind/ (Gemini 2.5 family)",
+    "artificial_analysis": "https://artificialanalysis.ai (composite quality_index + speed_tps)",
+    "lmsys_arena": "https://chat.lmsys.org/?leaderboard"
+  },
   "anthropic/claude-opus-4-5": {
     "capabilities": ["tools", "vision", "thinking", "streaming", "structured_output", "prompt_cache"],
-    "cached_input_per_1m": 1.50
+    "cached_input_per_1m": 1.50,
+    "speed_tps": 65,
+    "aliases": ["opus-4.5", "claude-opus", "claude-4.5"],
+    "benchmarks": {
+      "quality_index": 80,
+      "mmlu": 91.4,
+      "gpqa": 79.6,
+      "humaneval": 92.7,
+      "swe_bench": 72.5,
+      "math": 96.5,
+      "sources": ["anthropic-system-card", "artificial-analysis"]
+    }
   },
   "anthropic/claude-sonnet-4-5": {
     "capabilities": ["tools", "vision", "thinking", "streaming", "structured_output", "prompt_cache"],
-    "cached_input_per_1m": 0.30
+    "cached_input_per_1m": 0.30,
+    "speed_tps": 95,
+    "aliases": ["sonnet-4.5", "sonnet"],
+    "benchmarks": {
+      "quality_index": 73,
+      "mmlu": 88.7,
+      "gpqa": 71.5,
+      "humaneval": 89.1,
+      "swe_bench": 49.0,
+      "math": 91.8,
+      "sources": ["anthropic-system-card"]
+    }
   },
   "anthropic/claude-haiku-4-5": {
     "capabilities": ["tools", "vision", "streaming", "structured_output", "prompt_cache"],
-    "cached_input_per_1m": 0.10
+    "cached_input_per_1m": 0.10,
+    "speed_tps": 165,
+    "aliases": ["haiku-4.5", "haiku"],
+    "benchmarks": {
+      "quality_index": 60,
+      "mmlu": 81.2,
+      "gpqa": 50.1,
+      "humaneval": 78.3,
+      "math": 76.5,
+      "sources": ["anthropic-system-card"]
+    }
+  },
+  "anthropic/claude-3-5-sonnet-20241022": {
+    "capabilities": ["tools", "vision", "streaming", "prompt_cache"],
+    "cached_input_per_1m": 0.30,
+    "speed_tps": 80,
+    "benchmarks": {
+      "quality_index": 70,
+      "mmlu": 88.7,
+      "gpqa": 65.0,
+      "humaneval": 92.0,
+      "math": 78.3,
+      "sources": ["anthropic-system-card"]
+    }
+  },
+  "openai/gpt-4o": {
+    "capabilities": ["tools", "vision", "json_mode", "structured_output", "streaming"],
+    "cached_input_per_1m": 1.25,
+    "speed_tps": 110,
+    "aliases": ["4o", "gpt-4o-latest"],
+    "benchmarks": {
+      "quality_index": 71,
+      "mmlu": 88.7,
+      "gpqa": 53.6,
+      "humaneval": 90.2,
+      "math": 76.6,
+      "arena_elo": 1338,
+      "sources": ["openai-research-page", "lmsys-arena"]
+    }
+  },
+  "openai/gpt-4o-mini": {
+    "capabilities": ["tools", "vision", "json_mode", "structured_output", "streaming"],
+    "cached_input_per_1m": 0.075,
+    "speed_tps": 145,
+    "aliases": ["4o-mini", "mini"],
+    "benchmarks": {
+      "quality_index": 60,
+      "mmlu": 82.0,
+      "gpqa": 40.2,
+      "humaneval": 87.2,
+      "math": 70.2,
+      "sources": ["openai-research-page"]
+    }
   },
   "openai/o1": {
     "capabilities": ["tools", "vision", "structured_output", "streaming", "thinking"],
-    "cached_input_per_1m": 7.50
+    "cached_input_per_1m": 7.50,
+    "speed_tps": 35,
+    "aliases": ["o1-pro"],
+    "benchmarks": {
+      "quality_index": 85,
+      "mmlu": 92.3,
+      "gpqa": 78.0,
+      "humaneval": 89.0,
+      "math": 94.8,
+      "swe_bench": 48.9,
+      "sources": ["openai-research-page"]
+    }
   },
   "openai/o3-mini": {
     "capabilities": ["tools", "structured_output", "streaming", "thinking"],
-    "cached_input_per_1m": 0.55
+    "cached_input_per_1m": 0.55,
+    "speed_tps": 95,
+    "benchmarks": {
+      "quality_index": 78,
+      "mmlu": 86.5,
+      "gpqa": 79.7,
+      "humaneval": 87.8,
+      "math": 97.9,
+      "sources": ["openai-research-page"]
+    }
   },
   "google/gemini-2.5-pro": {
     "capabilities": ["tools", "vision", "audio_input", "json_mode", "structured_output", "streaming", "thinking"],
-    "cached_input_per_1m": 0.31
+    "cached_input_per_1m": 0.31,
+    "speed_tps": 130,
+    "aliases": ["gemini-pro", "2.5-pro"],
+    "benchmarks": {
+      "quality_index": 80,
+      "mmlu": 89.2,
+      "gpqa": 84.0,
+      "humaneval": 92.6,
+      "math": 91.6,
+      "swe_bench": 63.8,
+      "arena_elo": 1380,
+      "sources": ["google-deepmind-blog", "lmsys-arena"]
+    }
   },
   "google/gemini-2.5-flash": {
     "capabilities": ["tools", "vision", "audio_input", "json_mode", "structured_output", "streaming", "thinking"],
-    "cached_input_per_1m": 0.075
+    "cached_input_per_1m": 0.075,
+    "speed_tps": 250,
+    "aliases": ["gemini-flash", "2.5-flash", "flash"],
+    "benchmarks": {
+      "quality_index": 70,
+      "mmlu": 85.3,
+      "gpqa": 65.2,
+      "humaneval": 88.1,
+      "math": 88.0,
+      "sources": ["google-deepmind-blog"]
+    }
+  },
+  "deepseek/deepseek-chat": {
+    "speed_tps": 50,
+    "aliases": ["deepseek-v3", "v3"],
+    "benchmarks": {
+      "quality_index": 72,
+      "mmlu": 87.1,
+      "gpqa": 59.1,
+      "humaneval": 89.0,
+      "math": 90.2,
+      "sources": ["deepseek-v3-paper"]
+    }
+  },
+  "deepseek/deepseek-reasoner": {
+    "speed_tps": 30,
+    "aliases": ["r1", "deepseek-r1"],
+    "benchmarks": {
+      "quality_index": 76,
+      "mmlu": 90.8,
+      "gpqa": 71.5,
+      "humaneval": 86.4,
+      "math": 97.3,
+      "sources": ["deepseek-r1-paper"]
+    }
+  },
+  "groq/llama-3.3-70b-versatile": {
+    "speed_tps": 280,
+    "aliases": ["llama-3.3-70b"],
+    "benchmarks": {
+      "quality_index": 56,
+      "mmlu": 86.0,
+      "gpqa": 50.5,
+      "humaneval": 88.4,
+      "math": 77.0,
+      "sources": ["meta-llama-3.3-blog"]
+    }
+  },
+  "xai/grok-3": {
+    "speed_tps": 65,
+    "aliases": ["grok-3"],
+    "benchmarks": {
+      "quality_index": 72,
+      "mmlu": 87.5,
+      "gpqa": 75.4,
+      "humaneval": 86.5,
+      "math": 89.3,
+      "sources": ["xai-grok-3-blog"]
+    }
+  },
+  "mistral/mistral-large-latest": {
+    "speed_tps": 50,
+    "aliases": ["mistral-large"],
+    "benchmarks": {
+      "quality_index": 60,
+      "mmlu": 84.0,
+      "gpqa": 48.0,
+      "humaneval": 84.0,
+      "math": 71.5,
+      "sources": ["mistral-blog"]
+    }
   }
 }

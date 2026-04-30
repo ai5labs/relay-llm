@@ -141,6 +141,190 @@ def _cmd_providers(_args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_models_compare(args: argparse.Namespace) -> int:
+    """Side-by-side comparison of N models from the catalog."""
+    catalog = get_catalog()
+    rows: list[Any] = []
+    missing: list[str] = []
+    for slug in args.slugs:
+        # Allow alias lookup: try direct slug, then search aliases.
+        row = catalog.get(slug)
+        if row is None:
+            for r in catalog.values():
+                if slug in r.aliases or slug == r.model_id:
+                    row = r
+                    break
+        if row is None:
+            missing.append(slug)
+        else:
+            rows.append(row)
+    if missing:
+        print(f"unknown: {', '.join(missing)}", file=sys.stderr)
+        if not rows:
+            return 1
+
+    if args.json:
+        print(json.dumps([_row_to_dict(r) for r in rows], indent=2, default=str))
+        return 0
+
+    # Build a side-by-side table.
+    from collections.abc import Callable
+
+    fields: list[tuple[str, Callable[[Any], str]]] = [
+        ("model", lambda r: r.slug),
+        ("context", lambda r: f"{r.context_window:,}" if r.context_window else "—"),
+        ("input/1M", lambda r: f"${r.input_per_1m:.2f}" if r.input_per_1m is not None else "—"),
+        ("output/1M", lambda r: f"${r.output_per_1m:.2f}" if r.output_per_1m is not None else "—"),
+        ("speed", lambda r: f"{r.speed_tps:.0f} tok/s" if r.speed_tps else "—"),
+        (
+            "quality",
+            lambda r: (
+                f"{r.benchmarks.quality_index}"
+                if r.benchmarks and r.benchmarks.quality_index
+                else "—"
+            ),
+        ),
+        ("MMLU", lambda r: f"{r.benchmarks.mmlu}" if r.benchmarks and r.benchmarks.mmlu else "—"),
+        ("GPQA", lambda r: f"{r.benchmarks.gpqa}" if r.benchmarks and r.benchmarks.gpqa else "—"),
+        (
+            "HumanEval",
+            lambda r: (
+                f"{r.benchmarks.humaneval}" if r.benchmarks and r.benchmarks.humaneval else "—"
+            ),
+        ),
+        ("MATH", lambda r: f"{r.benchmarks.math}" if r.benchmarks and r.benchmarks.math else "—"),
+        (
+            "SWE-bench",
+            lambda r: (
+                f"{r.benchmarks.swe_bench}" if r.benchmarks and r.benchmarks.swe_bench else "—"
+            ),
+        ),
+        ("vision", lambda r: "✓" if "vision" in r.capabilities else "—"),
+        ("tools", lambda r: "✓" if "tools" in r.capabilities else "—"),
+        ("thinking", lambda r: "✓" if "thinking" in r.capabilities else "—"),
+    ]
+
+    label_w = max(len(name) for name, _ in fields)
+    col_w = max(max(len(fn(r)) for _, fn in fields) for r in rows)
+    col_w = max(col_w, 12)
+
+    for name, getter in fields:
+        line = f"{name:<{label_w}}  "
+        for r in rows:
+            line += f"{getter(r):<{col_w}}  "
+        print(line)
+    print()
+    print("(scores from each provider's published benchmarks; verify before quoting)")
+    return 0
+
+
+def _cmd_models_recommend(args: argparse.Namespace) -> int:
+    """Recommend models for a task / budget / capability set."""
+    catalog = get_catalog()
+    rows = [r for r in catalog.values() if not r.deprecated]
+
+    if args.needs:
+        for cap in args.needs:
+            rows = [r for r in rows if cap in r.capabilities]
+
+    if args.providers:
+        rows = [r for r in rows if r.provider in args.providers]
+
+    # Budget filter.
+    def _within(r: Any, threshold: float) -> bool:
+        avg = r.cost_per_1m_avg()
+        return avg is not None and avg < threshold
+
+    if args.budget == "cheap":
+        rows = [r for r in rows if _within(r, 1.0)]
+    elif args.budget == "balanced":
+        rows = [r for r in rows if _within(r, 10.0)]
+    # premium: no filter
+
+    # Score for ranking — varies by task.
+    def score(r: Any) -> float:
+        b = r.benchmarks
+        if b is None or b.quality_index is None:
+            return -1.0
+        # Task-specific weighting against the quality_index.
+        if args.task == "code":
+            return (b.humaneval or b.quality_index) + (b.swe_bench or 0) * 0.5
+        if args.task == "reasoning":
+            return (b.gpqa or 0) * 0.6 + (b.math or 0) * 0.4
+        if args.task == "math":
+            return b.math or b.quality_index
+        if args.task == "vision":
+            return b.quality_index if "vision" in r.capabilities else -1.0
+        # Default: chat — composite quality.
+        return b.quality_index
+
+    scored = [(r, score(r)) for r in rows]
+    scored = [(r, s) for r, s in scored if s > 0]
+    scored.sort(key=lambda x: -x[1])
+    top = scored[: args.limit]
+
+    if not top:
+        print("no models matched (try fewer constraints)", file=sys.stderr)
+        return 1
+
+    if args.json:
+        print(
+            json.dumps(
+                [{"slug": r.slug, "score": s, "row": _row_to_dict(r)} for r, s in top],
+                indent=2,
+                default=str,
+            )
+        )
+        return 0
+
+    print(f"Top {len(top)} for task={args.task!r} budget={args.budget!r}:")
+    print()
+    print(f"{'#':>2}  {'model':<48}  {'score':>6}  {'avg $/1M':>10}  {'speed':>10}  capabilities")
+    print("-" * 110)
+    for i, (r, s) in enumerate(top, 1):
+        cost = r.cost_per_1m_avg()
+        cost_str = f"${cost:.2f}" if cost is not None else "—"
+        speed_str = f"{r.speed_tps:.0f} tok/s" if r.speed_tps else "—"
+        caps = ",".join(sorted(set(r.capabilities) & {"tools", "vision", "thinking", "json_mode"}))
+        print(f"{i:>2}  {r.slug:<48}  {s:>6.1f}  {cost_str:>10}  {speed_str:>10}  {caps}")
+    print()
+    print(
+        "(ranking based on published benchmarks + filters; pick + test for your specific workload)"
+    )
+    return 0
+
+
+def _row_to_dict(r: Any) -> dict[str, Any]:
+    """Serialize a CatalogRow including benchmarks + aliases for JSON output."""
+    out: dict[str, Any] = {
+        "provider": r.provider,
+        "model_id": r.model_id,
+        "context_window": r.context_window,
+        "max_output": r.max_output,
+        "input_per_1m": r.input_per_1m,
+        "output_per_1m": r.output_per_1m,
+        "cached_input_per_1m": r.cached_input_per_1m,
+        "speed_tps": r.speed_tps,
+        "capabilities": list(r.capabilities),
+        "modalities_in": list(r.modalities_in),
+        "modalities_out": list(r.modalities_out),
+        "aliases": list(r.aliases),
+        "deprecated": r.deprecated,
+    }
+    if r.benchmarks is not None:
+        out["benchmarks"] = {
+            "quality_index": r.benchmarks.quality_index,
+            "arena_elo": r.benchmarks.arena_elo,
+            "mmlu": r.benchmarks.mmlu,
+            "gpqa": r.benchmarks.gpqa,
+            "humaneval": r.benchmarks.humaneval,
+            "math": r.benchmarks.math,
+            "swe_bench": r.benchmarks.swe_bench,
+            "sources": list(r.benchmarks.sources),
+        }
+    return out
+
+
 def _cmd_version(_args: argparse.Namespace) -> int:
     print(__version__)
     return 0
@@ -171,6 +355,46 @@ def _build_parser() -> argparse.ArgumentParser:
     p_models_inspect.add_argument("alias")
     p_models_inspect.add_argument("--config", help="YAML path (default: models.yaml)")
     p_models_inspect.set_defaults(func=_cmd_models_inspect)
+
+    p_models_compare = sub_models.add_parser(
+        "compare", help="side-by-side comparison of N models from the catalog"
+    )
+    p_models_compare.add_argument(
+        "slugs", nargs="+", help="model slugs (e.g. anthropic/claude-sonnet-4-5) or aliases"
+    )
+    p_models_compare.add_argument("--json", action="store_true", help="emit JSON")
+    p_models_compare.set_defaults(func=_cmd_models_compare)
+
+    p_models_recommend = sub_models.add_parser(
+        "recommend", help="recommend models for a task / budget / capability set"
+    )
+    p_models_recommend.add_argument(
+        "--task",
+        choices=["chat", "code", "reasoning", "math", "vision"],
+        default="chat",
+        help="primary task type to optimize for",
+    )
+    p_models_recommend.add_argument(
+        "--budget",
+        choices=["cheap", "balanced", "premium"],
+        default="balanced",
+        help="cheap=<$1/M avg; balanced=<$10/M; premium=any",
+    )
+    p_models_recommend.add_argument(
+        "--needs",
+        nargs="*",
+        default=[],
+        help="required capabilities (vision, tools, thinking, json_mode, ...)",
+    )
+    p_models_recommend.add_argument(
+        "--providers",
+        nargs="*",
+        default=[],
+        help="restrict to these providers (e.g. anthropic openai google)",
+    )
+    p_models_recommend.add_argument("--limit", type=int, default=10, help="how many to return")
+    p_models_recommend.add_argument("--json", action="store_true", help="emit JSON")
+    p_models_recommend.set_defaults(func=_cmd_models_recommend)
 
     p_catalog = subs.add_parser("catalog", help="inspect the built-in catalog")
     sub_catalog = p_catalog.add_subparsers(dest="catalog_cmd", required=True)

@@ -46,6 +46,38 @@ ProviderId = Literal[
 
 
 @dataclass(frozen=True, slots=True)
+class BenchmarkScores:
+    """Public benchmark scores for a model.
+
+    All fields optional. Sourced from the provider's published numbers, the
+    Artificial Analysis API, or LMSYS Arena where applicable. We never claim
+    these are *our* benchmarks — they're aggregates of public data with
+    provenance attached.
+
+    These are *quality* signals to help users choose between models. Speed
+    + cost are tracked elsewhere (``input_per_1m``, ``output_per_1m``,
+    ``speed_tps``).
+    """
+
+    quality_index: float | None = None
+    """Composite 0-100 quality index (Artificial Analysis style)."""
+    arena_elo: int | None = None
+    """LMSYS Chatbot Arena Elo rating."""
+    mmlu: float | None = None
+    """MMLU 5-shot accuracy (0-1 or 0-100, whichever the provider published)."""
+    gpqa: float | None = None
+    """GPQA Diamond accuracy."""
+    humaneval: float | None = None
+    """HumanEval pass@1 — code generation."""
+    math: float | None = None
+    """MATH benchmark accuracy."""
+    swe_bench: float | None = None
+    """SWE-bench Verified — agentic coding tasks."""
+    sources: tuple[str, ...] = ()
+    """Where these scores come from (URLs or labels like ``"anthropic-marketing"``)."""
+
+
+@dataclass(frozen=True, slots=True)
 class CatalogRow:
     """A single model's metadata as shipped with the library."""
 
@@ -59,6 +91,15 @@ class CatalogRow:
     capabilities: tuple[str, ...] = ()
     modalities_in: tuple[str, ...] = ("text",)
     modalities_out: tuple[str, ...] = ("text",)
+
+    # Performance + quality signals
+    speed_tps: float | None = None
+    """Output tokens-per-second under typical load (Artificial Analysis style)."""
+    benchmarks: BenchmarkScores | None = None
+    """Public benchmark scores. ``None`` if no scores known for this model."""
+    aliases: tuple[str, ...] = ()
+    """Alternate names users might call this model (``"sonnet"``, ``"4o"``, ...)."""
+
     deprecated: bool = False
     notes: str | None = None
     extra: dict[str, Any] = field(default_factory=dict)
@@ -69,6 +110,13 @@ class CatalogRow:
 
     def supports(self, capability: str) -> bool:
         return capability in self.capabilities
+
+    def cost_per_1m_avg(self) -> float | None:
+        """Convenience: average of input + output per-1M cost. Useful for
+        ``recommend`` queries when the user doesn't know their input/output ratio."""
+        if self.input_per_1m is None or self.output_per_1m is None:
+            return None
+        return (self.input_per_1m + self.output_per_1m) / 2
 
 
 @lru_cache(maxsize=1)
@@ -92,9 +140,45 @@ def get_catalog() -> dict[str, CatalogRow]:
         return {}
 
     catalog: dict[str, CatalogRow] = {}
+    known = {
+        "provider",
+        "model_id",
+        "context_window",
+        "max_output",
+        "input_per_1m",
+        "output_per_1m",
+        "cached_input_per_1m",
+        "capabilities",
+        "modalities_in",
+        "modalities_out",
+        "deprecated",
+        "notes",
+        "speed_tps",
+        "benchmarks",
+        "aliases",
+    }
     for r in rows:
         if not isinstance(r, dict) or "provider" not in r or "model_id" not in r:
             continue
+        # Defensive: drop sentinel/bogus prices (negative, NaN). Some upstream
+        # sources use ``-1`` for "variable" — keep the row but null the price.
+        for k in ("input_per_1m", "output_per_1m", "cached_input_per_1m"):
+            v = r.get(k)
+            if isinstance(v, (int, float)) and (v < 0 or v != v):  # v != v → NaN
+                r[k] = None
+        bench_data = r.get("benchmarks")
+        bench: BenchmarkScores | None = None
+        if isinstance(bench_data, dict):
+            bench = BenchmarkScores(
+                quality_index=bench_data.get("quality_index"),
+                arena_elo=bench_data.get("arena_elo"),
+                mmlu=bench_data.get("mmlu"),
+                gpqa=bench_data.get("gpqa"),
+                humaneval=bench_data.get("humaneval"),
+                math=bench_data.get("math"),
+                swe_bench=bench_data.get("swe_bench"),
+                sources=tuple(bench_data.get("sources", ())),
+            )
         row = CatalogRow(
             provider=r["provider"],
             model_id=r["model_id"],
@@ -106,27 +190,12 @@ def get_catalog() -> dict[str, CatalogRow]:
             capabilities=tuple(r.get("capabilities", ())),
             modalities_in=tuple(r.get("modalities_in", ("text",))),
             modalities_out=tuple(r.get("modalities_out", ("text",))),
+            speed_tps=r.get("speed_tps"),
+            benchmarks=bench,
+            aliases=tuple(r.get("aliases", ())),
             deprecated=bool(r.get("deprecated", False)),
             notes=r.get("notes"),
-            extra={
-                k: v
-                for k, v in r.items()
-                if k
-                not in {
-                    "provider",
-                    "model_id",
-                    "context_window",
-                    "max_output",
-                    "input_per_1m",
-                    "output_per_1m",
-                    "cached_input_per_1m",
-                    "capabilities",
-                    "modalities_in",
-                    "modalities_out",
-                    "deprecated",
-                    "notes",
-                }
-            },
+            extra={k: v for k, v in r.items() if k not in known},
         )
         catalog[row.slug] = row
     return catalog

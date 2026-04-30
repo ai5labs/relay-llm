@@ -124,6 +124,8 @@ relay schema --out relay.schema.json     # JSON Schema for editors / docs
 relay validate models.yaml               # validate config
 relay models list                        # list configured aliases
 relay models inspect smart               # show one alias's full config + catalog row
+relay models compare sonnet 4o flash     # side-by-side: price, speed, MMLU, GPQA, HumanEval...
+relay models recommend --task code --budget cheap --needs tools  # which model for the job?
 relay catalog list --provider anthropic  # browse the built-in catalog
 relay providers                          # list all supported providers
 ```

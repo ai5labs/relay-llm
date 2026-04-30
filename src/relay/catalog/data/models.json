@@ -1,254 +1,1095 @@
 [
   {
-    "_comment": "Relay built-in model catalog. Seed snapshot — pricing is provider list price at time of release. Regenerate with `python scripts/refresh_catalog.py`. User YAML overrides any field.",
+    "_comment": "Relay built-in model catalog. Auto-refreshed from OpenRouter + curated overrides via scripts/refresh_catalog.py.",
     "_schema_version": 1
   },
-
   {
-    "provider": "openai",
-    "model_id": "gpt-4o",
-    "context_window": 128000,
-    "max_output": 16384,
-    "input_per_1m": 2.50,
-    "output_per_1m": 10.00,
-    "cached_input_per_1m": 1.25,
-    "capabilities": ["tools", "vision", "json_mode", "structured_output", "streaming"],
-    "modalities_in": ["text", "image"],
-    "modalities_out": ["text"]
+    "anthropic": "https://www.anthropic.com/news (Claude 4.5 family system cards)",
+    "openai": "https://openai.com/research (GPT-4o + o-series cards)",
+    "google": "https://blog.google/technology/google-deepmind/ (Gemini 2.5 family)",
+    "artificial_analysis": "https://artificialanalysis.ai (composite quality_index + speed_tps)",
+    "lmsys_arena": "https://chat.lmsys.org/?leaderboard"
   },
   {
-    "provider": "openai",
-    "model_id": "gpt-4o-2024-11-20",
-    "context_window": 128000,
-    "max_output": 16384,
-    "input_per_1m": 2.50,
-    "output_per_1m": 10.00,
-    "cached_input_per_1m": 1.25,
-    "capabilities": ["tools", "vision", "json_mode", "structured_output", "streaming"],
-    "modalities_in": ["text", "image"],
-    "modalities_out": ["text"]
+    "provider": "ai21",
+    "model_id": "jamba-large-1.7",
+    "context_window": 256000,
+    "input_per_1m": 2.0,
+    "output_per_1m": 8.0,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
   },
   {
-    "provider": "openai",
-    "model_id": "gpt-4o-mini",
-    "context_window": 128000,
-    "max_output": 16384,
+    "provider": "aion-labs",
+    "model_id": "aion-1.0",
+    "context_window": 131072,
+    "input_per_1m": 4.0,
+    "output_per_1m": 8.0,
+    "capabilities": [],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "aion-labs",
+    "model_id": "aion-1.0-mini",
+    "context_window": 131072,
+    "input_per_1m": 0.7,
+    "output_per_1m": 1.4,
+    "capabilities": [],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "aion-labs",
+    "model_id": "aion-2.0",
+    "context_window": 131072,
+    "input_per_1m": 0.7999999999999999,
+    "output_per_1m": 1.5999999999999999,
+    "capabilities": [],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "aion-labs",
+    "model_id": "aion-rp-llama-3.1-8b",
+    "context_window": 32768,
+    "input_per_1m": 0.7999999999999999,
+    "output_per_1m": 1.5999999999999999,
+    "capabilities": [],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "alfredpros",
+    "model_id": "codellama-7b-instruct-solidity",
+    "context_window": 4096,
+    "input_per_1m": 0.7999999999999999,
+    "output_per_1m": 1.2,
+    "capabilities": [],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "alibaba",
+    "model_id": "tongyi-deepresearch-30b-a3b",
+    "context_window": 131072,
+    "input_per_1m": 0.09,
+    "output_per_1m": 0.44999999999999996,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "allenai",
+    "model_id": "olmo-3-32b-think",
+    "context_window": 65536,
     "input_per_1m": 0.15,
-    "output_per_1m": 0.60,
-    "cached_input_per_1m": 0.075,
-    "capabilities": ["tools", "vision", "json_mode", "structured_output", "streaming"],
-    "modalities_in": ["text", "image"]
+    "output_per_1m": 0.5,
+    "capabilities": [
+      "json_mode"
+    ],
+    "modalities_in": [
+      "text"
+    ]
   },
   {
-    "provider": "openai",
-    "model_id": "o1",
-    "context_window": 200000,
-    "max_output": 100000,
-    "input_per_1m": 15.00,
-    "output_per_1m": 60.00,
-    "cached_input_per_1m": 7.50,
-    "capabilities": ["tools", "vision", "structured_output", "streaming", "thinking"]
+    "provider": "allenai",
+    "model_id": "olmo-3.1-32b-instruct",
+    "context_window": 65536,
+    "input_per_1m": 0.19999999999999998,
+    "output_per_1m": 0.6,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
   },
   {
-    "provider": "openai",
-    "model_id": "o3-mini",
-    "context_window": 200000,
-    "max_output": 100000,
-    "input_per_1m": 1.10,
-    "output_per_1m": 4.40,
-    "cached_input_per_1m": 0.55,
-    "capabilities": ["tools", "structured_output", "streaming", "thinking"]
+    "provider": "alpindale",
+    "model_id": "goliath-120b",
+    "context_window": 6144,
+    "input_per_1m": 3.75,
+    "output_per_1m": 7.5,
+    "capabilities": [
+      "json_mode"
+    ],
+    "modalities_in": [
+      "text"
+    ]
   },
   {
-    "provider": "openai",
-    "model_id": "gpt-4-turbo",
+    "provider": "amazon",
+    "model_id": "nova-2-lite-v1",
+    "context_window": 1000000,
+    "input_per_1m": 0.3,
+    "output_per_1m": 2.5,
+    "capabilities": [
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "video",
+      "file"
+    ]
+  },
+  {
+    "provider": "amazon",
+    "model_id": "nova-lite-v1",
+    "context_window": 300000,
+    "input_per_1m": 0.06,
+    "output_per_1m": 0.24,
+    "capabilities": [
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "amazon",
+    "model_id": "nova-micro-v1",
     "context_window": 128000,
-    "max_output": 4096,
-    "input_per_1m": 10.00,
-    "output_per_1m": 30.00,
-    "capabilities": ["tools", "vision", "json_mode", "streaming"]
+    "input_per_1m": 0.035,
+    "output_per_1m": 0.14,
+    "capabilities": [
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
   },
   {
-    "provider": "openai",
-    "model_id": "gpt-3.5-turbo",
-    "context_window": 16385,
-    "max_output": 4096,
-    "input_per_1m": 0.50,
-    "output_per_1m": 1.50,
-    "capabilities": ["tools", "json_mode", "streaming"],
-    "deprecated": true
+    "provider": "amazon",
+    "model_id": "nova-premier-v1",
+    "context_window": 1000000,
+    "input_per_1m": 2.5,
+    "output_per_1m": 12.5,
+    "capabilities": [
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
   },
   {
-    "provider": "openai",
-    "model_id": "text-embedding-3-large",
-    "context_window": 8191,
-    "input_per_1m": 0.13,
-    "output_per_1m": 0,
-    "capabilities": ["embeddings"]
+    "provider": "amazon",
+    "model_id": "nova-pro-v1",
+    "context_window": 300000,
+    "input_per_1m": 0.7999999999999999,
+    "output_per_1m": 3.1999999999999997,
+    "capabilities": [
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
   },
   {
-    "provider": "openai",
-    "model_id": "text-embedding-3-small",
-    "context_window": 8191,
-    "input_per_1m": 0.02,
-    "output_per_1m": 0,
-    "capabilities": ["embeddings"]
-  },
-
-  {
-    "provider": "anthropic",
-    "model_id": "claude-opus-4-5",
-    "context_window": 200000,
-    "max_output": 32000,
-    "input_per_1m": 15.00,
-    "output_per_1m": 75.00,
-    "cached_input_per_1m": 1.50,
-    "capabilities": ["tools", "vision", "thinking", "streaming", "structured_output", "prompt_cache"],
-    "modalities_in": ["text", "image"]
-  },
-  {
-    "provider": "anthropic",
-    "model_id": "claude-sonnet-4-5",
-    "context_window": 200000,
-    "max_output": 64000,
-    "input_per_1m": 3.00,
-    "output_per_1m": 15.00,
-    "cached_input_per_1m": 0.30,
-    "capabilities": ["tools", "vision", "thinking", "streaming", "structured_output", "prompt_cache"],
-    "modalities_in": ["text", "image"]
-  },
-  {
-    "provider": "anthropic",
-    "model_id": "claude-haiku-4-5",
-    "context_window": 200000,
-    "max_output": 8192,
-    "input_per_1m": 1.00,
-    "output_per_1m": 5.00,
-    "cached_input_per_1m": 0.10,
-    "capabilities": ["tools", "vision", "streaming", "structured_output", "prompt_cache"],
-    "modalities_in": ["text", "image"]
-  },
-  {
-    "provider": "anthropic",
-    "model_id": "claude-3-5-sonnet-20241022",
-    "context_window": 200000,
-    "max_output": 8192,
-    "input_per_1m": 3.00,
-    "output_per_1m": 15.00,
-    "cached_input_per_1m": 0.30,
-    "capabilities": ["tools", "vision", "streaming", "prompt_cache"],
-    "modalities_in": ["text", "image"]
+    "provider": "anthracite-org",
+    "model_id": "magnum-v4-72b",
+    "context_window": 16384,
+    "input_per_1m": 3.0,
+    "output_per_1m": 5.0,
+    "capabilities": [
+      "json_mode"
+    ],
+    "modalities_in": [
+      "text"
+    ]
   },
   {
     "provider": "anthropic",
     "model_id": "claude-3-5-haiku-20241022",
     "context_window": 200000,
     "max_output": 8192,
-    "input_per_1m": 0.80,
-    "output_per_1m": 4.00,
-    "capabilities": ["tools", "streaming", "prompt_cache"]
+    "input_per_1m": 0.8,
+    "output_per_1m": 4.0,
+    "capabilities": [
+      "tools",
+      "streaming",
+      "prompt_cache"
+    ]
   },
-
   {
-    "provider": "google",
-    "model_id": "gemini-2.5-pro",
-    "context_window": 2000000,
+    "provider": "anthropic",
+    "model_id": "claude-3-5-sonnet-20241022",
+    "context_window": 200000,
     "max_output": 8192,
-    "input_per_1m": 1.25,
-    "output_per_1m": 10.00,
-    "cached_input_per_1m": 0.31,
-    "capabilities": ["tools", "vision", "audio_input", "json_mode", "structured_output", "streaming", "thinking"],
-    "modalities_in": ["text", "image", "audio", "video"]
+    "input_per_1m": 3.0,
+    "output_per_1m": 15.0,
+    "cached_input_per_1m": 0.3,
+    "capabilities": [
+      "tools",
+      "vision",
+      "streaming",
+      "prompt_cache"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ],
+    "speed_tps": 80,
+    "benchmarks": {
+      "quality_index": 70,
+      "mmlu": 88.7,
+      "gpqa": 65.0,
+      "humaneval": 92.0,
+      "math": 78.3,
+      "sources": [
+        "anthropic-system-card"
+      ]
+    }
   },
   {
-    "provider": "google",
-    "model_id": "gemini-2.5-flash",
+    "provider": "anthropic",
+    "model_id": "claude-3-haiku",
+    "context_window": 200000,
+    "input_per_1m": 0.25,
+    "output_per_1m": 1.25,
+    "capabilities": [
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "anthropic",
+    "model_id": "claude-3.5-haiku",
+    "context_window": 200000,
+    "input_per_1m": 0.7999999999999999,
+    "output_per_1m": 4.0,
+    "capabilities": [
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "anthropic",
+    "model_id": "claude-3.7-sonnet",
+    "context_window": 200000,
+    "input_per_1m": 3.0,
+    "output_per_1m": 15.0,
+    "capabilities": [
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "file"
+    ]
+  },
+  {
+    "provider": "anthropic",
+    "model_id": "claude-3.7-sonnet:thinking",
+    "context_window": 200000,
+    "input_per_1m": 3.0,
+    "output_per_1m": 15.0,
+    "capabilities": [
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "file"
+    ]
+  },
+  {
+    "provider": "anthropic",
+    "model_id": "claude-haiku-4-5",
+    "context_window": 200000,
+    "max_output": 8192,
+    "input_per_1m": 1.0,
+    "output_per_1m": 5.0,
+    "cached_input_per_1m": 0.1,
+    "capabilities": [
+      "tools",
+      "vision",
+      "streaming",
+      "structured_output",
+      "prompt_cache"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ],
+    "speed_tps": 165,
+    "aliases": [
+      "haiku-4.5",
+      "haiku"
+    ],
+    "benchmarks": {
+      "quality_index": 60,
+      "mmlu": 81.2,
+      "gpqa": 50.1,
+      "humaneval": 78.3,
+      "math": 76.5,
+      "sources": [
+        "anthropic-system-card"
+      ]
+    }
+  },
+  {
+    "provider": "anthropic",
+    "model_id": "claude-haiku-4.5",
+    "context_window": 200000,
+    "input_per_1m": 1.0,
+    "output_per_1m": 5.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "image",
+      "text"
+    ]
+  },
+  {
+    "provider": "anthropic",
+    "model_id": "claude-opus-4",
+    "context_window": 200000,
+    "input_per_1m": 15.0,
+    "output_per_1m": 75.0,
+    "capabilities": [
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "image",
+      "text",
+      "file"
+    ]
+  },
+  {
+    "provider": "anthropic",
+    "model_id": "claude-opus-4-5",
+    "context_window": 200000,
+    "max_output": 32000,
+    "input_per_1m": 15.0,
+    "output_per_1m": 75.0,
+    "cached_input_per_1m": 1.5,
+    "capabilities": [
+      "tools",
+      "vision",
+      "thinking",
+      "streaming",
+      "structured_output",
+      "prompt_cache"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ],
+    "speed_tps": 65,
+    "aliases": [
+      "opus-4.5",
+      "claude-opus",
+      "claude-4.5"
+    ],
+    "benchmarks": {
+      "quality_index": 80,
+      "mmlu": 91.4,
+      "gpqa": 79.6,
+      "humaneval": 92.7,
+      "swe_bench": 72.5,
+      "math": 96.5,
+      "sources": [
+        "anthropic-system-card",
+        "artificial-analysis"
+      ]
+    }
+  },
+  {
+    "provider": "anthropic",
+    "model_id": "claude-opus-4.1",
+    "context_window": 200000,
+    "input_per_1m": 15.0,
+    "output_per_1m": 75.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "image",
+      "text",
+      "file"
+    ]
+  },
+  {
+    "provider": "anthropic",
+    "model_id": "claude-opus-4.5",
+    "context_window": 200000,
+    "input_per_1m": 5.0,
+    "output_per_1m": 25.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "file",
+      "image",
+      "text"
+    ]
+  },
+  {
+    "provider": "anthropic",
+    "model_id": "claude-opus-4.6",
     "context_window": 1000000,
-    "max_output": 8192,
-    "input_per_1m": 0.30,
-    "output_per_1m": 2.50,
-    "cached_input_per_1m": 0.075,
-    "capabilities": ["tools", "vision", "audio_input", "json_mode", "structured_output", "streaming", "thinking"],
-    "modalities_in": ["text", "image", "audio", "video"]
+    "input_per_1m": 5.0,
+    "output_per_1m": 25.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
   },
   {
-    "provider": "google",
-    "model_id": "gemini-2.0-flash",
+    "provider": "anthropic",
+    "model_id": "claude-opus-4.6-fast",
     "context_window": 1000000,
-    "max_output": 8192,
-    "input_per_1m": 0.10,
-    "output_per_1m": 0.40,
-    "cached_input_per_1m": 0.025,
-    "capabilities": ["tools", "vision", "audio_input", "json_mode", "structured_output", "streaming"],
-    "modalities_in": ["text", "image", "audio", "video"]
+    "input_per_1m": 30.0,
+    "output_per_1m": 150.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
   },
   {
-    "provider": "google",
-    "model_id": "gemini-1.5-pro",
-    "context_window": 2000000,
-    "max_output": 8192,
-    "input_per_1m": 1.25,
-    "output_per_1m": 5.00,
-    "cached_input_per_1m": 0.3125,
-    "capabilities": ["tools", "vision", "audio_input", "json_mode", "structured_output", "streaming"]
-  },
-  {
-    "provider": "google",
-    "model_id": "gemini-1.5-flash",
+    "provider": "anthropic",
+    "model_id": "claude-opus-4.7",
     "context_window": 1000000,
-    "max_output": 8192,
-    "input_per_1m": 0.075,
-    "output_per_1m": 0.30,
-    "cached_input_per_1m": 0.01875,
-    "capabilities": ["tools", "vision", "audio_input", "json_mode", "streaming"]
-  },
-
-  {
-    "provider": "groq",
-    "model_id": "llama-3.3-70b-versatile",
-    "context_window": 131072,
-    "max_output": 32768,
-    "input_per_1m": 0.59,
-    "output_per_1m": 0.79,
-    "capabilities": ["tools", "json_mode", "streaming"]
+    "input_per_1m": 5.0,
+    "output_per_1m": 25.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
   },
   {
-    "provider": "groq",
-    "model_id": "llama-3.1-8b-instant",
-    "context_window": 131072,
-    "max_output": 8192,
-    "input_per_1m": 0.05,
-    "output_per_1m": 0.08,
-    "capabilities": ["tools", "streaming"]
+    "provider": "anthropic",
+    "model_id": "claude-sonnet-4",
+    "context_window": 1000000,
+    "input_per_1m": 3.0,
+    "output_per_1m": 15.0,
+    "capabilities": [
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "image",
+      "text",
+      "file"
+    ]
   },
   {
-    "provider": "groq",
-    "model_id": "mixtral-8x7b-32768",
+    "provider": "anthropic",
+    "model_id": "claude-sonnet-4-5",
+    "context_window": 200000,
+    "max_output": 64000,
+    "input_per_1m": 3.0,
+    "output_per_1m": 15.0,
+    "cached_input_per_1m": 0.3,
+    "capabilities": [
+      "tools",
+      "vision",
+      "thinking",
+      "streaming",
+      "structured_output",
+      "prompt_cache"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ],
+    "speed_tps": 95,
+    "aliases": [
+      "sonnet-4.5",
+      "sonnet"
+    ],
+    "benchmarks": {
+      "quality_index": 73,
+      "mmlu": 88.7,
+      "gpqa": 71.5,
+      "humaneval": 89.1,
+      "swe_bench": 49.0,
+      "math": 91.8,
+      "sources": [
+        "anthropic-system-card"
+      ]
+    }
+  },
+  {
+    "provider": "anthropic",
+    "model_id": "claude-sonnet-4.5",
+    "context_window": 1000000,
+    "input_per_1m": 3.0,
+    "output_per_1m": 15.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "file"
+    ]
+  },
+  {
+    "provider": "anthropic",
+    "model_id": "claude-sonnet-4.6",
+    "context_window": 1000000,
+    "input_per_1m": 3.0,
+    "output_per_1m": 15.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "arcee-ai",
+    "model_id": "coder-large",
     "context_window": 32768,
-    "max_output": 32768,
-    "input_per_1m": 0.24,
-    "output_per_1m": 0.24,
-    "capabilities": ["streaming"]
+    "input_per_1m": 0.5,
+    "output_per_1m": 0.7999999999999999,
+    "capabilities": [],
+    "modalities_in": [
+      "text"
+    ]
   },
   {
-    "provider": "groq",
-    "model_id": "deepseek-r1-distill-llama-70b",
+    "provider": "arcee-ai",
+    "model_id": "maestro-reasoning",
     "context_window": 131072,
-    "max_output": 131072,
-    "input_per_1m": 0.75,
-    "output_per_1m": 0.99,
-    "capabilities": ["streaming", "thinking"]
+    "input_per_1m": 0.8999999999999999,
+    "output_per_1m": 3.3000000000000003,
+    "capabilities": [],
+    "modalities_in": [
+      "text"
+    ]
   },
-
+  {
+    "provider": "arcee-ai",
+    "model_id": "spotlight",
+    "context_window": 131072,
+    "input_per_1m": 0.18,
+    "output_per_1m": 0.18,
+    "capabilities": [
+      "vision"
+    ],
+    "modalities_in": [
+      "image",
+      "text"
+    ]
+  },
+  {
+    "provider": "arcee-ai",
+    "model_id": "trinity-large-preview",
+    "context_window": 131000,
+    "input_per_1m": 0.15,
+    "output_per_1m": 0.44999999999999996,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "arcee-ai",
+    "model_id": "trinity-large-thinking",
+    "context_window": 262144,
+    "input_per_1m": 0.22,
+    "output_per_1m": 0.85,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "arcee-ai",
+    "model_id": "trinity-mini",
+    "context_window": 131072,
+    "input_per_1m": 0.045,
+    "output_per_1m": 0.15,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "arcee-ai",
+    "model_id": "virtuoso-large",
+    "context_window": 131072,
+    "input_per_1m": 0.75,
+    "output_per_1m": 1.2,
+    "capabilities": [
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "baidu",
+    "model_id": "ernie-4.5-21b-a3b",
+    "context_window": 120000,
+    "input_per_1m": 0.07,
+    "output_per_1m": 0.28,
+    "capabilities": [
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "baidu",
+    "model_id": "ernie-4.5-21b-a3b-thinking",
+    "context_window": 131072,
+    "input_per_1m": 0.07,
+    "output_per_1m": 0.28,
+    "capabilities": [],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "baidu",
+    "model_id": "ernie-4.5-300b-a47b",
+    "context_window": 123000,
+    "input_per_1m": 0.28,
+    "output_per_1m": 1.1,
+    "capabilities": [],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "baidu",
+    "model_id": "ernie-4.5-vl-28b-a3b",
+    "context_window": 30000,
+    "input_per_1m": 0.14,
+    "output_per_1m": 0.56,
+    "capabilities": [
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "baidu",
+    "model_id": "ernie-4.5-vl-424b-a47b",
+    "context_window": 123000,
+    "input_per_1m": 0.42,
+    "output_per_1m": 1.25,
+    "capabilities": [
+      "vision"
+    ],
+    "modalities_in": [
+      "image",
+      "text"
+    ]
+  },
+  {
+    "provider": "baidu",
+    "model_id": "qianfan-ocr-fast:free",
+    "context_window": 65536,
+    "capabilities": [
+      "vision"
+    ],
+    "modalities_in": [
+      "image",
+      "text"
+    ]
+  },
+  {
+    "provider": "bedrock",
+    "model_id": "anthropic.claude-opus-4-5-20250101-v1:0",
+    "context_window": 200000,
+    "max_output": 32000,
+    "input_per_1m": 15.0,
+    "output_per_1m": 75.0,
+    "capabilities": [
+      "tools",
+      "vision",
+      "thinking",
+      "streaming"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "bedrock",
+    "model_id": "anthropic.claude-sonnet-4-5-20250929-v1:0",
+    "context_window": 200000,
+    "max_output": 64000,
+    "input_per_1m": 3.0,
+    "output_per_1m": 15.0,
+    "cached_input_per_1m": 0.3,
+    "capabilities": [
+      "tools",
+      "vision",
+      "thinking",
+      "streaming",
+      "prompt_cache"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "bedrock",
+    "model_id": "meta.llama3-3-70b-instruct-v1:0",
+    "context_window": 131072,
+    "input_per_1m": 0.72,
+    "output_per_1m": 0.72,
+    "capabilities": [
+      "streaming"
+    ]
+  },
+  {
+    "provider": "bytedance-seed",
+    "model_id": "seed-1.6",
+    "context_window": 262144,
+    "input_per_1m": 0.25,
+    "output_per_1m": 2.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "image",
+      "text",
+      "video"
+    ]
+  },
+  {
+    "provider": "bytedance-seed",
+    "model_id": "seed-1.6-flash",
+    "context_window": 262144,
+    "input_per_1m": 0.075,
+    "output_per_1m": 0.3,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "image",
+      "text",
+      "video"
+    ]
+  },
+  {
+    "provider": "bytedance-seed",
+    "model_id": "seed-2.0-lite",
+    "context_window": 262144,
+    "input_per_1m": 0.25,
+    "output_per_1m": 2.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "video"
+    ]
+  },
+  {
+    "provider": "bytedance-seed",
+    "model_id": "seed-2.0-mini",
+    "context_window": 262144,
+    "input_per_1m": 0.09999999999999999,
+    "output_per_1m": 0.39999999999999997,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "video"
+    ]
+  },
+  {
+    "provider": "bytedance",
+    "model_id": "ui-tars-1.5-7b",
+    "context_window": 128000,
+    "input_per_1m": 0.09999999999999999,
+    "output_per_1m": 0.19999999999999998,
+    "capabilities": [
+      "vision"
+    ],
+    "modalities_in": [
+      "image",
+      "text"
+    ]
+  },
+  {
+    "provider": "cognitivecomputations",
+    "model_id": "dolphin-mistral-24b-venice-edition:free",
+    "context_window": 32768,
+    "capabilities": [
+      "json_mode"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "cohere",
+    "model_id": "command-a",
+    "context_window": 256000,
+    "input_per_1m": 2.5,
+    "output_per_1m": 10.0,
+    "capabilities": [
+      "json_mode"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "cohere",
+    "model_id": "command-r-08-2024",
+    "context_window": 128000,
+    "input_per_1m": 0.15,
+    "output_per_1m": 0.6,
+    "capabilities": [
+      "json_mode",
+      "streaming",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "cohere",
+    "model_id": "command-r-plus-08-2024",
+    "context_window": 128000,
+    "input_per_1m": 2.5,
+    "output_per_1m": 10.0,
+    "capabilities": [
+      "json_mode",
+      "streaming",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "cohere",
+    "model_id": "command-r7b-12-2024",
+    "context_window": 128000,
+    "input_per_1m": 0.0375,
+    "output_per_1m": 0.15,
+    "capabilities": [
+      "json_mode"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "deepcogito",
+    "model_id": "cogito-v2.1-671b",
+    "context_window": 128000,
+    "input_per_1m": 1.25,
+    "output_per_1m": 1.25,
+    "capabilities": [
+      "json_mode"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
   {
     "provider": "deepseek",
     "model_id": "deepseek-chat",
-    "context_window": 64000,
+    "context_window": 163840,
     "max_output": 8192,
-    "input_per_1m": 0.27,
-    "output_per_1m": 1.10,
+    "input_per_1m": 0.32,
+    "output_per_1m": 0.8899999999999999,
     "cached_input_per_1m": 0.07,
-    "capabilities": ["tools", "json_mode", "structured_output", "streaming"]
+    "capabilities": [
+      "json_mode",
+      "streaming",
+      "structured_output",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ],
+    "speed_tps": 50,
+    "aliases": [
+      "deepseek-v3",
+      "v3"
+    ],
+    "benchmarks": {
+      "quality_index": 72,
+      "mmlu": 87.1,
+      "gpqa": 59.1,
+      "humaneval": 89.0,
+      "math": 90.2,
+      "sources": [
+        "deepseek-v3-paper"
+      ]
+    }
+  },
+  {
+    "provider": "deepseek",
+    "model_id": "deepseek-chat-v3-0324",
+    "context_window": 163840,
+    "input_per_1m": 0.19999999999999998,
+    "output_per_1m": 0.77,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "deepseek",
+    "model_id": "deepseek-chat-v3.1",
+    "context_window": 32768,
+    "input_per_1m": 0.15,
+    "output_per_1m": 0.75,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "deepseek",
+    "model_id": "deepseek-r1",
+    "context_window": 64000,
+    "input_per_1m": 0.7,
+    "output_per_1m": 2.5,
+    "capabilities": [
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "deepseek",
+    "model_id": "deepseek-r1-0528",
+    "context_window": 163840,
+    "input_per_1m": 0.5,
+    "output_per_1m": 2.1500000000000004,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "deepseek",
+    "model_id": "deepseek-r1-distill-llama-70b",
+    "context_window": 131072,
+    "input_per_1m": 0.7,
+    "output_per_1m": 0.7999999999999999,
+    "capabilities": [
+      "json_mode"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "deepseek",
+    "model_id": "deepseek-r1-distill-qwen-32b",
+    "context_window": 32768,
+    "input_per_1m": 0.29,
+    "output_per_1m": 0.29,
+    "capabilities": [
+      "json_mode"
+    ],
+    "modalities_in": [
+      "text"
+    ]
   },
   {
     "provider": "deepseek",
@@ -258,183 +1099,2367 @@
     "input_per_1m": 0.55,
     "output_per_1m": 2.19,
     "cached_input_per_1m": 0.14,
-    "capabilities": ["streaming", "thinking"]
+    "capabilities": [
+      "streaming",
+      "thinking"
+    ],
+    "speed_tps": 30,
+    "aliases": [
+      "r1",
+      "deepseek-r1"
+    ],
+    "benchmarks": {
+      "quality_index": 76,
+      "mmlu": 90.8,
+      "gpqa": 71.5,
+      "humaneval": 86.4,
+      "math": 97.3,
+      "sources": [
+        "deepseek-r1-paper"
+      ]
+    }
   },
-
   {
-    "provider": "xai",
-    "model_id": "grok-2-1212",
+    "provider": "deepseek",
+    "model_id": "deepseek-v3.1-terminus",
+    "context_window": 163840,
+    "input_per_1m": 0.21,
+    "output_per_1m": 0.7899999999999999,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "deepseek",
+    "model_id": "deepseek-v3.2",
     "context_window": 131072,
-    "input_per_1m": 2.00,
-    "output_per_1m": 10.00,
-    "capabilities": ["tools", "json_mode", "structured_output", "streaming"]
+    "input_per_1m": 0.252,
+    "output_per_1m": 0.378,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
   },
   {
-    "provider": "xai",
-    "model_id": "grok-2-vision-1212",
+    "provider": "deepseek",
+    "model_id": "deepseek-v3.2-exp",
+    "context_window": 163840,
+    "input_per_1m": 0.27,
+    "output_per_1m": 0.41,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "deepseek",
+    "model_id": "deepseek-v3.2-speciale",
+    "context_window": 163840,
+    "input_per_1m": 0.39999999999999997,
+    "output_per_1m": 1.2,
+    "capabilities": [
+      "json_mode"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "deepseek",
+    "model_id": "deepseek-v4-flash",
+    "context_window": 1048576,
+    "input_per_1m": 0.14,
+    "output_per_1m": 0.28,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "deepseek",
+    "model_id": "deepseek-v4-pro",
+    "context_window": 1048576,
+    "input_per_1m": 0.435,
+    "output_per_1m": 0.87,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "essentialai",
+    "model_id": "rnj-1-instruct",
     "context_window": 32768,
-    "input_per_1m": 2.00,
-    "output_per_1m": 10.00,
-    "capabilities": ["tools", "vision", "streaming"],
-    "modalities_in": ["text", "image"]
-  },
-  {
-    "provider": "xai",
-    "model_id": "grok-3",
-    "context_window": 131072,
-    "input_per_1m": 3.00,
-    "output_per_1m": 15.00,
-    "capabilities": ["tools", "vision", "streaming", "thinking"]
-  },
-
-  {
-    "provider": "mistral",
-    "model_id": "mistral-large-latest",
-    "context_window": 128000,
-    "max_output": 32768,
-    "input_per_1m": 2.00,
-    "output_per_1m": 6.00,
-    "capabilities": ["tools", "json_mode", "structured_output", "streaming"]
-  },
-  {
-    "provider": "mistral",
-    "model_id": "mistral-small-latest",
-    "context_window": 128000,
-    "input_per_1m": 0.20,
-    "output_per_1m": 0.60,
-    "capabilities": ["tools", "json_mode", "streaming"]
-  },
-  {
-    "provider": "mistral",
-    "model_id": "codestral-latest",
-    "context_window": 256000,
-    "input_per_1m": 0.30,
-    "output_per_1m": 0.90,
-    "capabilities": ["tools", "streaming"]
-  },
-  {
-    "provider": "mistral",
-    "model_id": "pixtral-large-latest",
-    "context_window": 128000,
-    "input_per_1m": 2.00,
-    "output_per_1m": 6.00,
-    "capabilities": ["tools", "vision", "streaming"],
-    "modalities_in": ["text", "image"]
-  },
-
-  {
-    "provider": "together",
-    "model_id": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
-    "context_window": 131072,
-    "input_per_1m": 0.88,
-    "output_per_1m": 0.88,
-    "capabilities": ["tools", "streaming"]
-  },
-  {
-    "provider": "together",
-    "model_id": "meta-llama/Meta-Llama-3.1-405B-Instruct-Turbo",
-    "context_window": 131072,
-    "input_per_1m": 3.50,
-    "output_per_1m": 3.50,
-    "capabilities": ["tools", "streaming"]
-  },
-  {
-    "provider": "together",
-    "model_id": "Qwen/Qwen2.5-72B-Instruct-Turbo",
-    "context_window": 131072,
-    "input_per_1m": 1.20,
-    "output_per_1m": 1.20,
-    "capabilities": ["tools", "streaming"]
-  },
-
-  {
-    "provider": "fireworks",
-    "model_id": "accounts/fireworks/models/llama-v3p3-70b-instruct",
-    "context_window": 131072,
-    "input_per_1m": 0.90,
-    "output_per_1m": 0.90,
-    "capabilities": ["tools", "streaming"]
+    "input_per_1m": 0.15,
+    "output_per_1m": 0.15,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
   },
   {
     "provider": "fireworks",
     "model_id": "accounts/fireworks/models/deepseek-v3",
     "context_window": 131072,
-    "input_per_1m": 0.90,
-    "output_per_1m": 0.90,
-    "capabilities": ["tools", "streaming"]
-  },
-
-  {
-    "provider": "cohere",
-    "model_id": "command-r-plus-08-2024",
-    "context_window": 128000,
-    "input_per_1m": 2.50,
-    "output_per_1m": 10.00,
-    "capabilities": ["tools", "streaming"]
+    "input_per_1m": 0.9,
+    "output_per_1m": 0.9,
+    "capabilities": [
+      "tools",
+      "streaming"
+    ]
   },
   {
-    "provider": "cohere",
-    "model_id": "command-r-08-2024",
-    "context_window": 128000,
-    "input_per_1m": 0.15,
-    "output_per_1m": 0.60,
-    "capabilities": ["tools", "streaming"]
-  },
-
-  {
-    "provider": "perplexity",
-    "model_id": "sonar",
-    "context_window": 127072,
-    "input_per_1m": 1.00,
-    "output_per_1m": 1.00,
-    "capabilities": ["streaming", "web_search"]
-  },
-  {
-    "provider": "perplexity",
-    "model_id": "sonar-pro",
-    "context_window": 200000,
-    "input_per_1m": 3.00,
-    "output_per_1m": 15.00,
-    "capabilities": ["streaming", "web_search"]
-  },
-
-  {
-    "provider": "bedrock",
-    "model_id": "anthropic.claude-sonnet-4-5-20250929-v1:0",
-    "context_window": 200000,
-    "max_output": 64000,
-    "input_per_1m": 3.00,
-    "output_per_1m": 15.00,
-    "cached_input_per_1m": 0.30,
-    "capabilities": ["tools", "vision", "thinking", "streaming", "prompt_cache"],
-    "modalities_in": ["text", "image"]
-  },
-  {
-    "provider": "bedrock",
-    "model_id": "anthropic.claude-opus-4-5-20250101-v1:0",
-    "context_window": 200000,
-    "max_output": 32000,
-    "input_per_1m": 15.00,
-    "output_per_1m": 75.00,
-    "capabilities": ["tools", "vision", "thinking", "streaming"],
-    "modalities_in": ["text", "image"]
-  },
-  {
-    "provider": "bedrock",
-    "model_id": "meta.llama3-3-70b-instruct-v1:0",
+    "provider": "fireworks",
+    "model_id": "accounts/fireworks/models/llama-v3p3-70b-instruct",
     "context_window": 131072,
-    "input_per_1m": 0.72,
-    "output_per_1m": 0.72,
-    "capabilities": ["streaming"]
+    "input_per_1m": 0.9,
+    "output_per_1m": 0.9,
+    "capabilities": [
+      "tools",
+      "streaming"
+    ]
   },
-
+  {
+    "provider": "google",
+    "model_id": "gemini-1.5-flash",
+    "context_window": 1000000,
+    "max_output": 8192,
+    "input_per_1m": 0.075,
+    "output_per_1m": 0.3,
+    "cached_input_per_1m": 0.01875,
+    "capabilities": [
+      "tools",
+      "vision",
+      "audio_input",
+      "json_mode",
+      "streaming"
+    ]
+  },
+  {
+    "provider": "google",
+    "model_id": "gemini-1.5-pro",
+    "context_window": 2000000,
+    "max_output": 8192,
+    "input_per_1m": 1.25,
+    "output_per_1m": 5.0,
+    "cached_input_per_1m": 0.3125,
+    "capabilities": [
+      "tools",
+      "vision",
+      "audio_input",
+      "json_mode",
+      "structured_output",
+      "streaming"
+    ]
+  },
+  {
+    "provider": "google",
+    "model_id": "gemini-2.0-flash",
+    "context_window": 1000000,
+    "max_output": 8192,
+    "input_per_1m": 0.1,
+    "output_per_1m": 0.4,
+    "cached_input_per_1m": 0.025,
+    "capabilities": [
+      "tools",
+      "vision",
+      "audio_input",
+      "json_mode",
+      "structured_output",
+      "streaming"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "audio",
+      "video"
+    ]
+  },
+  {
+    "provider": "google",
+    "model_id": "gemini-2.0-flash-001",
+    "context_window": 1048576,
+    "input_per_1m": 0.09999999999999999,
+    "output_per_1m": 0.39999999999999997,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "file",
+      "audio",
+      "video"
+    ]
+  },
+  {
+    "provider": "google",
+    "model_id": "gemini-2.0-flash-lite-001",
+    "context_window": 1048576,
+    "input_per_1m": 0.075,
+    "output_per_1m": 0.3,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "file",
+      "audio",
+      "video"
+    ]
+  },
+  {
+    "provider": "google",
+    "model_id": "gemini-2.5-flash",
+    "context_window": 1048576,
+    "max_output": 8192,
+    "input_per_1m": 0.3,
+    "output_per_1m": 2.5,
+    "cached_input_per_1m": 0.075,
+    "capabilities": [
+      "tools",
+      "vision",
+      "audio_input",
+      "json_mode",
+      "structured_output",
+      "streaming",
+      "thinking"
+    ],
+    "modalities_in": [
+      "file",
+      "image",
+      "text",
+      "audio",
+      "video"
+    ],
+    "speed_tps": 250,
+    "aliases": [
+      "gemini-flash",
+      "2.5-flash",
+      "flash"
+    ],
+    "benchmarks": {
+      "quality_index": 70,
+      "mmlu": 85.3,
+      "gpqa": 65.2,
+      "humaneval": 88.1,
+      "math": 88.0,
+      "sources": [
+        "google-deepmind-blog"
+      ]
+    }
+  },
+  {
+    "provider": "google",
+    "model_id": "gemini-2.5-flash-image",
+    "context_window": 32768,
+    "input_per_1m": 0.3,
+    "output_per_1m": 2.5,
+    "capabilities": [
+      "json_mode",
+      "vision"
+    ],
+    "modalities_in": [
+      "image",
+      "text"
+    ]
+  },
+  {
+    "provider": "google",
+    "model_id": "gemini-2.5-flash-lite",
+    "context_window": 1048576,
+    "input_per_1m": 0.09999999999999999,
+    "output_per_1m": 0.39999999999999997,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "file",
+      "audio",
+      "video"
+    ]
+  },
+  {
+    "provider": "google",
+    "model_id": "gemini-2.5-flash-lite-preview-09-2025",
+    "context_window": 1048576,
+    "input_per_1m": 0.09999999999999999,
+    "output_per_1m": 0.39999999999999997,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "file",
+      "audio",
+      "video"
+    ]
+  },
+  {
+    "provider": "google",
+    "model_id": "gemini-2.5-pro",
+    "context_window": 1048576,
+    "max_output": 8192,
+    "input_per_1m": 1.25,
+    "output_per_1m": 10.0,
+    "cached_input_per_1m": 0.31,
+    "capabilities": [
+      "tools",
+      "vision",
+      "audio_input",
+      "json_mode",
+      "structured_output",
+      "streaming",
+      "thinking"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "file",
+      "audio",
+      "video"
+    ],
+    "speed_tps": 130,
+    "aliases": [
+      "gemini-pro",
+      "2.5-pro"
+    ],
+    "benchmarks": {
+      "quality_index": 80,
+      "mmlu": 89.2,
+      "gpqa": 84.0,
+      "humaneval": 92.6,
+      "math": 91.6,
+      "swe_bench": 63.8,
+      "arena_elo": 1380,
+      "sources": [
+        "google-deepmind-blog",
+        "lmsys-arena"
+      ]
+    }
+  },
+  {
+    "provider": "google",
+    "model_id": "gemini-2.5-pro-preview",
+    "context_window": 1048576,
+    "input_per_1m": 1.25,
+    "output_per_1m": 10.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "file",
+      "image",
+      "text",
+      "audio"
+    ]
+  },
+  {
+    "provider": "google",
+    "model_id": "gemini-2.5-pro-preview-05-06",
+    "context_window": 1048576,
+    "input_per_1m": 1.25,
+    "output_per_1m": 10.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "file",
+      "audio",
+      "video"
+    ]
+  },
+  {
+    "provider": "google",
+    "model_id": "gemini-3-flash-preview",
+    "context_window": 1048576,
+    "input_per_1m": 0.5,
+    "output_per_1m": 3.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "file",
+      "audio",
+      "video"
+    ]
+  },
+  {
+    "provider": "google",
+    "model_id": "gemini-3-pro-image-preview",
+    "context_window": 65536,
+    "input_per_1m": 2.0,
+    "output_per_1m": 12.0,
+    "capabilities": [
+      "json_mode",
+      "vision"
+    ],
+    "modalities_in": [
+      "image",
+      "text"
+    ]
+  },
+  {
+    "provider": "google",
+    "model_id": "gemini-3.1-flash-image-preview",
+    "context_window": 65536,
+    "input_per_1m": 0.5,
+    "output_per_1m": 3.0,
+    "capabilities": [
+      "json_mode",
+      "vision"
+    ],
+    "modalities_in": [
+      "image",
+      "text"
+    ]
+  },
+  {
+    "provider": "google",
+    "model_id": "gemini-3.1-flash-lite-preview",
+    "context_window": 1048576,
+    "input_per_1m": 0.25,
+    "output_per_1m": 1.5,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "video",
+      "file",
+      "audio"
+    ]
+  },
+  {
+    "provider": "google",
+    "model_id": "gemini-3.1-pro-preview",
+    "context_window": 1048576,
+    "input_per_1m": 2.0,
+    "output_per_1m": 12.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "audio",
+      "file",
+      "image",
+      "text",
+      "video"
+    ]
+  },
+  {
+    "provider": "google",
+    "model_id": "gemini-3.1-pro-preview-customtools",
+    "context_window": 1048576,
+    "input_per_1m": 2.0,
+    "output_per_1m": 12.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "audio",
+      "image",
+      "video",
+      "file"
+    ]
+  },
+  {
+    "provider": "google",
+    "model_id": "gemma-2-27b-it",
+    "context_window": 8192,
+    "input_per_1m": 0.65,
+    "output_per_1m": 0.65,
+    "capabilities": [
+      "json_mode"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "google",
+    "model_id": "gemma-3-12b-it",
+    "context_window": 131072,
+    "input_per_1m": 0.04,
+    "output_per_1m": 0.13,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "google",
+    "model_id": "gemma-3-12b-it:free",
+    "context_window": 32768,
+    "capabilities": [
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "google",
+    "model_id": "gemma-3-27b-it",
+    "context_window": 131072,
+    "input_per_1m": 0.08,
+    "output_per_1m": 0.16,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "google",
+    "model_id": "gemma-3-27b-it:free",
+    "context_window": 131072,
+    "capabilities": [
+      "json_mode",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "google",
+    "model_id": "gemma-3-4b-it",
+    "context_window": 131072,
+    "input_per_1m": 0.04,
+    "output_per_1m": 0.08,
+    "capabilities": [
+      "json_mode",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "google",
+    "model_id": "gemma-3-4b-it:free",
+    "context_window": 32768,
+    "capabilities": [
+      "json_mode",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "google",
+    "model_id": "gemma-3n-e2b-it:free",
+    "context_window": 8192,
+    "capabilities": [
+      "json_mode"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "google",
+    "model_id": "gemma-3n-e4b-it",
+    "context_window": 32768,
+    "input_per_1m": 0.06,
+    "output_per_1m": 0.12,
+    "capabilities": [],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "google",
+    "model_id": "gemma-3n-e4b-it:free",
+    "context_window": 8192,
+    "capabilities": [
+      "json_mode"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "google",
+    "model_id": "gemma-4-26b-a4b-it",
+    "context_window": 262144,
+    "input_per_1m": 0.06,
+    "output_per_1m": 0.33,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "image",
+      "text",
+      "video"
+    ]
+  },
+  {
+    "provider": "google",
+    "model_id": "gemma-4-26b-a4b-it:free",
+    "context_window": 262144,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "image",
+      "text",
+      "video"
+    ]
+  },
+  {
+    "provider": "google",
+    "model_id": "gemma-4-31b-it",
+    "context_window": 262144,
+    "input_per_1m": 0.13,
+    "output_per_1m": 0.38,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "image",
+      "text",
+      "video"
+    ]
+  },
+  {
+    "provider": "google",
+    "model_id": "gemma-4-31b-it:free",
+    "context_window": 262144,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "image",
+      "text",
+      "video"
+    ]
+  },
+  {
+    "provider": "google",
+    "model_id": "lyria-3-clip-preview",
+    "context_window": 1048576,
+    "capabilities": [
+      "json_mode",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "google",
+    "model_id": "lyria-3-pro-preview",
+    "context_window": 1048576,
+    "capabilities": [
+      "json_mode",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "groq",
+    "model_id": "deepseek-r1-distill-llama-70b",
+    "context_window": 131072,
+    "max_output": 131072,
+    "input_per_1m": 0.75,
+    "output_per_1m": 0.99,
+    "capabilities": [
+      "streaming",
+      "thinking"
+    ]
+  },
+  {
+    "provider": "groq",
+    "model_id": "llama-3.1-8b-instant",
+    "context_window": 131072,
+    "max_output": 8192,
+    "input_per_1m": 0.05,
+    "output_per_1m": 0.08,
+    "capabilities": [
+      "tools",
+      "streaming"
+    ]
+  },
+  {
+    "provider": "groq",
+    "model_id": "llama-3.3-70b-versatile",
+    "context_window": 131072,
+    "max_output": 32768,
+    "input_per_1m": 0.59,
+    "output_per_1m": 0.79,
+    "capabilities": [
+      "tools",
+      "json_mode",
+      "streaming"
+    ],
+    "speed_tps": 280,
+    "aliases": [
+      "llama-3.3-70b"
+    ],
+    "benchmarks": {
+      "quality_index": 56,
+      "mmlu": 86.0,
+      "gpqa": 50.5,
+      "humaneval": 88.4,
+      "math": 77.0,
+      "sources": [
+        "meta-llama-3.3-blog"
+      ]
+    }
+  },
+  {
+    "provider": "groq",
+    "model_id": "mixtral-8x7b-32768",
+    "context_window": 32768,
+    "max_output": 32768,
+    "input_per_1m": 0.24,
+    "output_per_1m": 0.24,
+    "capabilities": [
+      "streaming"
+    ]
+  },
+  {
+    "provider": "gryphe",
+    "model_id": "mythomax-l2-13b",
+    "context_window": 4096,
+    "input_per_1m": 0.06,
+    "output_per_1m": 0.06,
+    "capabilities": [
+      "json_mode"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "ibm-granite",
+    "model_id": "granite-4.0-h-micro",
+    "context_window": 131000,
+    "input_per_1m": 0.017,
+    "output_per_1m": 0.11,
+    "capabilities": [],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "inception",
+    "model_id": "mercury-2",
+    "context_window": 128000,
+    "input_per_1m": 0.25,
+    "output_per_1m": 0.75,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "inclusionai",
+    "model_id": "ling-2.6-1t:free",
+    "context_window": 262144,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "inclusionai",
+    "model_id": "ling-2.6-flash",
+    "context_window": 262144,
+    "input_per_1m": 0.08,
+    "output_per_1m": 0.24,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "inflection",
+    "model_id": "inflection-3-pi",
+    "context_window": 8000,
+    "input_per_1m": 2.5,
+    "output_per_1m": 10.0,
+    "capabilities": [],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "inflection",
+    "model_id": "inflection-3-productivity",
+    "context_window": 8000,
+    "input_per_1m": 2.5,
+    "output_per_1m": 10.0,
+    "capabilities": [],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "kwaipilot",
+    "model_id": "kat-coder-pro-v2",
+    "context_window": 256000,
+    "input_per_1m": 0.3,
+    "output_per_1m": 1.2,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "liquid",
+    "model_id": "lfm-2-24b-a2b",
+    "context_window": 32768,
+    "input_per_1m": 0.03,
+    "output_per_1m": 0.12,
+    "capabilities": [],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "liquid",
+    "model_id": "lfm-2.5-1.2b-instruct:free",
+    "context_window": 32768,
+    "capabilities": [],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "liquid",
+    "model_id": "lfm-2.5-1.2b-thinking:free",
+    "context_window": 32768,
+    "capabilities": [],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "mancer",
+    "model_id": "weaver",
+    "context_window": 8000,
+    "input_per_1m": 0.75,
+    "output_per_1m": 1.0,
+    "capabilities": [
+      "json_mode"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "meta-llama",
+    "model_id": "llama-3-70b-instruct",
+    "context_window": 8192,
+    "input_per_1m": 0.51,
+    "output_per_1m": 0.74,
+    "capabilities": [],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "meta-llama",
+    "model_id": "llama-3-8b-instruct",
+    "context_window": 8192,
+    "input_per_1m": 0.03,
+    "output_per_1m": 0.04,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "meta-llama",
+    "model_id": "llama-3.1-70b-instruct",
+    "context_window": 131072,
+    "input_per_1m": 0.39999999999999997,
+    "output_per_1m": 0.39999999999999997,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "meta-llama",
+    "model_id": "llama-3.1-8b-instruct",
+    "context_window": 16384,
+    "input_per_1m": 0.02,
+    "output_per_1m": 0.049999999999999996,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "meta-llama",
+    "model_id": "llama-3.2-11b-vision-instruct",
+    "context_window": 131072,
+    "input_per_1m": 0.245,
+    "output_per_1m": 0.245,
+    "capabilities": [
+      "json_mode",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "meta-llama",
+    "model_id": "llama-3.2-1b-instruct",
+    "context_window": 60000,
+    "input_per_1m": 0.027,
+    "output_per_1m": 0.19999999999999998,
+    "capabilities": [],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "meta-llama",
+    "model_id": "llama-3.2-3b-instruct",
+    "context_window": 80000,
+    "input_per_1m": 0.051,
+    "output_per_1m": 0.33999999999999997,
+    "capabilities": [],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "meta-llama",
+    "model_id": "llama-3.2-3b-instruct:free",
+    "context_window": 131072,
+    "capabilities": [],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "meta-llama",
+    "model_id": "llama-3.3-70b-instruct",
+    "context_window": 131072,
+    "input_per_1m": 0.09999999999999999,
+    "output_per_1m": 0.32,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "meta-llama",
+    "model_id": "llama-3.3-70b-instruct:free",
+    "context_window": 65536,
+    "capabilities": [
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "meta-llama",
+    "model_id": "llama-4-maverick",
+    "context_window": 1048576,
+    "input_per_1m": 0.15,
+    "output_per_1m": 0.6,
+    "capabilities": [
+      "json_mode",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "meta-llama",
+    "model_id": "llama-4-scout",
+    "context_window": 327680,
+    "input_per_1m": 0.08,
+    "output_per_1m": 0.3,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "meta-llama",
+    "model_id": "llama-guard-3-8b",
+    "context_window": 131072,
+    "input_per_1m": 0.48,
+    "output_per_1m": 0.03,
+    "capabilities": [],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "meta-llama",
+    "model_id": "llama-guard-4-12b",
+    "context_window": 163840,
+    "input_per_1m": 0.18,
+    "output_per_1m": 0.18,
+    "capabilities": [
+      "json_mode",
+      "vision"
+    ],
+    "modalities_in": [
+      "image",
+      "text"
+    ]
+  },
+  {
+    "provider": "microsoft",
+    "model_id": "phi-4",
+    "context_window": 16384,
+    "input_per_1m": 0.065,
+    "output_per_1m": 0.14,
+    "capabilities": [
+      "json_mode"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "microsoft",
+    "model_id": "wizardlm-2-8x22b",
+    "context_window": 65535,
+    "input_per_1m": 0.62,
+    "output_per_1m": 0.62,
+    "capabilities": [],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "minimax",
+    "model_id": "minimax-01",
+    "context_window": 1000192,
+    "input_per_1m": 0.19999999999999998,
+    "output_per_1m": 1.1,
+    "capabilities": [
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "minimax",
+    "model_id": "minimax-m1",
+    "context_window": 1000000,
+    "input_per_1m": 0.39999999999999997,
+    "output_per_1m": 2.2,
+    "capabilities": [
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "minimax",
+    "model_id": "minimax-m2",
+    "context_window": 196608,
+    "input_per_1m": 0.255,
+    "output_per_1m": 1.0,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "minimax",
+    "model_id": "minimax-m2-her",
+    "context_window": 65536,
+    "input_per_1m": 0.3,
+    "output_per_1m": 1.2,
+    "capabilities": [],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "minimax",
+    "model_id": "minimax-m2.1",
+    "context_window": 196608,
+    "input_per_1m": 0.29,
+    "output_per_1m": 0.95,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "minimax",
+    "model_id": "minimax-m2.5",
+    "context_window": 196608,
+    "input_per_1m": 0.15,
+    "output_per_1m": 1.15,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "minimax",
+    "model_id": "minimax-m2.5:free",
+    "context_window": 196608,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "minimax",
+    "model_id": "minimax-m2.7",
+    "context_window": 196608,
+    "input_per_1m": 0.3,
+    "output_per_1m": 1.2,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "codestral-2508",
+    "context_window": 256000,
+    "input_per_1m": 0.3,
+    "output_per_1m": 0.8999999999999999,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "codestral-latest",
+    "context_window": 256000,
+    "input_per_1m": 0.3,
+    "output_per_1m": 0.9,
+    "capabilities": [
+      "tools",
+      "streaming"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "devstral-2512",
+    "context_window": 262144,
+    "input_per_1m": 0.39999999999999997,
+    "output_per_1m": 2.0,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "devstral-medium",
+    "context_window": 131072,
+    "input_per_1m": 0.39999999999999997,
+    "output_per_1m": 2.0,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "devstral-small",
+    "context_window": 131072,
+    "input_per_1m": 0.09999999999999999,
+    "output_per_1m": 0.3,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "ministral-14b-2512",
+    "context_window": 262144,
+    "input_per_1m": 0.19999999999999998,
+    "output_per_1m": 0.19999999999999998,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "ministral-3b-2512",
+    "context_window": 131072,
+    "input_per_1m": 0.09999999999999999,
+    "output_per_1m": 0.09999999999999999,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "ministral-8b-2512",
+    "context_window": 262144,
+    "input_per_1m": 0.15,
+    "output_per_1m": 0.15,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "mistral-7b-instruct-v0.1",
+    "context_window": 2824,
+    "input_per_1m": 0.11,
+    "output_per_1m": 0.19,
+    "capabilities": [],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "mistral-large",
+    "context_window": 128000,
+    "input_per_1m": 2.0,
+    "output_per_1m": 6.0,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "mistral-large-2407",
+    "context_window": 131072,
+    "input_per_1m": 2.0,
+    "output_per_1m": 6.0,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "mistral-large-2411",
+    "context_window": 131072,
+    "input_per_1m": 2.0,
+    "output_per_1m": 6.0,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "mistral-large-2512",
+    "context_window": 262144,
+    "input_per_1m": 0.5,
+    "output_per_1m": 1.5,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "mistral-large-latest",
+    "context_window": 128000,
+    "max_output": 32768,
+    "input_per_1m": 2.0,
+    "output_per_1m": 6.0,
+    "capabilities": [
+      "tools",
+      "json_mode",
+      "structured_output",
+      "streaming"
+    ],
+    "speed_tps": 50,
+    "aliases": [
+      "mistral-large"
+    ],
+    "benchmarks": {
+      "quality_index": 60,
+      "mmlu": 84.0,
+      "gpqa": 48.0,
+      "humaneval": 84.0,
+      "math": 71.5,
+      "sources": [
+        "mistral-blog"
+      ]
+    }
+  },
+  {
+    "provider": "mistral",
+    "model_id": "mistral-medium-3",
+    "context_window": 131072,
+    "input_per_1m": 0.39999999999999997,
+    "output_per_1m": 2.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "mistral-medium-3.1",
+    "context_window": 131072,
+    "input_per_1m": 0.39999999999999997,
+    "output_per_1m": 2.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "mistral-nemo",
+    "context_window": 131072,
+    "input_per_1m": 0.02,
+    "output_per_1m": 0.03,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "mistral-saba",
+    "context_window": 32768,
+    "input_per_1m": 0.19999999999999998,
+    "output_per_1m": 0.6,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "mistral-small-24b-instruct-2501",
+    "context_window": 32768,
+    "input_per_1m": 0.049999999999999996,
+    "output_per_1m": 0.08,
+    "capabilities": [
+      "json_mode"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "mistral-small-2603",
+    "context_window": 262144,
+    "input_per_1m": 0.15,
+    "output_per_1m": 0.6,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "mistral-small-3.1-24b-instruct",
+    "context_window": 128000,
+    "input_per_1m": 0.35,
+    "output_per_1m": 0.56,
+    "capabilities": [
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "mistral-small-3.2-24b-instruct",
+    "context_window": 128000,
+    "input_per_1m": 0.075,
+    "output_per_1m": 0.19999999999999998,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "image",
+      "text"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "mistral-small-latest",
+    "context_window": 128000,
+    "input_per_1m": 0.2,
+    "output_per_1m": 0.6,
+    "capabilities": [
+      "tools",
+      "json_mode",
+      "streaming"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "mixtral-8x22b-instruct",
+    "context_window": 65536,
+    "input_per_1m": 2.0,
+    "output_per_1m": 6.0,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "mixtral-8x7b-instruct",
+    "context_window": 32768,
+    "input_per_1m": 0.54,
+    "output_per_1m": 0.54,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "pixtral-large-2411",
+    "context_window": 131072,
+    "input_per_1m": 2.0,
+    "output_per_1m": 6.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "pixtral-large-latest",
+    "context_window": 128000,
+    "input_per_1m": 2.0,
+    "output_per_1m": 6.0,
+    "capabilities": [
+      "tools",
+      "vision",
+      "streaming"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "voxtral-small-24b-2507",
+    "context_window": 32000,
+    "input_per_1m": 0.09999999999999999,
+    "output_per_1m": 0.3,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text",
+      "audio"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "codestral-2508",
+    "context_window": 256000,
+    "input_per_1m": 0.3,
+    "output_per_1m": 0.8999999999999999,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "devstral-2512",
+    "context_window": 262144,
+    "input_per_1m": 0.39999999999999997,
+    "output_per_1m": 2.0,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "devstral-medium",
+    "context_window": 131072,
+    "input_per_1m": 0.39999999999999997,
+    "output_per_1m": 2.0,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "devstral-small",
+    "context_window": 131072,
+    "input_per_1m": 0.09999999999999999,
+    "output_per_1m": 0.3,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "ministral-14b-2512",
+    "context_window": 262144,
+    "input_per_1m": 0.19999999999999998,
+    "output_per_1m": 0.19999999999999998,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "ministral-3b-2512",
+    "context_window": 131072,
+    "input_per_1m": 0.09999999999999999,
+    "output_per_1m": 0.09999999999999999,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "ministral-8b-2512",
+    "context_window": 262144,
+    "input_per_1m": 0.15,
+    "output_per_1m": 0.15,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "mistral-7b-instruct-v0.1",
+    "context_window": 2824,
+    "input_per_1m": 0.11,
+    "output_per_1m": 0.19,
+    "capabilities": [],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "mistral-large",
+    "context_window": 128000,
+    "input_per_1m": 2.0,
+    "output_per_1m": 6.0,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "mistral-large-2407",
+    "context_window": 131072,
+    "input_per_1m": 2.0,
+    "output_per_1m": 6.0,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "mistral-large-2411",
+    "context_window": 131072,
+    "input_per_1m": 2.0,
+    "output_per_1m": 6.0,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "mistral-large-2512",
+    "context_window": 262144,
+    "input_per_1m": 0.5,
+    "output_per_1m": 1.5,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "mistral-medium-3",
+    "context_window": 131072,
+    "input_per_1m": 0.39999999999999997,
+    "output_per_1m": 2.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "mistral-medium-3.1",
+    "context_window": 131072,
+    "input_per_1m": 0.39999999999999997,
+    "output_per_1m": 2.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "mistral-nemo",
+    "context_window": 131072,
+    "input_per_1m": 0.02,
+    "output_per_1m": 0.03,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "mistral-saba",
+    "context_window": 32768,
+    "input_per_1m": 0.19999999999999998,
+    "output_per_1m": 0.6,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "mistral-small-24b-instruct-2501",
+    "context_window": 32768,
+    "input_per_1m": 0.049999999999999996,
+    "output_per_1m": 0.08,
+    "capabilities": [
+      "json_mode"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "mistral-small-2603",
+    "context_window": 262144,
+    "input_per_1m": 0.15,
+    "output_per_1m": 0.6,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "mistral-small-3.1-24b-instruct",
+    "context_window": 128000,
+    "input_per_1m": 0.35,
+    "output_per_1m": 0.56,
+    "capabilities": [
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "mistral-small-3.2-24b-instruct",
+    "context_window": 128000,
+    "input_per_1m": 0.075,
+    "output_per_1m": 0.19999999999999998,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "image",
+      "text"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "mixtral-8x22b-instruct",
+    "context_window": 65536,
+    "input_per_1m": 2.0,
+    "output_per_1m": 6.0,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "mixtral-8x7b-instruct",
+    "context_window": 32768,
+    "input_per_1m": 0.54,
+    "output_per_1m": 0.54,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "pixtral-large-2411",
+    "context_window": 131072,
+    "input_per_1m": 2.0,
+    "output_per_1m": 6.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "voxtral-small-24b-2507",
+    "context_window": 32000,
+    "input_per_1m": 0.09999999999999999,
+    "output_per_1m": 0.3,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text",
+      "audio"
+    ]
+  },
+  {
+    "provider": "moonshotai",
+    "model_id": "kimi-k2",
+    "context_window": 131072,
+    "input_per_1m": 0.5700000000000001,
+    "output_per_1m": 2.3,
+    "capabilities": [
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "moonshotai",
+    "model_id": "kimi-k2-0905",
+    "context_window": 262144,
+    "input_per_1m": 0.39999999999999997,
+    "output_per_1m": 2.0,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "moonshotai",
+    "model_id": "kimi-k2-thinking",
+    "context_window": 262144,
+    "input_per_1m": 0.6,
+    "output_per_1m": 2.5,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "moonshotai",
+    "model_id": "kimi-k2.5",
+    "context_window": 262144,
+    "input_per_1m": 0.44,
+    "output_per_1m": 2.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "moonshotai",
+    "model_id": "kimi-k2.6",
+    "context_window": 262142,
+    "input_per_1m": 0.74,
+    "output_per_1m": 3.49,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "morph",
+    "model_id": "morph-v3-fast",
+    "context_window": 81920,
+    "input_per_1m": 0.7999999999999999,
+    "output_per_1m": 1.2,
+    "capabilities": [],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "morph",
+    "model_id": "morph-v3-large",
+    "context_window": 262144,
+    "input_per_1m": 0.8999999999999999,
+    "output_per_1m": 1.9,
+    "capabilities": [],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "nex-agi",
+    "model_id": "deepseek-v3.1-nex-n1",
+    "context_window": 131072,
+    "input_per_1m": 0.135,
+    "output_per_1m": 0.5,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "nousresearch",
+    "model_id": "hermes-2-pro-llama-3-8b",
+    "context_window": 8192,
+    "input_per_1m": 0.14,
+    "output_per_1m": 0.14,
+    "capabilities": [
+      "json_mode"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "nousresearch",
+    "model_id": "hermes-3-llama-3.1-405b",
+    "context_window": 131072,
+    "input_per_1m": 1.0,
+    "output_per_1m": 1.0,
+    "capabilities": [
+      "json_mode"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "nousresearch",
+    "model_id": "hermes-3-llama-3.1-405b:free",
+    "context_window": 131072,
+    "capabilities": [],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "nousresearch",
+    "model_id": "hermes-3-llama-3.1-70b",
+    "context_window": 131072,
+    "input_per_1m": 0.3,
+    "output_per_1m": 0.3,
+    "capabilities": [
+      "json_mode"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "nousresearch",
+    "model_id": "hermes-4-405b",
+    "context_window": 131072,
+    "input_per_1m": 1.0,
+    "output_per_1m": 3.0,
+    "capabilities": [
+      "json_mode"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "nousresearch",
+    "model_id": "hermes-4-70b",
+    "context_window": 131072,
+    "input_per_1m": 0.13,
+    "output_per_1m": 0.39999999999999997,
+    "capabilities": [
+      "json_mode"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "nvidia",
+    "model_id": "llama-3.1-nemotron-70b-instruct",
+    "context_window": 131072,
+    "input_per_1m": 1.2,
+    "output_per_1m": 1.2,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "nvidia",
+    "model_id": "llama-3.3-nemotron-super-49b-v1.5",
+    "context_window": 131072,
+    "input_per_1m": 0.09999999999999999,
+    "output_per_1m": 0.39999999999999997,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "nvidia",
+    "model_id": "nemotron-3-nano-30b-a3b",
+    "context_window": 262144,
+    "input_per_1m": 0.049999999999999996,
+    "output_per_1m": 0.19999999999999998,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "nvidia",
+    "model_id": "nemotron-3-nano-30b-a3b:free",
+    "context_window": 256000,
+    "capabilities": [
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "nvidia",
+    "model_id": "nemotron-3-nano-omni-30b-a3b-reasoning:free",
+    "context_window": 256000,
+    "capabilities": [
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "audio",
+      "image",
+      "video"
+    ]
+  },
+  {
+    "provider": "nvidia",
+    "model_id": "nemotron-3-super-120b-a12b",
+    "context_window": 262144,
+    "input_per_1m": 0.09,
+    "output_per_1m": 0.44999999999999996,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "nvidia",
+    "model_id": "nemotron-3-super-120b-a12b:free",
+    "context_window": 262144,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "nvidia",
+    "model_id": "nemotron-nano-12b-v2-vl",
+    "context_window": 131072,
+    "input_per_1m": 0.19999999999999998,
+    "output_per_1m": 0.6,
+    "capabilities": [
+      "json_mode",
+      "vision"
+    ],
+    "modalities_in": [
+      "image",
+      "text",
+      "video"
+    ]
+  },
+  {
+    "provider": "nvidia",
+    "model_id": "nemotron-nano-12b-v2-vl:free",
+    "context_window": 128000,
+    "capabilities": [
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "image",
+      "text",
+      "video"
+    ]
+  },
+  {
+    "provider": "nvidia",
+    "model_id": "nemotron-nano-9b-v2",
+    "context_window": 131072,
+    "input_per_1m": 0.04,
+    "output_per_1m": 0.16,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "nvidia",
+    "model_id": "nemotron-nano-9b-v2:free",
+    "context_window": 128000,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
   {
     "provider": "ollama",
     "model_id": "llama3.3",
     "context_window": 131072,
     "input_per_1m": 0,
     "output_per_1m": 0,
-    "capabilities": ["tools", "streaming"],
+    "capabilities": [
+      "tools",
+      "streaming"
+    ],
     "notes": "self-hosted; cost is hardware-dependent"
   },
   {
@@ -443,6 +3468,3110 @@
     "context_window": 131072,
     "input_per_1m": 0,
     "output_per_1m": 0,
-    "capabilities": ["tools", "streaming"]
+    "capabilities": [
+      "tools",
+      "streaming"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-3.5-turbo",
+    "context_window": 16385,
+    "max_output": 4096,
+    "input_per_1m": 0.5,
+    "output_per_1m": 1.5,
+    "capabilities": [
+      "json_mode",
+      "streaming",
+      "tools"
+    ],
+    "deprecated": true,
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-3.5-turbo-0613",
+    "context_window": 4095,
+    "input_per_1m": 1.0,
+    "output_per_1m": 2.0,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-3.5-turbo-16k",
+    "context_window": 16385,
+    "input_per_1m": 3.0,
+    "output_per_1m": 4.0,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-3.5-turbo-instruct",
+    "context_window": 4095,
+    "input_per_1m": 1.5,
+    "output_per_1m": 2.0,
+    "capabilities": [
+      "json_mode"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-4",
+    "context_window": 8191,
+    "input_per_1m": 30.0,
+    "output_per_1m": 60.0,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-4-0314",
+    "context_window": 8191,
+    "input_per_1m": 30.0,
+    "output_per_1m": 60.0,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-4-1106-preview",
+    "context_window": 128000,
+    "input_per_1m": 10.0,
+    "output_per_1m": 30.0,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-4-turbo",
+    "context_window": 128000,
+    "max_output": 4096,
+    "input_per_1m": 10.0,
+    "output_per_1m": 30.0,
+    "capabilities": [
+      "json_mode",
+      "streaming",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-4-turbo-preview",
+    "context_window": 128000,
+    "input_per_1m": 10.0,
+    "output_per_1m": 30.0,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-4.1",
+    "context_window": 1047576,
+    "input_per_1m": 2.0,
+    "output_per_1m": 8.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "image",
+      "text",
+      "file"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-4.1-mini",
+    "context_window": 1047576,
+    "input_per_1m": 0.39999999999999997,
+    "output_per_1m": 1.5999999999999999,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "image",
+      "text",
+      "file"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-4.1-nano",
+    "context_window": 1047576,
+    "input_per_1m": 0.09999999999999999,
+    "output_per_1m": 0.39999999999999997,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "image",
+      "text",
+      "file"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-4o",
+    "context_window": 128000,
+    "max_output": 16384,
+    "input_per_1m": 2.5,
+    "output_per_1m": 10.0,
+    "cached_input_per_1m": 1.25,
+    "capabilities": [
+      "tools",
+      "vision",
+      "json_mode",
+      "structured_output",
+      "streaming"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "file"
+    ],
+    "modalities_out": [
+      "text"
+    ],
+    "speed_tps": 110,
+    "aliases": [
+      "4o",
+      "gpt-4o-latest"
+    ],
+    "benchmarks": {
+      "quality_index": 71,
+      "mmlu": 88.7,
+      "gpqa": 53.6,
+      "humaneval": 90.2,
+      "math": 76.6,
+      "arena_elo": 1338,
+      "sources": [
+        "openai-research-page",
+        "lmsys-arena"
+      ]
+    }
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-4o-2024-05-13",
+    "context_window": 128000,
+    "input_per_1m": 5.0,
+    "output_per_1m": 15.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "file"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-4o-2024-08-06",
+    "context_window": 128000,
+    "input_per_1m": 2.5,
+    "output_per_1m": 10.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "file"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-4o-2024-11-20",
+    "context_window": 128000,
+    "max_output": 16384,
+    "input_per_1m": 2.5,
+    "output_per_1m": 10.0,
+    "cached_input_per_1m": 1.25,
+    "capabilities": [
+      "json_mode",
+      "streaming",
+      "structured_output",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "file"
+    ],
+    "modalities_out": [
+      "text"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-4o-audio-preview",
+    "context_window": 128000,
+    "input_per_1m": 2.5,
+    "output_per_1m": 10.0,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "audio",
+      "text"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-4o-mini",
+    "context_window": 128000,
+    "max_output": 16384,
+    "input_per_1m": 0.15,
+    "output_per_1m": 0.6,
+    "cached_input_per_1m": 0.075,
+    "capabilities": [
+      "tools",
+      "vision",
+      "json_mode",
+      "structured_output",
+      "streaming"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "file"
+    ],
+    "speed_tps": 145,
+    "aliases": [
+      "4o-mini",
+      "mini"
+    ],
+    "benchmarks": {
+      "quality_index": 60,
+      "mmlu": 82.0,
+      "gpqa": 40.2,
+      "humaneval": 87.2,
+      "math": 70.2,
+      "sources": [
+        "openai-research-page"
+      ]
+    }
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-4o-mini-2024-07-18",
+    "context_window": 128000,
+    "input_per_1m": 0.15,
+    "output_per_1m": 0.6,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "file"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-4o-mini-search-preview",
+    "context_window": 128000,
+    "input_per_1m": 0.15,
+    "output_per_1m": 0.6,
+    "capabilities": [
+      "json_mode"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-4o-search-preview",
+    "context_window": 128000,
+    "input_per_1m": 2.5,
+    "output_per_1m": 10.0,
+    "capabilities": [
+      "json_mode"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-5",
+    "context_window": 400000,
+    "input_per_1m": 1.25,
+    "output_per_1m": 10.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "file"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-5-chat",
+    "context_window": 128000,
+    "input_per_1m": 1.25,
+    "output_per_1m": 10.0,
+    "capabilities": [
+      "json_mode",
+      "vision"
+    ],
+    "modalities_in": [
+      "file",
+      "image",
+      "text"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-5-codex",
+    "context_window": 400000,
+    "input_per_1m": 1.25,
+    "output_per_1m": 10.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-5-image",
+    "context_window": 400000,
+    "input_per_1m": 10.0,
+    "output_per_1m": 10.0,
+    "capabilities": [
+      "json_mode",
+      "vision"
+    ],
+    "modalities_in": [
+      "image",
+      "text",
+      "file"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-5-image-mini",
+    "context_window": 400000,
+    "input_per_1m": 2.5,
+    "output_per_1m": 2.0,
+    "capabilities": [
+      "json_mode",
+      "vision"
+    ],
+    "modalities_in": [
+      "file",
+      "image",
+      "text"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-5-mini",
+    "context_window": 400000,
+    "input_per_1m": 0.25,
+    "output_per_1m": 2.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "file"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-5-nano",
+    "context_window": 400000,
+    "input_per_1m": 0.049999999999999996,
+    "output_per_1m": 0.39999999999999997,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "file"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-5-pro",
+    "context_window": 400000,
+    "input_per_1m": 15.0,
+    "output_per_1m": 120.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "image",
+      "text",
+      "file"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-5.1",
+    "context_window": 400000,
+    "input_per_1m": 1.25,
+    "output_per_1m": 10.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "image",
+      "text",
+      "file"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-5.1-chat",
+    "context_window": 128000,
+    "input_per_1m": 1.25,
+    "output_per_1m": 10.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "file",
+      "image",
+      "text"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-5.1-codex",
+    "context_window": 400000,
+    "input_per_1m": 1.25,
+    "output_per_1m": 10.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-5.1-codex-max",
+    "context_window": 400000,
+    "input_per_1m": 1.25,
+    "output_per_1m": 10.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-5.1-codex-mini",
+    "context_window": 400000,
+    "input_per_1m": 0.25,
+    "output_per_1m": 2.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "image",
+      "text"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-5.2",
+    "context_window": 400000,
+    "input_per_1m": 1.75,
+    "output_per_1m": 14.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "file",
+      "image",
+      "text"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-5.2-chat",
+    "context_window": 128000,
+    "input_per_1m": 1.75,
+    "output_per_1m": 14.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "file",
+      "image",
+      "text"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-5.2-codex",
+    "context_window": 400000,
+    "input_per_1m": 1.75,
+    "output_per_1m": 14.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-5.2-pro",
+    "context_window": 400000,
+    "input_per_1m": 21.0,
+    "output_per_1m": 168.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "image",
+      "text",
+      "file"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-5.3-chat",
+    "context_window": 128000,
+    "input_per_1m": 1.75,
+    "output_per_1m": 14.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "file"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-5.3-codex",
+    "context_window": 400000,
+    "input_per_1m": 1.75,
+    "output_per_1m": 14.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "file"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-5.4",
+    "context_window": 1050000,
+    "input_per_1m": 2.5,
+    "output_per_1m": 15.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "file"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-5.4-image-2",
+    "context_window": 272000,
+    "input_per_1m": 8.0,
+    "output_per_1m": 15.0,
+    "capabilities": [
+      "json_mode",
+      "vision"
+    ],
+    "modalities_in": [
+      "image",
+      "text",
+      "file"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-5.4-mini",
+    "context_window": 400000,
+    "input_per_1m": 0.75,
+    "output_per_1m": 4.5,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "file",
+      "image",
+      "text"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-5.4-nano",
+    "context_window": 400000,
+    "input_per_1m": 0.19999999999999998,
+    "output_per_1m": 1.25,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "file",
+      "image",
+      "text"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-5.4-pro",
+    "context_window": 1050000,
+    "input_per_1m": 30.0,
+    "output_per_1m": 180.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "file"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-5.5",
+    "context_window": 1050000,
+    "input_per_1m": 5.0,
+    "output_per_1m": 30.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "file",
+      "image",
+      "text"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-5.5-pro",
+    "context_window": 1050000,
+    "input_per_1m": 30.0,
+    "output_per_1m": 180.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "file",
+      "image",
+      "text"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-audio",
+    "context_window": 128000,
+    "input_per_1m": 2.5,
+    "output_per_1m": 10.0,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text",
+      "audio"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-audio-mini",
+    "context_window": 128000,
+    "input_per_1m": 0.6,
+    "output_per_1m": 2.4,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text",
+      "audio"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-oss-120b",
+    "context_window": 131072,
+    "input_per_1m": 0.039,
+    "output_per_1m": 0.18,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-oss-120b:free",
+    "context_window": 131072,
+    "capabilities": [
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-oss-20b",
+    "context_window": 131072,
+    "input_per_1m": 0.03,
+    "output_per_1m": 0.14,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-oss-20b:free",
+    "context_window": 131072,
+    "capabilities": [
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-oss-safeguard-20b",
+    "context_window": 131072,
+    "input_per_1m": 0.075,
+    "output_per_1m": 0.3,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "o1",
+    "context_window": 200000,
+    "max_output": 100000,
+    "input_per_1m": 15.0,
+    "output_per_1m": 60.0,
+    "cached_input_per_1m": 7.5,
+    "capabilities": [
+      "tools",
+      "vision",
+      "structured_output",
+      "streaming",
+      "thinking"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "file"
+    ],
+    "speed_tps": 35,
+    "aliases": [
+      "o1-pro"
+    ],
+    "benchmarks": {
+      "quality_index": 85,
+      "mmlu": 92.3,
+      "gpqa": 78.0,
+      "humaneval": 89.0,
+      "math": 94.8,
+      "swe_bench": 48.9,
+      "sources": [
+        "openai-research-page"
+      ]
+    }
+  },
+  {
+    "provider": "openai",
+    "model_id": "o1-pro",
+    "context_window": 200000,
+    "input_per_1m": 150.0,
+    "output_per_1m": 600.0,
+    "capabilities": [
+      "json_mode",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "file"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "o3",
+    "context_window": 200000,
+    "input_per_1m": 2.0,
+    "output_per_1m": 8.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "image",
+      "text",
+      "file"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "o3-deep-research",
+    "context_window": 200000,
+    "input_per_1m": 10.0,
+    "output_per_1m": 40.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "image",
+      "text",
+      "file"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "o3-mini",
+    "context_window": 200000,
+    "max_output": 100000,
+    "input_per_1m": 1.1,
+    "output_per_1m": 4.4,
+    "cached_input_per_1m": 0.55,
+    "capabilities": [
+      "tools",
+      "structured_output",
+      "streaming",
+      "thinking"
+    ],
+    "modalities_in": [
+      "text",
+      "file"
+    ],
+    "speed_tps": 95,
+    "benchmarks": {
+      "quality_index": 78,
+      "mmlu": 86.5,
+      "gpqa": 79.7,
+      "humaneval": 87.8,
+      "math": 97.9,
+      "sources": [
+        "openai-research-page"
+      ]
+    }
+  },
+  {
+    "provider": "openai",
+    "model_id": "o3-mini-high",
+    "context_window": 200000,
+    "input_per_1m": 1.1,
+    "output_per_1m": 4.4,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text",
+      "file"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "o3-pro",
+    "context_window": 200000,
+    "input_per_1m": 20.0,
+    "output_per_1m": 80.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "file",
+      "image"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "o4-mini",
+    "context_window": 200000,
+    "input_per_1m": 1.1,
+    "output_per_1m": 4.4,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "image",
+      "text",
+      "file"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "o4-mini-deep-research",
+    "context_window": 200000,
+    "input_per_1m": 2.0,
+    "output_per_1m": 8.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "file",
+      "image",
+      "text"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "o4-mini-high",
+    "context_window": 200000,
+    "input_per_1m": 1.1,
+    "output_per_1m": 4.4,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "image",
+      "text",
+      "file"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "text-embedding-3-large",
+    "context_window": 8191,
+    "input_per_1m": 0.13,
+    "output_per_1m": 0,
+    "capabilities": [
+      "embeddings"
+    ]
+  },
+  {
+    "provider": "openai",
+    "model_id": "text-embedding-3-small",
+    "context_window": 8191,
+    "input_per_1m": 0.02,
+    "output_per_1m": 0,
+    "capabilities": [
+      "embeddings"
+    ]
+  },
+  {
+    "provider": "openrouter",
+    "model_id": "auto",
+    "context_window": 2000000,
+    "input_per_1m": -1000000.0,
+    "output_per_1m": -1000000.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "audio",
+      "file",
+      "video"
+    ]
+  },
+  {
+    "provider": "openrouter",
+    "model_id": "bodybuilder",
+    "context_window": 128000,
+    "input_per_1m": -1000000.0,
+    "output_per_1m": -1000000.0,
+    "capabilities": [],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "openrouter",
+    "model_id": "free",
+    "context_window": 200000,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "openrouter",
+    "model_id": "owl-alpha",
+    "context_window": 1048756,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "openrouter",
+    "model_id": "pareto-code",
+    "context_window": 200000,
+    "input_per_1m": -1000000.0,
+    "output_per_1m": -1000000.0,
+    "capabilities": [],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "perplexity",
+    "model_id": "sonar",
+    "context_window": 127072,
+    "input_per_1m": 1.0,
+    "output_per_1m": 1.0,
+    "capabilities": [
+      "streaming",
+      "vision",
+      "web_search"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "perplexity",
+    "model_id": "sonar-deep-research",
+    "context_window": 128000,
+    "input_per_1m": 2.0,
+    "output_per_1m": 8.0,
+    "capabilities": [],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "perplexity",
+    "model_id": "sonar-pro",
+    "context_window": 200000,
+    "input_per_1m": 3.0,
+    "output_per_1m": 15.0,
+    "capabilities": [
+      "streaming",
+      "vision",
+      "web_search"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "perplexity",
+    "model_id": "sonar-pro-search",
+    "context_window": 200000,
+    "input_per_1m": 3.0,
+    "output_per_1m": 15.0,
+    "capabilities": [
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "perplexity",
+    "model_id": "sonar-reasoning-pro",
+    "context_window": 128000,
+    "input_per_1m": 2.0,
+    "output_per_1m": 8.0,
+    "capabilities": [
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "poolside",
+    "model_id": "laguna-m.1:free",
+    "context_window": 131072,
+    "capabilities": [
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "poolside",
+    "model_id": "laguna-xs.2:free",
+    "context_window": 131072,
+    "capabilities": [
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "prime-intellect",
+    "model_id": "intellect-3",
+    "context_window": 131072,
+    "input_per_1m": 0.19999999999999998,
+    "output_per_1m": 1.1,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen-2.5-72b-instruct",
+    "context_window": 32768,
+    "input_per_1m": 0.36,
+    "output_per_1m": 0.39999999999999997,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen-2.5-7b-instruct",
+    "context_window": 32768,
+    "input_per_1m": 0.04,
+    "output_per_1m": 0.09999999999999999,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen-2.5-coder-32b-instruct",
+    "context_window": 32768,
+    "input_per_1m": 0.66,
+    "output_per_1m": 1.0,
+    "capabilities": [],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen-max",
+    "context_window": 32768,
+    "input_per_1m": 1.04,
+    "output_per_1m": 4.16,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen-plus",
+    "context_window": 1000000,
+    "input_per_1m": 0.26,
+    "output_per_1m": 0.78,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen-plus-2025-07-28",
+    "context_window": 1000000,
+    "input_per_1m": 0.26,
+    "output_per_1m": 0.78,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen-plus-2025-07-28:thinking",
+    "context_window": 1000000,
+    "input_per_1m": 0.26,
+    "output_per_1m": 0.78,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen-turbo",
+    "context_window": 131072,
+    "input_per_1m": 0.0325,
+    "output_per_1m": 0.13,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen-vl-max",
+    "context_window": 131072,
+    "input_per_1m": 0.52,
+    "output_per_1m": 2.08,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen-vl-plus",
+    "context_window": 131072,
+    "input_per_1m": 0.1365,
+    "output_per_1m": 0.40950000000000003,
+    "capabilities": [
+      "json_mode",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen2.5-vl-72b-instruct",
+    "context_window": 32000,
+    "input_per_1m": 0.25,
+    "output_per_1m": 0.75,
+    "capabilities": [
+      "json_mode",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen3-14b",
+    "context_window": 40960,
+    "input_per_1m": 0.06,
+    "output_per_1m": 0.24,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen3-235b-a22b",
+    "context_window": 131072,
+    "input_per_1m": 0.45499999999999996,
+    "output_per_1m": 1.8199999999999998,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen3-235b-a22b-2507",
+    "context_window": 262144,
+    "input_per_1m": 0.071,
+    "output_per_1m": 0.09999999999999999,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen3-235b-a22b-thinking-2507",
+    "context_window": 131072,
+    "input_per_1m": 0.14950000000000002,
+    "output_per_1m": 1.495,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen3-30b-a3b",
+    "context_window": 40960,
+    "input_per_1m": 0.08,
+    "output_per_1m": 0.28,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen3-30b-a3b-instruct-2507",
+    "context_window": 262144,
+    "input_per_1m": 0.09,
+    "output_per_1m": 0.3,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen3-30b-a3b-thinking-2507",
+    "context_window": 131072,
+    "input_per_1m": 0.08,
+    "output_per_1m": 0.39999999999999997,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen3-32b",
+    "context_window": 40960,
+    "input_per_1m": 0.08,
+    "output_per_1m": 0.24,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen3-8b",
+    "context_window": 40960,
+    "input_per_1m": 0.049999999999999996,
+    "output_per_1m": 0.39999999999999997,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen3-coder",
+    "context_window": 262144,
+    "input_per_1m": 0.22,
+    "output_per_1m": 1.7999999999999998,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen3-coder-30b-a3b-instruct",
+    "context_window": 160000,
+    "input_per_1m": 0.07,
+    "output_per_1m": 0.27,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen3-coder-flash",
+    "context_window": 1000000,
+    "input_per_1m": 0.195,
+    "output_per_1m": 0.975,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen3-coder-next",
+    "context_window": 262144,
+    "input_per_1m": 0.14,
+    "output_per_1m": 0.7999999999999999,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen3-coder-plus",
+    "context_window": 1000000,
+    "input_per_1m": 0.65,
+    "output_per_1m": 3.25,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen3-coder:free",
+    "context_window": 262000,
+    "capabilities": [
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen3-max",
+    "context_window": 262144,
+    "input_per_1m": 0.78,
+    "output_per_1m": 3.9,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen3-max-thinking",
+    "context_window": 262144,
+    "input_per_1m": 0.78,
+    "output_per_1m": 3.9,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen3-next-80b-a3b-instruct",
+    "context_window": 262144,
+    "input_per_1m": 0.09,
+    "output_per_1m": 1.1,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen3-next-80b-a3b-instruct:free",
+    "context_window": 262144,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen3-next-80b-a3b-thinking",
+    "context_window": 131072,
+    "input_per_1m": 0.0975,
+    "output_per_1m": 0.78,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen3-vl-235b-a22b-instruct",
+    "context_window": 262144,
+    "input_per_1m": 0.19999999999999998,
+    "output_per_1m": 0.88,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen3-vl-235b-a22b-thinking",
+    "context_window": 131072,
+    "input_per_1m": 0.26,
+    "output_per_1m": 2.6,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen3-vl-30b-a3b-instruct",
+    "context_window": 131072,
+    "input_per_1m": 0.13,
+    "output_per_1m": 0.52,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen3-vl-30b-a3b-thinking",
+    "context_window": 131072,
+    "input_per_1m": 0.13,
+    "output_per_1m": 1.56,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen3-vl-32b-instruct",
+    "context_window": 131072,
+    "input_per_1m": 0.10400000000000001,
+    "output_per_1m": 0.41600000000000004,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen3-vl-8b-instruct",
+    "context_window": 131072,
+    "input_per_1m": 0.08,
+    "output_per_1m": 0.5,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "image",
+      "text"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen3-vl-8b-thinking",
+    "context_window": 131072,
+    "input_per_1m": 0.117,
+    "output_per_1m": 1.365,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "image",
+      "text"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen3.5-122b-a10b",
+    "context_window": 262144,
+    "input_per_1m": 0.26,
+    "output_per_1m": 2.08,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "video"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen3.5-27b",
+    "context_window": 262144,
+    "input_per_1m": 0.195,
+    "output_per_1m": 1.56,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "video"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen3.5-35b-a3b",
+    "context_window": 262144,
+    "input_per_1m": 0.1625,
+    "output_per_1m": 1.3,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "video"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen3.5-397b-a17b",
+    "context_window": 262144,
+    "input_per_1m": 0.39,
+    "output_per_1m": 2.34,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "video"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen3.5-9b",
+    "context_window": 262144,
+    "input_per_1m": 0.09999999999999999,
+    "output_per_1m": 0.15,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "video"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen3.5-flash-02-23",
+    "context_window": 1000000,
+    "input_per_1m": 0.065,
+    "output_per_1m": 0.26,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "video"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen3.5-plus-02-15",
+    "context_window": 1000000,
+    "input_per_1m": 0.26,
+    "output_per_1m": 1.56,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "video"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen3.5-plus-20260420",
+    "context_window": 1000000,
+    "input_per_1m": 0.39999999999999997,
+    "output_per_1m": 2.4,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "video"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen3.6-27b",
+    "context_window": 256000,
+    "input_per_1m": 0.325,
+    "output_per_1m": 3.25,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "video"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen3.6-35b-a3b",
+    "context_window": 262144,
+    "input_per_1m": 0.16119999999999998,
+    "output_per_1m": 0.9652499999999999,
+    "capabilities": [
+      "json_mode",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "video"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen3.6-flash",
+    "context_window": 1000000,
+    "input_per_1m": 0.25,
+    "output_per_1m": 1.5,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "video"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen3.6-max-preview",
+    "context_window": 262144,
+    "input_per_1m": 1.04,
+    "output_per_1m": 6.24,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "qwen",
+    "model_id": "qwen3.6-plus",
+    "context_window": 1000000,
+    "input_per_1m": 0.325,
+    "output_per_1m": 1.95,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "video"
+    ]
+  },
+  {
+    "provider": "rekaai",
+    "model_id": "reka-edge",
+    "context_window": 16384,
+    "input_per_1m": 0.09999999999999999,
+    "output_per_1m": 0.09999999999999999,
+    "capabilities": [
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "image",
+      "text",
+      "video"
+    ]
+  },
+  {
+    "provider": "rekaai",
+    "model_id": "reka-flash-3",
+    "context_window": 65536,
+    "input_per_1m": 0.09999999999999999,
+    "output_per_1m": 0.19999999999999998,
+    "capabilities": [],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "relace",
+    "model_id": "relace-apply-3",
+    "context_window": 256000,
+    "input_per_1m": 0.85,
+    "output_per_1m": 1.25,
+    "capabilities": [],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "relace",
+    "model_id": "relace-search",
+    "context_window": 256000,
+    "input_per_1m": 1.0,
+    "output_per_1m": 3.0,
+    "capabilities": [
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "sao10k",
+    "model_id": "l3-euryale-70b",
+    "context_window": 8192,
+    "input_per_1m": 1.48,
+    "output_per_1m": 1.48,
+    "capabilities": [
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "sao10k",
+    "model_id": "l3-lunaris-8b",
+    "context_window": 8192,
+    "input_per_1m": 0.04,
+    "output_per_1m": 0.049999999999999996,
+    "capabilities": [
+      "json_mode"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "sao10k",
+    "model_id": "l3.1-70b-hanami-x1",
+    "context_window": 16000,
+    "input_per_1m": 3.0,
+    "output_per_1m": 3.0,
+    "capabilities": [],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "sao10k",
+    "model_id": "l3.1-euryale-70b",
+    "context_window": 131072,
+    "input_per_1m": 0.85,
+    "output_per_1m": 0.85,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "sao10k",
+    "model_id": "l3.3-euryale-70b",
+    "context_window": 131072,
+    "input_per_1m": 0.65,
+    "output_per_1m": 0.75,
+    "capabilities": [
+      "json_mode"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "stepfun",
+    "model_id": "step-3.5-flash",
+    "context_window": 262144,
+    "input_per_1m": 0.09999999999999999,
+    "output_per_1m": 0.3,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "switchpoint",
+    "model_id": "router",
+    "context_window": 131072,
+    "input_per_1m": 0.85,
+    "output_per_1m": 3.4,
+    "capabilities": [],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "tencent",
+    "model_id": "hunyuan-a13b-instruct",
+    "context_window": 131072,
+    "input_per_1m": 0.14,
+    "output_per_1m": 0.5700000000000001,
+    "capabilities": [
+      "json_mode"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "tencent",
+    "model_id": "hy3-preview:free",
+    "context_window": 262144,
+    "capabilities": [
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "thedrummer",
+    "model_id": "cydonia-24b-v4.1",
+    "context_window": 131072,
+    "input_per_1m": 0.3,
+    "output_per_1m": 0.5,
+    "capabilities": [],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "thedrummer",
+    "model_id": "rocinante-12b",
+    "context_window": 32768,
+    "input_per_1m": 0.16999999999999998,
+    "output_per_1m": 0.43,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "thedrummer",
+    "model_id": "skyfall-36b-v2",
+    "context_window": 32768,
+    "input_per_1m": 0.55,
+    "output_per_1m": 0.7999999999999999,
+    "capabilities": [],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "thedrummer",
+    "model_id": "unslopnemo-12b",
+    "context_window": 32768,
+    "input_per_1m": 0.39999999999999997,
+    "output_per_1m": 0.39999999999999997,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "tngtech",
+    "model_id": "deepseek-r1t2-chimera",
+    "context_window": 163840,
+    "input_per_1m": 0.3,
+    "output_per_1m": 1.1,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "together",
+    "model_id": "Qwen/Qwen2.5-72B-Instruct-Turbo",
+    "context_window": 131072,
+    "input_per_1m": 1.2,
+    "output_per_1m": 1.2,
+    "capabilities": [
+      "tools",
+      "streaming"
+    ]
+  },
+  {
+    "provider": "together",
+    "model_id": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+    "context_window": 131072,
+    "input_per_1m": 0.88,
+    "output_per_1m": 0.88,
+    "capabilities": [
+      "tools",
+      "streaming"
+    ]
+  },
+  {
+    "provider": "together",
+    "model_id": "meta-llama/Meta-Llama-3.1-405B-Instruct-Turbo",
+    "context_window": 131072,
+    "input_per_1m": 3.5,
+    "output_per_1m": 3.5,
+    "capabilities": [
+      "tools",
+      "streaming"
+    ]
+  },
+  {
+    "provider": "undi95",
+    "model_id": "remm-slerp-l2-13b",
+    "context_window": 6144,
+    "input_per_1m": 0.44999999999999996,
+    "output_per_1m": 0.65,
+    "capabilities": [
+      "json_mode"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "upstage",
+    "model_id": "solar-pro-3",
+    "context_window": 128000,
+    "input_per_1m": 0.15,
+    "output_per_1m": 0.6,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "writer",
+    "model_id": "palmyra-x5",
+    "context_window": 1040000,
+    "input_per_1m": 0.6,
+    "output_per_1m": 6.0,
+    "capabilities": [],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "xai",
+    "model_id": "grok-3",
+    "context_window": 131072,
+    "input_per_1m": 3.0,
+    "output_per_1m": 15.0,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "xai",
+    "model_id": "grok-3-beta",
+    "context_window": 131072,
+    "input_per_1m": 3.0,
+    "output_per_1m": 15.0,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "xai",
+    "model_id": "grok-3-mini",
+    "context_window": 131072,
+    "input_per_1m": 0.3,
+    "output_per_1m": 0.5,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "xai",
+    "model_id": "grok-3-mini-beta",
+    "context_window": 131072,
+    "input_per_1m": 0.3,
+    "output_per_1m": 0.5,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "xai",
+    "model_id": "grok-4",
+    "context_window": 256000,
+    "input_per_1m": 3.0,
+    "output_per_1m": 15.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "image",
+      "text",
+      "file"
+    ]
+  },
+  {
+    "provider": "xai",
+    "model_id": "grok-4-fast",
+    "context_window": 2000000,
+    "input_per_1m": 0.19999999999999998,
+    "output_per_1m": 0.5,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "file"
+    ]
+  },
+  {
+    "provider": "xai",
+    "model_id": "grok-4.1-fast",
+    "context_window": 2000000,
+    "input_per_1m": 0.19999999999999998,
+    "output_per_1m": 0.5,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "file"
+    ]
+  },
+  {
+    "provider": "xai",
+    "model_id": "grok-4.20",
+    "context_window": 2000000,
+    "input_per_1m": 2.0,
+    "output_per_1m": 6.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "file"
+    ]
+  },
+  {
+    "provider": "xai",
+    "model_id": "grok-4.20-multi-agent",
+    "context_window": 2000000,
+    "input_per_1m": 2.0,
+    "output_per_1m": 6.0,
+    "capabilities": [
+      "json_mode",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "file"
+    ]
+  },
+  {
+    "provider": "xai",
+    "model_id": "grok-code-fast-1",
+    "context_window": 256000,
+    "input_per_1m": 0.19999999999999998,
+    "output_per_1m": 1.5,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "xai",
+    "model_id": "grok-2-1212",
+    "context_window": 131072,
+    "input_per_1m": 2.0,
+    "output_per_1m": 10.0,
+    "capabilities": [
+      "tools",
+      "json_mode",
+      "structured_output",
+      "streaming"
+    ]
+  },
+  {
+    "provider": "xai",
+    "model_id": "grok-2-vision-1212",
+    "context_window": 32768,
+    "input_per_1m": 2.0,
+    "output_per_1m": 10.0,
+    "capabilities": [
+      "tools",
+      "vision",
+      "streaming"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "xai",
+    "model_id": "grok-3",
+    "context_window": 131072,
+    "input_per_1m": 3.0,
+    "output_per_1m": 15.0,
+    "capabilities": [
+      "tools",
+      "vision",
+      "streaming",
+      "thinking"
+    ],
+    "speed_tps": 65,
+    "aliases": [
+      "grok-3"
+    ],
+    "benchmarks": {
+      "quality_index": 72,
+      "mmlu": 87.5,
+      "gpqa": 75.4,
+      "humaneval": 86.5,
+      "math": 89.3,
+      "sources": [
+        "xai-grok-3-blog"
+      ]
+    }
+  },
+  {
+    "provider": "xai",
+    "model_id": "grok-3-beta",
+    "context_window": 131072,
+    "input_per_1m": 3.0,
+    "output_per_1m": 15.0,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "xai",
+    "model_id": "grok-3-mini",
+    "context_window": 131072,
+    "input_per_1m": 0.3,
+    "output_per_1m": 0.5,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "xai",
+    "model_id": "grok-3-mini-beta",
+    "context_window": 131072,
+    "input_per_1m": 0.3,
+    "output_per_1m": 0.5,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "xai",
+    "model_id": "grok-4",
+    "context_window": 256000,
+    "input_per_1m": 3.0,
+    "output_per_1m": 15.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "image",
+      "text",
+      "file"
+    ]
+  },
+  {
+    "provider": "xai",
+    "model_id": "grok-4-fast",
+    "context_window": 2000000,
+    "input_per_1m": 0.19999999999999998,
+    "output_per_1m": 0.5,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "file"
+    ]
+  },
+  {
+    "provider": "xai",
+    "model_id": "grok-4.1-fast",
+    "context_window": 2000000,
+    "input_per_1m": 0.19999999999999998,
+    "output_per_1m": 0.5,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "file"
+    ]
+  },
+  {
+    "provider": "xai",
+    "model_id": "grok-4.20",
+    "context_window": 2000000,
+    "input_per_1m": 2.0,
+    "output_per_1m": 6.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "file"
+    ]
+  },
+  {
+    "provider": "xai",
+    "model_id": "grok-4.20-multi-agent",
+    "context_window": 2000000,
+    "input_per_1m": 2.0,
+    "output_per_1m": 6.0,
+    "capabilities": [
+      "json_mode",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "file"
+    ]
+  },
+  {
+    "provider": "xai",
+    "model_id": "grok-code-fast-1",
+    "context_window": 256000,
+    "input_per_1m": 0.19999999999999998,
+    "output_per_1m": 1.5,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "xiaomi",
+    "model_id": "mimo-v2-flash",
+    "context_window": 262144,
+    "input_per_1m": 0.09,
+    "output_per_1m": 0.29,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "xiaomi",
+    "model_id": "mimo-v2-omni",
+    "context_window": 262144,
+    "input_per_1m": 0.39999999999999997,
+    "output_per_1m": 2.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "audio",
+      "image",
+      "video"
+    ]
+  },
+  {
+    "provider": "xiaomi",
+    "model_id": "mimo-v2-pro",
+    "context_window": 1048576,
+    "input_per_1m": 1.0,
+    "output_per_1m": 3.0,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "xiaomi",
+    "model_id": "mimo-v2.5",
+    "context_window": 1048576,
+    "input_per_1m": 0.39999999999999997,
+    "output_per_1m": 2.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "audio",
+      "image",
+      "video"
+    ]
+  },
+  {
+    "provider": "xiaomi",
+    "model_id": "mimo-v2.5-pro",
+    "context_window": 1048576,
+    "input_per_1m": 1.0,
+    "output_per_1m": 3.0,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "z-ai",
+    "model_id": "glm-4-32b",
+    "context_window": 128000,
+    "input_per_1m": 0.09999999999999999,
+    "output_per_1m": 0.09999999999999999,
+    "capabilities": [
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "z-ai",
+    "model_id": "glm-4.5",
+    "context_window": 131072,
+    "input_per_1m": 0.6,
+    "output_per_1m": 2.2,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "z-ai",
+    "model_id": "glm-4.5-air",
+    "context_window": 131072,
+    "input_per_1m": 0.13,
+    "output_per_1m": 0.85,
+    "capabilities": [
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "z-ai",
+    "model_id": "glm-4.5-air:free",
+    "context_window": 131072,
+    "capabilities": [
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "z-ai",
+    "model_id": "glm-4.5v",
+    "context_window": 65536,
+    "input_per_1m": 0.6,
+    "output_per_1m": 1.7999999999999998,
+    "capabilities": [
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "z-ai",
+    "model_id": "glm-4.6",
+    "context_window": 204800,
+    "input_per_1m": 0.39,
+    "output_per_1m": 1.9,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "z-ai",
+    "model_id": "glm-4.6v",
+    "context_window": 131072,
+    "input_per_1m": 0.3,
+    "output_per_1m": 0.8999999999999999,
+    "capabilities": [
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "image",
+      "text",
+      "video"
+    ]
+  },
+  {
+    "provider": "z-ai",
+    "model_id": "glm-4.7",
+    "context_window": 202752,
+    "input_per_1m": 0.38,
+    "output_per_1m": 1.74,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "z-ai",
+    "model_id": "glm-4.7-flash",
+    "context_window": 202752,
+    "input_per_1m": 0.06,
+    "output_per_1m": 0.39999999999999997,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "z-ai",
+    "model_id": "glm-5",
+    "context_window": 202752,
+    "input_per_1m": 0.6,
+    "output_per_1m": 2.08,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "z-ai",
+    "model_id": "glm-5-turbo",
+    "context_window": 202752,
+    "input_per_1m": 1.2,
+    "output_per_1m": 4.0,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "z-ai",
+    "model_id": "glm-5.1",
+    "context_window": 202752,
+    "input_per_1m": 1.0499999999999998,
+    "output_per_1m": 3.5,
+    "capabilities": [
+      "json_mode",
+      "tools"
+    ],
+    "modalities_in": [
+      "text"
+    ]
+  },
+  {
+    "provider": "z-ai",
+    "model_id": "glm-5v-turbo",
+    "context_window": 202752,
+    "input_per_1m": 1.2,
+    "output_per_1m": 4.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "image",
+      "text",
+      "video"
+    ]
+  },
+  {
+    "provider": "~anthropic",
+    "model_id": "claude-haiku-latest",
+    "context_window": 200000,
+    "input_per_1m": 1.0,
+    "output_per_1m": 5.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "image",
+      "text"
+    ]
+  },
+  {
+    "provider": "~anthropic",
+    "model_id": "claude-opus-latest",
+    "context_window": 1000000,
+    "input_per_1m": 5.0,
+    "output_per_1m": 25.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "~anthropic",
+    "model_id": "claude-sonnet-latest",
+    "context_window": 1000000,
+    "input_per_1m": 3.0,
+    "output_per_1m": 15.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "~google",
+    "model_id": "gemini-flash-latest",
+    "context_window": 1048576,
+    "input_per_1m": 0.5,
+    "output_per_1m": 3.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image",
+      "file",
+      "audio",
+      "video"
+    ]
+  },
+  {
+    "provider": "~google",
+    "model_id": "gemini-pro-latest",
+    "context_window": 1048576,
+    "input_per_1m": 2.0,
+    "output_per_1m": 12.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "audio",
+      "file",
+      "image",
+      "text",
+      "video"
+    ]
+  },
+  {
+    "provider": "~moonshotai",
+    "model_id": "kimi-latest",
+    "context_window": 262142,
+    "input_per_1m": 0.74,
+    "output_per_1m": 3.49,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "provider": "~openai",
+    "model_id": "gpt-latest",
+    "context_window": 1050000,
+    "input_per_1m": 5.0,
+    "output_per_1m": 30.0,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "file",
+      "image",
+      "text"
+    ]
+  },
+  {
+    "provider": "~openai",
+    "model_id": "gpt-mini-latest",
+    "context_window": 400000,
+    "input_per_1m": 0.75,
+    "output_per_1m": 4.5,
+    "capabilities": [
+      "json_mode",
+      "tools",
+      "vision"
+    ],
+    "modalities_in": [
+      "file",
+      "image",
+      "text"
+    ]
   }
 ]

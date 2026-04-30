@@ -79,6 +79,7 @@ nav:
     - Caching: features/caching.md
     - Reasoning budgets: features/reasoning.md
     - Batch API: features/batch.md
+    - Model selection: features/model-selection.md
   - Production:
     - Observability (OTel): production/observability.md
     - PII redaction: production/redaction.md

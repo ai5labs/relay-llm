@@ -19,6 +19,7 @@ The first tier that returns a value wins, and the resulting :class:`Cost` carrie
 """
 
 from relay.catalog._loader import (
+    BenchmarkScores,
     CatalogRow,
     get_catalog,
     lookup,
@@ -29,6 +30,7 @@ from relay.catalog._pricing import (
 )
 
 __all__ = [
+    "BenchmarkScores",
     "CatalogRow",
     "PricingResolution",
     "PricingResolver",
