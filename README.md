@@ -1,8 +1,14 @@
 # Relay
 
-> One YAML, one interface, every model.
+> The fastest, lightest BYOK relay for any and every LLM model — open source.
 
-A Python library that gives you a unified interface to every major LLM provider, with the available models defined in a YAML file you check into your repo. Like LiteLLM, but built to a higher production bar.
+[![CI](https://github.com/ai5labs/relay-llm/actions/workflows/ci.yml/badge.svg)](https://github.com/ai5labs/relay-llm/actions/workflows/ci.yml)
+[![Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://python.org)
+
+A Python library that gives you one interface to every major LLM — chat, streaming, tool calls, structured output, batch, MCP — defined in a YAML file you check into your repo. Production-grade, enterprise-ready, OSS.
+
+**Faster than LiteLLM at every percentile**, with **8.5× faster cold start** ([benchmarks](BENCHMARKS.md)).
 
 ```bash
 pip install relayllm
