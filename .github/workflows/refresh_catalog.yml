@@ -21,7 +21,7 @@ jobs:
       - name: Run refresh script
         run: uv run python scripts/refresh_catalog.py
       - name: Open PR with diff
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           commit-message: "chore(catalog): weekly refresh"
           title: "chore(catalog): weekly refresh"
