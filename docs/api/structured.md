@@ -1,0 +1,3 @@
+# `relay.structured`
+
+::: relay.structured

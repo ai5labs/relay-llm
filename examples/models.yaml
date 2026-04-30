@@ -1,0 +1,57 @@
+# yaml-language-server: $schema=https://relay.ai5labs.com/schema/v1.json
+#
+# Example Relay config. Aliases on the left are what you call from code; the
+# `target` field on the right resolves into the catalog for capabilities,
+# context window, and list-price defaults.
+
+version: 1
+
+defaults:
+  timeout: 60
+  max_retries: 2
+
+models:
+  fast-cheap:
+    target: groq/llama-3.3-70b-versatile
+    credential: $env.GROQ_API_KEY
+    tags: [fast, cheap]
+
+  smart:
+    target: anthropic/claude-sonnet-4-5
+    credential: $env.ANTHROPIC_API_KEY
+    params:
+      max_tokens: 4096
+    tags: [smart, vision, thinking]
+
+  smart-cheap-fallback:
+    target: deepseek/deepseek-chat
+    credential: $env.DEEPSEEK_API_KEY
+
+  vision:
+    target: openai/gpt-4o-mini
+    credential: $env.OPENAI_API_KEY
+    tags: [vision, cheap]
+
+  reasoning:
+    target: openai/o3-mini
+    credential: $env.OPENAI_API_KEY
+    tags: [thinking]
+
+  local:
+    target: ollama/llama3.3
+    base_url: http://localhost:11434/v1
+    # Ollama does not require a credential.
+
+groups:
+  default:
+    strategy: fallback
+    members:
+      - smart
+      - smart-cheap-fallback
+      - fast-cheap
+
+  any-fast:
+    strategy: weighted
+    members:
+      - { name: fast-cheap, weight: 3 }
+      - { name: vision, weight: 1 }

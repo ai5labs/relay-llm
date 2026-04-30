@@ -1,0 +1,37 @@
+name: Refresh model catalog
+
+on:
+  schedule:
+    - cron: "0 4 * * 1"   # weekly Monday 04:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    if: github.repository == 'ai5labs/relay-llm'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - name: Install
+        run: uv sync
+      - name: Run refresh script
+        run: uv run python scripts/refresh_catalog.py
+      - name: Open PR with diff
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: "chore(catalog): weekly refresh"
+          title: "chore(catalog): weekly refresh"
+          body: |
+            Automated weekly catalog refresh from OpenRouter + curated overrides.
+
+            Run: ${{ github.serverUrl }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+            Review the diff before merging — sometimes new models with unusual
+            slugs or pricing tiers slip through and need a curated override in
+            `scripts/curated.json`.
+          branch: chore/refresh-catalog
+          labels: catalog, automated

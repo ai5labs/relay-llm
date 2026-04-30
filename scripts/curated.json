@@ -1,0 +1,31 @@
+{
+  "_comment": "Hand-edited capability + pricing overrides. The catalog refresh script merges these on top of OpenRouter data.",
+  "anthropic/claude-opus-4-5": {
+    "capabilities": ["tools", "vision", "thinking", "streaming", "structured_output", "prompt_cache"],
+    "cached_input_per_1m": 1.50
+  },
+  "anthropic/claude-sonnet-4-5": {
+    "capabilities": ["tools", "vision", "thinking", "streaming", "structured_output", "prompt_cache"],
+    "cached_input_per_1m": 0.30
+  },
+  "anthropic/claude-haiku-4-5": {
+    "capabilities": ["tools", "vision", "streaming", "structured_output", "prompt_cache"],
+    "cached_input_per_1m": 0.10
+  },
+  "openai/o1": {
+    "capabilities": ["tools", "vision", "structured_output", "streaming", "thinking"],
+    "cached_input_per_1m": 7.50
+  },
+  "openai/o3-mini": {
+    "capabilities": ["tools", "structured_output", "streaming", "thinking"],
+    "cached_input_per_1m": 0.55
+  },
+  "google/gemini-2.5-pro": {
+    "capabilities": ["tools", "vision", "audio_input", "json_mode", "structured_output", "streaming", "thinking"],
+    "cached_input_per_1m": 0.31
+  },
+  "google/gemini-2.5-flash": {
+    "capabilities": ["tools", "vision", "audio_input", "json_mode", "structured_output", "streaming", "thinking"],
+    "cached_input_per_1m": 0.075
+  }
+}

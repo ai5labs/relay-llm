@@ -1,0 +1,165 @@
+"""MCP manager tests.
+
+We don't spin up a real MCP server here — we mock the underlying session
+so the namespacing, dispatch, and translation logic can be tested in isolation.
+"""
+
+from __future__ import annotations
+
+from typing import Any
+from unittest.mock import AsyncMock
+
+import pytest
+
+from relay.errors import ConfigError
+from relay.mcp import MCPManager, MCPToolError
+from relay.tools import compile_for
+from relay.types import ToolDefinition
+
+
+def _stub_server(server_name: str, tools: list[dict[str, Any]]) -> Any:
+    """Make a fake :class:`MCPServer` that returns a fixed list of tools."""
+    from relay.mcp._manager import MCPServer
+
+    server = MCPServer(name=server_name, transport="stdio", config={"command": "/bin/true"})
+    server._tools_cache = [
+        ToolDefinition(
+            name=t["name"],
+            description=t.get("description", ""),
+            parameters=t.get("inputSchema", {"type": "object", "properties": {}}),
+        )
+        for t in tools
+    ]
+    server._session = object()  # bypass the real connect()
+    server.connect = AsyncMock()  # type: ignore[method-assign]
+    return server
+
+
+@pytest.mark.asyncio
+async def test_list_tools_prefixes_with_server_name() -> None:
+    mgr = MCPManager()
+    mgr._servers["github"] = _stub_server(
+        "github", [{"name": "create_issue", "description": "Open an issue"}]
+    )
+    mgr._servers["slack"] = _stub_server("slack", [{"name": "send_message"}])
+    tools = await mgr.list_tools()
+    names = sorted(t.name for t in tools)
+    assert names == ["github__create_issue", "slack__send_message"]
+
+
+@pytest.mark.asyncio
+async def test_list_tools_avoids_collision_across_servers() -> None:
+    mgr = MCPManager()
+    mgr._servers["a"] = _stub_server("a", [{"name": "create_issue"}])
+    mgr._servers["b"] = _stub_server("b", [{"name": "create_issue"}])
+    tools = await mgr.list_tools()
+    assert {t.name for t in tools} == {"a__create_issue", "b__create_issue"}
+
+
+@pytest.mark.asyncio
+async def test_call_tool_routes_to_correct_server() -> None:
+    mgr = MCPManager()
+    a = _stub_server("a", [])
+    b = _stub_server("b", [])
+    a.call_tool = AsyncMock(return_value="from-a")  # type: ignore[method-assign]
+    b.call_tool = AsyncMock(return_value="from-b")  # type: ignore[method-assign]
+    mgr._servers["a"] = a
+    mgr._servers["b"] = b
+
+    out = await mgr.call_tool("a__do_thing", {"x": 1})
+    assert out == "from-a"
+    a.call_tool.assert_awaited_with("do_thing", {"x": 1})
+    b.call_tool.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_call_tool_unknown_server_raises() -> None:
+    mgr = MCPManager()
+    with pytest.raises(MCPToolError, match="unknown MCP server"):
+        await mgr.call_tool("ghost__do", {})
+
+
+@pytest.mark.asyncio
+async def test_call_tool_unprefixed_name_raises() -> None:
+    mgr = MCPManager()
+    with pytest.raises(MCPToolError, match="not server-prefixed"):
+        await mgr.call_tool("bare_name", {})
+
+
+@pytest.mark.asyncio
+async def test_duplicate_server_name_rejected() -> None:
+    mgr = MCPManager()
+    mgr._servers["already"] = _stub_server("already", [])
+    with pytest.raises(ConfigError, match="already added"):
+        await mgr.add_stdio("already", command="/bin/true")
+
+
+@pytest.mark.asyncio
+async def test_mcp_tools_compile_for_each_provider() -> None:
+    """An MCP-provided tool should round-trip cleanly through the schema compiler
+    for every provider — that's the whole point of the universal layer."""
+    mgr = MCPManager()
+    mgr._servers["gh"] = _stub_server(
+        "gh",
+        [
+            {
+                "name": "create_issue",
+                "description": "Open an issue",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "title": {"type": "string"},
+                        "body": {"type": "string"},
+                    },
+                    "required": ["title"],
+                },
+            }
+        ],
+    )
+    [tool] = await mgr.list_tools()
+    assert tool.name == "gh__create_issue"
+
+    # Compile for OpenAI, Anthropic, Gemini, Bedrock — all should succeed.
+    openai_shape = compile_for(tool, "openai")
+    anthropic_shape = compile_for(tool, "anthropic")
+    gemini_shape = compile_for(tool, "google")
+    bedrock_shape = compile_for(tool, "bedrock")
+
+    assert openai_shape["function"]["name"] == "gh__create_issue"
+    assert anthropic_shape["name"] == "gh__create_issue"
+    assert gemini_shape["name"] == "gh__create_issue"
+    assert bedrock_shape["toolSpec"]["name"] == "gh__create_issue"
+
+
+@pytest.mark.asyncio
+async def test_manager_aclose_clears_servers() -> None:
+    mgr = MCPManager()
+    server = _stub_server("a", [])
+    server.aclose = AsyncMock()  # type: ignore[method-assign]
+    mgr._servers["a"] = server
+    await mgr.aclose()
+    assert mgr.list_servers() == []
+    server.aclose.assert_awaited()
+
+
+@pytest.mark.asyncio
+async def test_hub_attach_mcp() -> None:
+    from relay import Hub
+    from relay.config import load_str
+
+    yaml = """
+        version: 1
+        catalog:
+          fetch_live_pricing: false
+          offline: true
+        models:
+          m:
+            target: openai/gpt-4o-mini
+    """
+    hub = Hub.from_config(load_str(yaml))
+    mgr = MCPManager()
+    mgr._servers["a"] = _stub_server("a", [{"name": "ping"}])
+    hub.attach_mcp(mgr)
+    tools = await hub.mcp_tools()
+    assert tools[0].name == "a__ping"
+    await hub.aclose()

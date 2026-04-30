@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+wheels/
+*.egg
+
+# Virtualenvs
+.venv/
+venv/
+env/
+
+# uv
+.uv-cache/
+
+# Tooling
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+.hypothesis/
+.pyright/
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local secrets — never commit
+.env
+.env.local
+*.local.yaml
+
+# Site builds
+site/
+docs/_build/

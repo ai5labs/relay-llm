@@ -1,0 +1,448 @@
+[
+  {
+    "_comment": "Relay built-in model catalog. Seed snapshot — pricing is provider list price at time of release. Regenerate with `python scripts/refresh_catalog.py`. User YAML overrides any field.",
+    "_schema_version": 1
+  },
+
+  {
+    "provider": "openai",
+    "model_id": "gpt-4o",
+    "context_window": 128000,
+    "max_output": 16384,
+    "input_per_1m": 2.50,
+    "output_per_1m": 10.00,
+    "cached_input_per_1m": 1.25,
+    "capabilities": ["tools", "vision", "json_mode", "structured_output", "streaming"],
+    "modalities_in": ["text", "image"],
+    "modalities_out": ["text"]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-4o-2024-11-20",
+    "context_window": 128000,
+    "max_output": 16384,
+    "input_per_1m": 2.50,
+    "output_per_1m": 10.00,
+    "cached_input_per_1m": 1.25,
+    "capabilities": ["tools", "vision", "json_mode", "structured_output", "streaming"],
+    "modalities_in": ["text", "image"],
+    "modalities_out": ["text"]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-4o-mini",
+    "context_window": 128000,
+    "max_output": 16384,
+    "input_per_1m": 0.15,
+    "output_per_1m": 0.60,
+    "cached_input_per_1m": 0.075,
+    "capabilities": ["tools", "vision", "json_mode", "structured_output", "streaming"],
+    "modalities_in": ["text", "image"]
+  },
+  {
+    "provider": "openai",
+    "model_id": "o1",
+    "context_window": 200000,
+    "max_output": 100000,
+    "input_per_1m": 15.00,
+    "output_per_1m": 60.00,
+    "cached_input_per_1m": 7.50,
+    "capabilities": ["tools", "vision", "structured_output", "streaming", "thinking"]
+  },
+  {
+    "provider": "openai",
+    "model_id": "o3-mini",
+    "context_window": 200000,
+    "max_output": 100000,
+    "input_per_1m": 1.10,
+    "output_per_1m": 4.40,
+    "cached_input_per_1m": 0.55,
+    "capabilities": ["tools", "structured_output", "streaming", "thinking"]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-4-turbo",
+    "context_window": 128000,
+    "max_output": 4096,
+    "input_per_1m": 10.00,
+    "output_per_1m": 30.00,
+    "capabilities": ["tools", "vision", "json_mode", "streaming"]
+  },
+  {
+    "provider": "openai",
+    "model_id": "gpt-3.5-turbo",
+    "context_window": 16385,
+    "max_output": 4096,
+    "input_per_1m": 0.50,
+    "output_per_1m": 1.50,
+    "capabilities": ["tools", "json_mode", "streaming"],
+    "deprecated": true
+  },
+  {
+    "provider": "openai",
+    "model_id": "text-embedding-3-large",
+    "context_window": 8191,
+    "input_per_1m": 0.13,
+    "output_per_1m": 0,
+    "capabilities": ["embeddings"]
+  },
+  {
+    "provider": "openai",
+    "model_id": "text-embedding-3-small",
+    "context_window": 8191,
+    "input_per_1m": 0.02,
+    "output_per_1m": 0,
+    "capabilities": ["embeddings"]
+  },
+
+  {
+    "provider": "anthropic",
+    "model_id": "claude-opus-4-5",
+    "context_window": 200000,
+    "max_output": 32000,
+    "input_per_1m": 15.00,
+    "output_per_1m": 75.00,
+    "cached_input_per_1m": 1.50,
+    "capabilities": ["tools", "vision", "thinking", "streaming", "structured_output", "prompt_cache"],
+    "modalities_in": ["text", "image"]
+  },
+  {
+    "provider": "anthropic",
+    "model_id": "claude-sonnet-4-5",
+    "context_window": 200000,
+    "max_output": 64000,
+    "input_per_1m": 3.00,
+    "output_per_1m": 15.00,
+    "cached_input_per_1m": 0.30,
+    "capabilities": ["tools", "vision", "thinking", "streaming", "structured_output", "prompt_cache"],
+    "modalities_in": ["text", "image"]
+  },
+  {
+    "provider": "anthropic",
+    "model_id": "claude-haiku-4-5",
+    "context_window": 200000,
+    "max_output": 8192,
+    "input_per_1m": 1.00,
+    "output_per_1m": 5.00,
+    "cached_input_per_1m": 0.10,
+    "capabilities": ["tools", "vision", "streaming", "structured_output", "prompt_cache"],
+    "modalities_in": ["text", "image"]
+  },
+  {
+    "provider": "anthropic",
+    "model_id": "claude-3-5-sonnet-20241022",
+    "context_window": 200000,
+    "max_output": 8192,
+    "input_per_1m": 3.00,
+    "output_per_1m": 15.00,
+    "cached_input_per_1m": 0.30,
+    "capabilities": ["tools", "vision", "streaming", "prompt_cache"],
+    "modalities_in": ["text", "image"]
+  },
+  {
+    "provider": "anthropic",
+    "model_id": "claude-3-5-haiku-20241022",
+    "context_window": 200000,
+    "max_output": 8192,
+    "input_per_1m": 0.80,
+    "output_per_1m": 4.00,
+    "capabilities": ["tools", "streaming", "prompt_cache"]
+  },
+
+  {
+    "provider": "google",
+    "model_id": "gemini-2.5-pro",
+    "context_window": 2000000,
+    "max_output": 8192,
+    "input_per_1m": 1.25,
+    "output_per_1m": 10.00,
+    "cached_input_per_1m": 0.31,
+    "capabilities": ["tools", "vision", "audio_input", "json_mode", "structured_output", "streaming", "thinking"],
+    "modalities_in": ["text", "image", "audio", "video"]
+  },
+  {
+    "provider": "google",
+    "model_id": "gemini-2.5-flash",
+    "context_window": 1000000,
+    "max_output": 8192,
+    "input_per_1m": 0.30,
+    "output_per_1m": 2.50,
+    "cached_input_per_1m": 0.075,
+    "capabilities": ["tools", "vision", "audio_input", "json_mode", "structured_output", "streaming", "thinking"],
+    "modalities_in": ["text", "image", "audio", "video"]
+  },
+  {
+    "provider": "google",
+    "model_id": "gemini-2.0-flash",
+    "context_window": 1000000,
+    "max_output": 8192,
+    "input_per_1m": 0.10,
+    "output_per_1m": 0.40,
+    "cached_input_per_1m": 0.025,
+    "capabilities": ["tools", "vision", "audio_input", "json_mode", "structured_output", "streaming"],
+    "modalities_in": ["text", "image", "audio", "video"]
+  },
+  {
+    "provider": "google",
+    "model_id": "gemini-1.5-pro",
+    "context_window": 2000000,
+    "max_output": 8192,
+    "input_per_1m": 1.25,
+    "output_per_1m": 5.00,
+    "cached_input_per_1m": 0.3125,
+    "capabilities": ["tools", "vision", "audio_input", "json_mode", "structured_output", "streaming"]
+  },
+  {
+    "provider": "google",
+    "model_id": "gemini-1.5-flash",
+    "context_window": 1000000,
+    "max_output": 8192,
+    "input_per_1m": 0.075,
+    "output_per_1m": 0.30,
+    "cached_input_per_1m": 0.01875,
+    "capabilities": ["tools", "vision", "audio_input", "json_mode", "streaming"]
+  },
+
+  {
+    "provider": "groq",
+    "model_id": "llama-3.3-70b-versatile",
+    "context_window": 131072,
+    "max_output": 32768,
+    "input_per_1m": 0.59,
+    "output_per_1m": 0.79,
+    "capabilities": ["tools", "json_mode", "streaming"]
+  },
+  {
+    "provider": "groq",
+    "model_id": "llama-3.1-8b-instant",
+    "context_window": 131072,
+    "max_output": 8192,
+    "input_per_1m": 0.05,
+    "output_per_1m": 0.08,
+    "capabilities": ["tools", "streaming"]
+  },
+  {
+    "provider": "groq",
+    "model_id": "mixtral-8x7b-32768",
+    "context_window": 32768,
+    "max_output": 32768,
+    "input_per_1m": 0.24,
+    "output_per_1m": 0.24,
+    "capabilities": ["streaming"]
+  },
+  {
+    "provider": "groq",
+    "model_id": "deepseek-r1-distill-llama-70b",
+    "context_window": 131072,
+    "max_output": 131072,
+    "input_per_1m": 0.75,
+    "output_per_1m": 0.99,
+    "capabilities": ["streaming", "thinking"]
+  },
+
+  {
+    "provider": "deepseek",
+    "model_id": "deepseek-chat",
+    "context_window": 64000,
+    "max_output": 8192,
+    "input_per_1m": 0.27,
+    "output_per_1m": 1.10,
+    "cached_input_per_1m": 0.07,
+    "capabilities": ["tools", "json_mode", "structured_output", "streaming"]
+  },
+  {
+    "provider": "deepseek",
+    "model_id": "deepseek-reasoner",
+    "context_window": 64000,
+    "max_output": 8192,
+    "input_per_1m": 0.55,
+    "output_per_1m": 2.19,
+    "cached_input_per_1m": 0.14,
+    "capabilities": ["streaming", "thinking"]
+  },
+
+  {
+    "provider": "xai",
+    "model_id": "grok-2-1212",
+    "context_window": 131072,
+    "input_per_1m": 2.00,
+    "output_per_1m": 10.00,
+    "capabilities": ["tools", "json_mode", "structured_output", "streaming"]
+  },
+  {
+    "provider": "xai",
+    "model_id": "grok-2-vision-1212",
+    "context_window": 32768,
+    "input_per_1m": 2.00,
+    "output_per_1m": 10.00,
+    "capabilities": ["tools", "vision", "streaming"],
+    "modalities_in": ["text", "image"]
+  },
+  {
+    "provider": "xai",
+    "model_id": "grok-3",
+    "context_window": 131072,
+    "input_per_1m": 3.00,
+    "output_per_1m": 15.00,
+    "capabilities": ["tools", "vision", "streaming", "thinking"]
+  },
+
+  {
+    "provider": "mistral",
+    "model_id": "mistral-large-latest",
+    "context_window": 128000,
+    "max_output": 32768,
+    "input_per_1m": 2.00,
+    "output_per_1m": 6.00,
+    "capabilities": ["tools", "json_mode", "structured_output", "streaming"]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "mistral-small-latest",
+    "context_window": 128000,
+    "input_per_1m": 0.20,
+    "output_per_1m": 0.60,
+    "capabilities": ["tools", "json_mode", "streaming"]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "codestral-latest",
+    "context_window": 256000,
+    "input_per_1m": 0.30,
+    "output_per_1m": 0.90,
+    "capabilities": ["tools", "streaming"]
+  },
+  {
+    "provider": "mistral",
+    "model_id": "pixtral-large-latest",
+    "context_window": 128000,
+    "input_per_1m": 2.00,
+    "output_per_1m": 6.00,
+    "capabilities": ["tools", "vision", "streaming"],
+    "modalities_in": ["text", "image"]
+  },
+
+  {
+    "provider": "together",
+    "model_id": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+    "context_window": 131072,
+    "input_per_1m": 0.88,
+    "output_per_1m": 0.88,
+    "capabilities": ["tools", "streaming"]
+  },
+  {
+    "provider": "together",
+    "model_id": "meta-llama/Meta-Llama-3.1-405B-Instruct-Turbo",
+    "context_window": 131072,
+    "input_per_1m": 3.50,
+    "output_per_1m": 3.50,
+    "capabilities": ["tools", "streaming"]
+  },
+  {
+    "provider": "together",
+    "model_id": "Qwen/Qwen2.5-72B-Instruct-Turbo",
+    "context_window": 131072,
+    "input_per_1m": 1.20,
+    "output_per_1m": 1.20,
+    "capabilities": ["tools", "streaming"]
+  },
+
+  {
+    "provider": "fireworks",
+    "model_id": "accounts/fireworks/models/llama-v3p3-70b-instruct",
+    "context_window": 131072,
+    "input_per_1m": 0.90,
+    "output_per_1m": 0.90,
+    "capabilities": ["tools", "streaming"]
+  },
+  {
+    "provider": "fireworks",
+    "model_id": "accounts/fireworks/models/deepseek-v3",
+    "context_window": 131072,
+    "input_per_1m": 0.90,
+    "output_per_1m": 0.90,
+    "capabilities": ["tools", "streaming"]
+  },
+
+  {
+    "provider": "cohere",
+    "model_id": "command-r-plus-08-2024",
+    "context_window": 128000,
+    "input_per_1m": 2.50,
+    "output_per_1m": 10.00,
+    "capabilities": ["tools", "streaming"]
+  },
+  {
+    "provider": "cohere",
+    "model_id": "command-r-08-2024",
+    "context_window": 128000,
+    "input_per_1m": 0.15,
+    "output_per_1m": 0.60,
+    "capabilities": ["tools", "streaming"]
+  },
+
+  {
+    "provider": "perplexity",
+    "model_id": "sonar",
+    "context_window": 127072,
+    "input_per_1m": 1.00,
+    "output_per_1m": 1.00,
+    "capabilities": ["streaming", "web_search"]
+  },
+  {
+    "provider": "perplexity",
+    "model_id": "sonar-pro",
+    "context_window": 200000,
+    "input_per_1m": 3.00,
+    "output_per_1m": 15.00,
+    "capabilities": ["streaming", "web_search"]
+  },
+
+  {
+    "provider": "bedrock",
+    "model_id": "anthropic.claude-sonnet-4-5-20250929-v1:0",
+    "context_window": 200000,
+    "max_output": 64000,
+    "input_per_1m": 3.00,
+    "output_per_1m": 15.00,
+    "cached_input_per_1m": 0.30,
+    "capabilities": ["tools", "vision", "thinking", "streaming", "prompt_cache"],
+    "modalities_in": ["text", "image"]
+  },
+  {
+    "provider": "bedrock",
+    "model_id": "anthropic.claude-opus-4-5-20250101-v1:0",
+    "context_window": 200000,
+    "max_output": 32000,
+    "input_per_1m": 15.00,
+    "output_per_1m": 75.00,
+    "capabilities": ["tools", "vision", "thinking", "streaming"],
+    "modalities_in": ["text", "image"]
+  },
+  {
+    "provider": "bedrock",
+    "model_id": "meta.llama3-3-70b-instruct-v1:0",
+    "context_window": 131072,
+    "input_per_1m": 0.72,
+    "output_per_1m": 0.72,
+    "capabilities": ["streaming"]
+  },
+
+  {
+    "provider": "ollama",
+    "model_id": "llama3.3",
+    "context_window": 131072,
+    "input_per_1m": 0,
+    "output_per_1m": 0,
+    "capabilities": ["tools", "streaming"],
+    "notes": "self-hosted; cost is hardware-dependent"
+  },
+  {
+    "provider": "ollama",
+    "model_id": "qwen2.5",
+    "context_window": 131072,
+    "input_per_1m": 0,
+    "output_per_1m": 0,
+    "capabilities": ["tools", "streaming"]
+  }
+]

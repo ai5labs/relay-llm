@@ -1,0 +1,156 @@
+[build-system]
+requires = ["uv_build>=0.5.0,<0.12"]
+build-backend = "uv_build"
+
+[project]
+name = "relayllm"
+version = "0.1.0"
+description = "Relay — production-grade multi-provider LLM client. One YAML, one interface, every model."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+authors = [{ name = "ai5labs Research OPC Pvt Ltd", email = "engineering@ai5labs.com" }]
+keywords = ["llm", "ai", "openai", "anthropic", "gemini", "bedrock", "router", "yaml"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+]
+dependencies = [
+    "httpx[http2]>=0.27",
+    "pydantic>=2.7",
+    "pyyaml>=6.0",
+    "orjson>=3.10",
+    "typing-extensions>=4.12",
+]
+
+[project.optional-dependencies]
+otel = ["opentelemetry-api>=1.27", "opentelemetry-sdk>=1.27"]
+aws = ["boto3>=1.34"]
+gcp = ["google-auth>=2.30"]
+mcp = ["mcp>=1.0"]
+all = ["relayllm[otel,aws,gcp,mcp]"]
+
+[project.scripts]
+relay = "relay._cli:main"
+
+[project.urls]
+Homepage = "https://github.com/ai5labs/relay-llm"
+Documentation = "https://relay.ai5labs.com"
+Repository = "https://github.com/ai5labs/relay-llm"
+Issues = "https://github.com/ai5labs/relay-llm/issues"
+Changelog = "https://github.com/ai5labs/relay-llm/blob/main/CHANGELOG.md"
+
+[tool.uv.build-backend]
+module-name = "relay"
+module-root = "src"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "pytest-recording>=0.13",
+    "respx>=0.21",
+    "hypothesis>=6.100",
+    "ruff>=0.6",
+    "mypy>=1.11",
+    "pyright>=1.1.380",
+    "pre-commit>=3.7",
+    "towncrier>=23.11",
+    "opentelemetry-api>=1.41.1",
+    "opentelemetry-sdk>=1.41.1",
+    "boto3>=1.42.97",
+    "botocore>=1.42.97",
+    "pytest-benchmark>=5.2.3",
+]
+docs = [
+    "mkdocs>=1.6",
+    "mkdocs-material>=9.5",
+    "mkdocstrings[python]>=0.26",
+    "mkdocs-gen-files>=0.5",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "C4", "SIM", "TID", "RUF", "PT", "ASYNC", "S"]
+ignore = ["S101", "B008"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S", "PT011", "E501"]
+"scripts/**" = ["ASYNC240"]
+"bench/**" = ["S", "E501"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+warn_unreachable = true
+warn_redundant_casts = true
+disallow_untyped_decorators = true
+files = ["src"]
+# v0.1: union-attr is too noisy with our string-discriminated content blocks
+# (`block.type == "text"` is checked at runtime but mypy can't narrow). Refactor
+# block dispatch to isinstance checks in v0.2 and re-enable.
+disable_error_code = ["union-attr", "unused-ignore", "no-any-return"]
+
+[[tool.mypy.overrides]]
+module = ["yaml.*", "mcp.*"]
+ignore_missing_imports = true
+
+[tool.pyright]
+include = ["src"]
+typeCheckingMode = "strict"
+pythonVersion = "3.10"
+reportMissingTypeStubs = false
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+markers = [
+    "live: marks tests that hit real provider APIs (requires API keys)",
+    "slow: marks slow tests",
+    "benchmark: marks microbenchmarks (in bench/, run separately)",
+]
+norecursedirs = ["bench", "site", "dist", "build", ".venv"]
+
+[tool.towncrier]
+package = "relay"
+directory = "changes"
+filename = "CHANGELOG.md"
+title_format = "## [{version}] - {project_date}"
+issue_format = "[#{issue}](https://github.com/ai5labs/relay-llm/issues/{issue})"
+
+[[tool.towncrier.type]]
+directory = "added"
+name = "Added"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "changed"
+name = "Changed"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "fixed"
+name = "Fixed"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "removed"
+name = "Removed"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "security"
+name = "Security"
+showcontent = true

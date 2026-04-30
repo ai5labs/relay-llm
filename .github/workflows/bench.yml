@@ -1,0 +1,43 @@
+name: Benchmarks
+
+on:
+  pull_request:
+    paths:
+      - "src/**"
+      - "bench/**"
+      - "pyproject.toml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  bench:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+      - name: Install
+        run: uv sync --all-groups
+      - name: Run benchmarks (PR branch)
+        run: uv run pytest bench/ --benchmark-only --benchmark-json=pr.json
+      - name: Checkout main
+        run: git checkout main
+      - name: Run benchmarks (main)
+        run: uv run pytest bench/ --benchmark-only --benchmark-json=main.json
+      - name: Compare
+        run: |
+          uv run pytest-benchmark compare main.json pr.json --csv=compare.csv || true
+          cat compare.csv
+      - uses: actions/upload-artifact@v4
+        with:
+          name: benchmarks
+          path: |
+            pr.json
+            main.json
+            compare.csv

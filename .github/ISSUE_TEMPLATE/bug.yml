@@ -1,0 +1,58 @@
+name: Bug report
+description: A defect in Relay's behavior
+labels: [bug]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Relay version
+      placeholder: "0.1.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: provider
+    attributes:
+      label: Affected provider
+      options:
+        - openai
+        - anthropic
+        - groq
+        - together
+        - deepseek
+        - xai
+        - mistral
+        - fireworks
+        - perplexity
+        - ollama
+        - vllm
+        - lmstudio
+        - openrouter
+        - bedrock
+        - azure
+        - google
+        - vertex
+        - cohere
+        - n/a (config / hub / catalog)
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Minimal reproduction
+      description: Smallest YAML + code snippet that demonstrates the bug. Redact API keys.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected vs actual behavior
+    validations:
+      required: true
+  - type: input
+    id: python
+    attributes:
+      label: Python version
+      placeholder: "3.12.7"
+    validations:
+      required: true

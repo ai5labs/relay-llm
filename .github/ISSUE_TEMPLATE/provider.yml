@@ -1,0 +1,33 @@
+name: New provider request
+description: Request support for a new LLM provider
+labels: [enhancement, provider]
+body:
+  - type: input
+    id: provider
+    attributes:
+      label: Provider name
+    validations:
+      required: true
+  - type: input
+    id: docs
+    attributes:
+      label: API docs URL
+    validations:
+      required: true
+  - type: dropdown
+    id: shape
+    attributes:
+      label: API shape
+      options:
+        - OpenAI-compatible (/v1/chat/completions)
+        - Native Anthropic Messages
+        - Native (custom)
+        - Bedrock Converse
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional notes
+      description: Models you'd want supported, auth specifics, anything unusual.
