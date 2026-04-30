@@ -19,6 +19,7 @@ from relay.errors import (
     RateLimitError,
     RelayError,
     TimeoutError,
+    ToolSchemaError,
 )
 from relay.hub import Hub, Model
 from relay.types import (
@@ -30,6 +31,7 @@ from relay.types import (
     StreamEvent,
     ThinkingBlock,
     ToolCall,
+    ToolDefinition,
     ToolResult,
     Usage,
 )
@@ -56,7 +58,9 @@ __all__ = [
     "ThinkingBlock",
     "TimeoutError",
     "ToolCall",
+    "ToolDefinition",
     "ToolResult",
+    "ToolSchemaError",
     "Usage",
     "__version__",
 ]

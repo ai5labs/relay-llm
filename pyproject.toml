@@ -11,16 +11,30 @@ requires-python = ">=3.10"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
 authors = [{ name = "ai5labs Research OPC Pvt Ltd", email = "engineering@ai5labs.com" }]
-keywords = ["llm", "ai", "openai", "anthropic", "gemini", "bedrock", "router", "yaml"]
+keywords = [
+    "llm", "ai", "machine-learning",
+    "openai", "anthropic", "claude", "gemini", "bedrock", "vertex", "azure-openai",
+    "groq", "mistral", "deepseek", "cohere", "ollama", "vllm",
+    "router", "gateway", "relay", "byok",
+    "mcp", "model-context-protocol",
+    "streaming", "tool-calling", "structured-output",
+    "cost-tracking", "observability", "opentelemetry",
+    "yaml", "async",
+]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Topic :: Software Development :: Libraries :: Python Modules",
+    "Framework :: AsyncIO",
     "Typing :: Typed",
 ]
 dependencies = [
