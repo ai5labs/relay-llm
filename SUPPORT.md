@@ -12,18 +12,22 @@ The fastest way to make Relay better is to fix something that bugs you.
 
 You don't need anyone's permission to start. Open a draft PR and we'll work with you.
 
-## 2. Sponsor on GitHub
+## 2. Sponsor the project
 
-If your team uses Relay in production and wants to keep it healthy, a small monthly sponsorship goes a long way:
+If your team uses Relay in production and wants to keep it healthy, a small monthly sponsorship goes a long way.
 
-➡️ **[github.com/sponsors/ai5labs](https://github.com/sponsors/ai5labs)**
+**For Indian donors** — UPI / cards / netbanking via Razorpay (coming soon — link will be added here once activated).
+
+**For everyone else** — GitHub Sponsors (pending approval; the Sponsor button on the repo header will light up once it's live):
+
+➡️ [github.com/sponsors/ai5labs](https://github.com/sponsors/ai5labs)
 
 Every sponsorship dollar pays for:
 
 * Maintainer time on issues, PR review, releases
 * Live contract-test budgets (we run Relay against real OpenAI, Anthropic, Groq nightly — that costs money)
 * Catalog refresh + new-model day-one support
-* CI compute (matrix testing across Python 3.10–3.13 × 3 OSes)
+* CI compute (matrix testing across Python 3.10-3.13 × 3 OSes)
 
 Sponsors are publicly thanked in the README.
 
