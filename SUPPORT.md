@@ -16,11 +16,9 @@ You don't need anyone's permission to start. Open a draft PR and we'll work with
 
 If your team uses Relay in production and wants to keep it healthy, a small monthly sponsorship goes a long way.
 
-**For Indian donors** — UPI / cards / netbanking via Razorpay (coming soon — link will be added here once activated).
+**Anywhere in the world** — donate via PayPal, GitHub Sponsors (linked to Open Collective), Liberapay, or Open Collective directly. Links will appear here as each platform goes live; you can already see the configured ones in [`.github/FUNDING.yml`](.github/FUNDING.yml).
 
-**For everyone else** — GitHub Sponsors (pending approval; the Sponsor button on the repo header will light up once it's live):
-
-➡️ [github.com/sponsors/ai5labs](https://github.com/sponsors/ai5labs)
+**India-native (UPI / cards / netbanking)** — Razorpay link will appear here once activated.
 
 Every sponsorship dollar pays for:
 

@@ -3,61 +3,65 @@
 # Uncomment lines as you activate each platform. Anything left commented out
 # is hidden — GitHub never errors on missing-but-unconfigured channels.
 
-# --- Context: ai5labs Research OPC Pvt Ltd is an Indian Pvt Ltd. Stripe
-# became invite-only in India (May 2024), which affects payout availability
-# on Stripe-backed platforms (GitHub Sponsors, Polar, Liberapay-via-Stripe).
-# The donation stack is structured around that reality.
+# --- The plan: global-first, with India-native UPI as a bonus channel ---
+#
+# ai5labs Research OPC Pvt Ltd is incorporated in India. Stripe is invite-
+# only in India since May 2024. The truly-global OSS-funding path is:
+# Open Source Collective (OSC) as fiscal host, plus PayPal Business for
+# direct cards, plus Liberapay for fee-free recurring.
 
-# --- Tier 1: live first — global + India-native ---
+# --- Tier 1: truly global ---
 
-# Razorpay Pages — primary donation channel. Same-day onboarding for Indian
-# Pvt Ltd. Native UPI for Indian donors (near-zero fee), cards/netbanking
-# for global donors. Settles to INR current account. ~2% all-in.
-# Create at: https://razorpay.com → Pages → New Page → set tiers
-# Replace this URL once the page is live, then move it under `custom:`:
+# Open Collective with Open Source Collective as the fiscal host. OSC is
+# the canonical fiscal host for ~2,500 OSS projects worldwide. Solves the
+# Stripe-in-region problem because OSC handles all payments and you receive
+# USD via expense reports.
+# Apply: https://www.oscollective.org → become a collective → OSC reviews
+# (1-2 weeks). Once approved, you can link OSC to GitHub Sponsors so the
+# repo Sponsor button works globally.
+# open_collective: relay-llm
+
+# GitHub Sponsors — once OSC fiscal hosting is approved, link OSC as your
+# org's payout method. Until then leave the line commented to avoid
+# routing donors at a profile that can't actually receive funds.
+# github: [ai5labs]
+
+# PayPal Business — accept from 200+ countries, auto-deposits to your
+# Indian bank account daily. Lowest friction global option. ~3-5% fees.
+# Set up at https://www.paypal.com/in → register the Pvt Ltd → link bank.
+# Then create a payment page and add the URL here:
+# custom:
+#   - "https://www.paypal.com/donate/?business=..."
+
+# Liberapay — 0% platform fee, only payment-processor fees. Globally
+# accessible. Capped at €100/donor/week.
+# Create at https://liberapay.com → register the ai5labs team profile.
+# liberapay: ai5labs
+
+# --- Tier 2: India-native bonus channel ---
+
+# Razorpay Pages — captures Indian donors via UPI (basically free for them).
+# Useful as a complement to the global stack rather than the primary path.
+# Create at https://razorpay.com → Pages → New Page → tiers
 # custom:
 #   - "https://pages.razorpay.com/ai5labs-relay"
 
-# Liberapay — 0% platform fees, only payment-processor fees. Globally
-# accessible. Capped at €100/donor/week, fine for OSS donations.
-# Create at: https://liberapay.com → register as the ai5labs team
-# liberapay: ai5labs
+# --- Tier 3: defer ---
 
-# --- Tier 2: prestige (apply now, lights up later) ---
-
-# GitHub Sponsors — the famous Sponsor-button channel. Apply as the ai5labs
-# org. Because Stripe is invite-only in India, GitHub Sponsors may route
-# Indian payouts through Open Source Collective as a fiscal host. Plan for
-# 2-4 weeks of approval time, not 7-14 days.
-github: [ai5labs]
-
-# --- Tier 3: defer until volume justifies setup ---
-
-# Polar.sh — OSS-native (issue funding + tiers). Built on Stripe Connect;
-# India payout availability not yet confirmed publicly. Try after the Tier 1
-# stack is generating real volume.
+# Polar.sh — OSS-native, but built on Stripe Connect with India payout
+# unconfirmed. Re-evaluate when payouts to India are formally announced.
 # polar: ai5labs
 
-# Open Collective — public ledger. As an incorporated Pvt Ltd you can
-# participate via the Open Source Collective fiscal host. More overhead
-# than it's worth at small donation volumes.
-# open_collective: relay-llm
-
-# Buy Me a Coffee / Ko-fi — casual one-off donations. Lower prestige
-# signal but very low friction for casual donors.
+# Buy Me a Coffee / Ko-fi — casual one-offs. Lower prestige.
 # custom:
 #   - "https://www.buymeacoffee.com/ai5labs"
 
-# Crypto wallet addresses — possible but creates large accounting
-# overhead for an Indian Pvt Ltd: 30% flat tax on gains, Schedule III
-# balance-sheet disclosure, banks intermittently refuse settlement.
-# Re-evaluate when annual donations cross ~$50k.
+# Crypto wallet addresses — large accounting overhead for an Indian
+# Pvt Ltd: 30% flat tax on gains, Schedule III balance-sheet disclosure,
+# banks intermittently refuse settlement. Re-evaluate above ~$50k/year.
 # custom:
 #   - "bitcoin:bc1q..."
-#   - "https://etherscan.io/address/0x..."
 
-# --- Tier 4: enterprise sponsorships (separate sales motion) ---
-
-# For enterprise sponsorships ($2.5k+/month, logo on README + roadmap input),
-# we list a contact email in SUPPORT.md rather than a self-serve form.
-# Direct INR or USD wire transfers, invoiced.
+# --- Tier 4: enterprise sponsorships (not click-to-donate) ---
+# Direct invoiced sponsorships ($2.5k+/month, logo on README, roadmap input)
+# are handled via SUPPORT.md → engineering@ai5labs.com.
