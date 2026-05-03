@@ -3,44 +3,61 @@
 # Uncomment lines as you activate each platform. Anything left commented out
 # is hidden — GitHub never errors on missing-but-unconfigured channels.
 
-# --- Tier 1: prestige + recurring ---
+# --- Context: ai5labs Research OPC Pvt Ltd is an Indian Pvt Ltd. Stripe
+# became invite-only in India (May 2024), which affects payout availability
+# on Stripe-backed platforms (GitHub Sponsors, Polar, Liberapay-via-Stripe).
+# The donation stack is structured around that reality.
 
-# GitHub Sponsors — apply at https://github.com/sponsors as the ai5labs org
-# admin. Approval takes ~7-14 days. Once approved, the Sponsor button on the
-# repo header lands sponsors directly on this profile.
-github: [ai5labs]
+# --- Tier 1: live first — global + India-native ---
 
-# --- Tier 2: easy + India-native ---
-
-# Razorpay Pages — fastest path for an Indian Pvt Ltd. Same-day onboarding.
-# Native UPI support (near-zero fee for Indian donors), cards, netbanking.
-# Create at: https://razorpay.com → Pages → new page → tiers
-# Replace this URL after creating the page:
+# Razorpay Pages — primary donation channel. Same-day onboarding for Indian
+# Pvt Ltd. Native UPI for Indian donors (near-zero fee), cards/netbanking
+# for global donors. Settles to INR current account. ~2% all-in.
+# Create at: https://razorpay.com → Pages → New Page → set tiers
+# Replace this URL once the page is live, then move it under `custom:`:
 # custom:
 #   - "https://pages.razorpay.com/ai5labs-relay"
 
-# --- Tier 3: defer until needed ---
+# Liberapay — 0% platform fees, only payment-processor fees. Globally
+# accessible. Capped at €100/donor/week, fine for OSS donations.
+# Create at: https://liberapay.com → register as the ai5labs team
+# liberapay: ai5labs
 
-# Polar.sh — issue-funding + monthly support. Sign up at https://polar.sh
+# --- Tier 2: prestige (apply now, lights up later) ---
+
+# GitHub Sponsors — the famous Sponsor-button channel. Apply as the ai5labs
+# org. Because Stripe is invite-only in India, GitHub Sponsors may route
+# Indian payouts through Open Source Collective as a fiscal host. Plan for
+# 2-4 weeks of approval time, not 7-14 days.
+github: [ai5labs]
+
+# --- Tier 3: defer until volume justifies setup ---
+
+# Polar.sh — OSS-native (issue funding + tiers). Built on Stripe Connect;
+# India payout availability not yet confirmed publicly. Try after the Tier 1
+# stack is generating real volume.
 # polar: ai5labs
 
-# Open Collective — public ledger. Bureaucratic for a registered Pvt Ltd
-# but appealing to enterprise donors who want full transparency.
-# Create at: https://opencollective.com/create
+# Open Collective — public ledger. As an incorporated Pvt Ltd you can
+# participate via the Open Source Collective fiscal host. More overhead
+# than it's worth at small donation volumes.
 # open_collective: relay-llm
 
-# Buy Me a Coffee / Ko-fi — for casual one-off donations.
-# Set up at https://buymeacoffee.com (or ko-fi.com)
+# Buy Me a Coffee / Ko-fi — casual one-off donations. Lower prestige
+# signal but very low friction for casual donors.
 # custom:
 #   - "https://www.buymeacoffee.com/ai5labs"
 
-# Crypto wallet addresses — possible but creates accounting overhead for
-# an Indian Pvt Ltd (30% flat tax on crypto gains, Schedule III balance
-# sheet disclosure). Defer until donation volume justifies the CA cost.
+# Crypto wallet addresses — possible but creates large accounting
+# overhead for an Indian Pvt Ltd: 30% flat tax on gains, Schedule III
+# balance-sheet disclosure, banks intermittently refuse settlement.
+# Re-evaluate when annual donations cross ~$50k.
 # custom:
 #   - "bitcoin:bc1q..."
 #   - "https://etherscan.io/address/0x..."
 
-# --- Note ---
-# We removed the ai5labs.com/relay-llm/sponsor + /enterprise URLs because
-# those pages don't exist yet. Re-add them under `custom:` once they do.
+# --- Tier 4: enterprise sponsorships (separate sales motion) ---
+
+# For enterprise sponsorships ($2.5k+/month, logo on README + roadmap input),
+# we list a contact email in SUPPORT.md rather than a self-serve form.
+# Direct INR or USD wire transfers, invoiced.
