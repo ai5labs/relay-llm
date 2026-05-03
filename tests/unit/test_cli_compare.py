@@ -70,9 +70,7 @@ def test_recommend_basic_chat(capsys: object) -> None:
 
 
 def test_recommend_code_cheap_filters_by_budget(capsys: object) -> None:
-    rc = main(
-        ["models", "recommend", "--task", "code", "--budget", "cheap", "--limit", "5"]
-    )
+    rc = main(["models", "recommend", "--task", "code", "--budget", "cheap", "--limit", "5"])
     assert rc == 0
     out = capsys.readouterr().out  # type: ignore[attr-defined]
     # Cheap budget = avg cost < $1/M; opus ($45/M avg) must NOT appear
@@ -80,9 +78,7 @@ def test_recommend_code_cheap_filters_by_budget(capsys: object) -> None:
 
 
 def test_recommend_with_needs_capability_filter(capsys: object) -> None:
-    rc = main(
-        ["models", "recommend", "--task", "chat", "--needs", "vision", "--limit", "5"]
-    )
+    rc = main(["models", "recommend", "--task", "chat", "--needs", "vision", "--limit", "5"])
     assert rc == 0
     out = capsys.readouterr().out  # type: ignore[attr-defined]
     # All recommendations must support vision; deepseek-chat (no vision) excluded
@@ -92,10 +88,14 @@ def test_recommend_with_needs_capability_filter(capsys: object) -> None:
 def test_recommend_provider_filter(capsys: object) -> None:
     rc = main(
         [
-            "models", "recommend",
-            "--task", "chat",
-            "--providers", "anthropic",
-            "--limit", "5",
+            "models",
+            "recommend",
+            "--task",
+            "chat",
+            "--providers",
+            "anthropic",
+            "--limit",
+            "5",
         ]
     )
     assert rc == 0
@@ -111,9 +111,7 @@ def test_recommend_provider_filter(capsys: object) -> None:
 
 
 def test_recommend_reasoning_premium_returns_top_models(capsys: object) -> None:
-    rc = main(
-        ["models", "recommend", "--task", "reasoning", "--budget", "premium", "--limit", "3"]
-    )
+    rc = main(["models", "recommend", "--task", "reasoning", "--budget", "premium", "--limit", "3"])
     assert rc == 0
     out = capsys.readouterr().out  # type: ignore[attr-defined]
     # Top reasoning models should include at least one of the canonical thinkers
@@ -122,8 +120,7 @@ def test_recommend_reasoning_premium_returns_top_models(capsys: object) -> None:
 
 def test_recommend_json(capsys: object) -> None:
     rc = main(
-        ["models", "recommend", "--task", "code", "--budget", "cheap",
-         "--limit", "3", "--json"]
+        ["models", "recommend", "--task", "code", "--budget", "cheap", "--limit", "3", "--json"]
     )
     assert rc == 0
     out = capsys.readouterr().out  # type: ignore[attr-defined]
@@ -139,10 +136,17 @@ def test_recommend_no_match_returns_error(capsys: object) -> None:
     # Impossible filter — bedrock vision with cheap budget yields nothing
     # since no bedrock model with benchmarks is < $1/M avg
     rc = main(
-        ["models", "recommend",
-         "--needs", "thinking", "vision",
-         "--providers", "groq",
-         "--budget", "cheap"]
+        [
+            "models",
+            "recommend",
+            "--needs",
+            "thinking",
+            "vision",
+            "--providers",
+            "groq",
+            "--budget",
+            "cheap",
+        ]
     )
     assert rc == 1
     err = capsys.readouterr().err  # type: ignore[attr-defined]
