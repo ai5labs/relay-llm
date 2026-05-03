@@ -192,7 +192,7 @@ class BedrockProvider(BaseProvider):
             import boto3  # type: ignore[import-not-found,import-untyped]
         except ImportError as e:
             raise ConfigError(
-                "Bedrock requires 'boto3'. Install with: pip install relayllm[aws]"
+                "Bedrock requires 'boto3'. Install with: pip install ai5labs-relay[aws]"
             ) from e
 
         region = entry.region or "us-east-1"

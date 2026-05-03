@@ -54,7 +54,7 @@ def instrument(hub: Hub, *, capture_messages: CaptureMode = "metadata_only") -> 
     except ImportError as e:
         raise ConfigError(
             "OpenTelemetry instrumentation requires the 'otel' extra. "
-            "Install with: pip install relayllm[otel]"
+            "Install with: pip install ai5labs-relay[otel]"
         ) from e
 
     tracer = trace.get_tracer("relay", "0.1.0")

@@ -36,7 +36,7 @@ python -m bench.gateway_comparison.harness \
 * **Streaming workload**: 100 streaming requests, sequential.
 * **Warm-up**: 3 untimed requests per gateway before measurement.
 * **Hardware**: macOS, Apple Silicon, Python 3.10.13.
-* **Versions**: `relayllm==0.1.0`, `litellm==1.83.0`, `httpx==0.28.x`.
+* **Versions**: `ai5labs-relay==0.1.0`, `litellm==1.83.0`, `httpx==0.28.x`.
 
 ## Results
 

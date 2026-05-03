@@ -12,7 +12,7 @@ A Python library that gives you one interface to every major LLM — chat, strea
 **Faster than LiteLLM at every percentile**, with **8.5× faster cold start** ([benchmarks](BENCHMARKS.md)).
 
 ```bash
-pip install relayllm
+pip install ai5labs-relay
 ```
 
 ```python

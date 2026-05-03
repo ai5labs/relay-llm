@@ -235,7 +235,7 @@ class VertexProvider(GoogleProvider):
                 import google.auth.transport.requests  # type: ignore[import-untyped,import-not-found]
             except ImportError as e:
                 raise ConfigError(
-                    "Vertex AI requires google-auth. Install with: pip install relayllm[gcp]"
+                    "Vertex AI requires google-auth. Install with: pip install ai5labs-relay[gcp]"
                 ) from e
 
             # google-auth is sync; offload to the default executor.

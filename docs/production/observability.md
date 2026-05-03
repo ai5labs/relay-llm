@@ -3,7 +3,7 @@
 Relay emits OpenTelemetry GenAI semantic-convention spans + metrics — the standard format Datadog, Honeycomb, Langfuse, Arize, and Phoenix all consume.
 
 ```bash
-pip install 'relayllm[otel]'
+pip install 'ai5labs-relay[otel]'
 ```
 
 ```python

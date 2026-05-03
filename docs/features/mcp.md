@@ -3,7 +3,7 @@
 Relay's universal MCP layer lets you attach any [Model Context Protocol](https://modelcontextprotocol.io) server (GitHub, Slack, Postgres, filesystem, Playwright) and use its tools against **any** configured model — including providers without native MCP support.
 
 ```bash
-pip install 'relayllm[mcp]'
+pip install 'ai5labs-relay[mcp]'
 ```
 
 ## Connect to MCP servers

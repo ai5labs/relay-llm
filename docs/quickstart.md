@@ -3,17 +3,17 @@
 ## Install
 
 ```bash
-pip install relayllm
+pip install ai5labs-relay
 ```
 
 Optional extras:
 
 ```bash
-pip install 'relayllm[otel]'    # OpenTelemetry instrumentation
-pip install 'relayllm[aws]'     # AWS Bedrock + Secrets Manager
-pip install 'relayllm[gcp]'     # GCP Vertex AI + Secret Manager
-pip install 'relayllm[mcp]'     # Model Context Protocol
-pip install 'relayllm[all]'     # everything
+pip install 'ai5labs-relay[otel]'    # OpenTelemetry instrumentation
+pip install 'ai5labs-relay[aws]'     # AWS Bedrock + Secrets Manager
+pip install 'ai5labs-relay[gcp]'     # GCP Vertex AI + Secret Manager
+pip install 'ai5labs-relay[mcp]'     # Model Context Protocol
+pip install 'ai5labs-relay[all]'     # everything
 ```
 
 ## Define your models

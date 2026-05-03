@@ -24,7 +24,7 @@ jobs:
     needs: build
     environment:
       name: release
-      url: https://pypi.org/p/relayllm
+      url: https://pypi.org/p/ai5labs-relay
     permissions:
       id-token: write   # Trusted Publishing — no API token needed
       attestations: write

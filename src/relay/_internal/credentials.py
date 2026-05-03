@@ -89,7 +89,7 @@ async def _resolve_aws_secret(ref: AwsSecretsCredential) -> str:
     except ImportError as e:
         raise ConfigError(
             "credential type 'aws_secrets' requires 'boto3'. "
-            "Install with: pip install relayllm[aws]"
+            "Install with: pip install ai5labs-relay[aws]"
         ) from e
     client = boto3.client("secretsmanager", region_name=ref.region)
     resp = client.get_secret_value(SecretId=ref.arn)

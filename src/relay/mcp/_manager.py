@@ -67,7 +67,7 @@ class MCPServer:
             except ImportError as e:
                 raise ConfigError(
                     "MCP support requires the 'mcp' package. "
-                    "Install with: pip install relayllm[mcp]"
+                    "Install with: pip install ai5labs-relay[mcp]"
                 ) from e
 
             stack = AsyncExitStack()
