@@ -9,7 +9,7 @@
 
 A Python library that gives you one interface to every major LLM — chat, streaming, tool calls, structured output, batch, MCP — defined in a YAML file you check into your repo. Production-grade, enterprise-ready, OSS.
 
-**Faster than LiteLLM at every percentile**, with **8.5× faster cold start** ([benchmarks](BENCHMARKS.md)).
+**~5–19× faster cold start than LiteLLM**, **~20% faster streaming TTFT**, and tied at the median on chat overhead with more consistent tails ([reproducible benchmarks](BENCHMARKS.md)).
 
 ```bash
 pip install ai5labs-relay
