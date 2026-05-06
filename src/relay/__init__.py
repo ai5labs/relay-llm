@@ -22,6 +22,7 @@ from relay.errors import (
     ToolSchemaError,
 )
 from relay.hub import Hub, Model
+from relay.structured import request_structured
 from relay.types import (
     ChatRequest,
     ChatResponse,
@@ -63,4 +64,5 @@ __all__ = [
     "ToolSchemaError",
     "Usage",
     "__version__",
+    "request_structured",
 ]

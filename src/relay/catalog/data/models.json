@@ -1808,32 +1808,6 @@
     ]
   },
   {
-    "provider": "google",
-    "model_id": "lyria-3-clip-preview",
-    "context_window": 1048576,
-    "capabilities": [
-      "json_mode",
-      "vision"
-    ],
-    "modalities_in": [
-      "text",
-      "image"
-    ]
-  },
-  {
-    "provider": "google",
-    "model_id": "lyria-3-pro-preview",
-    "context_window": 1048576,
-    "capabilities": [
-      "json_mode",
-      "vision"
-    ],
-    "modalities_in": [
-      "text",
-      "image"
-    ]
-  },
-  {
     "provider": "groq",
     "model_id": "deepseek-r1-distill-llama-70b",
     "context_window": 131072,
@@ -2745,357 +2719,6 @@
       "tools",
       "vision",
       "streaming"
-    ],
-    "modalities_in": [
-      "text",
-      "image"
-    ]
-  },
-  {
-    "provider": "mistral",
-    "model_id": "voxtral-small-24b-2507",
-    "context_window": 32000,
-    "input_per_1m": 0.09999999999999999,
-    "output_per_1m": 0.3,
-    "capabilities": [
-      "json_mode",
-      "tools"
-    ],
-    "modalities_in": [
-      "text",
-      "audio"
-    ]
-  },
-  {
-    "provider": "mistral",
-    "model_id": "codestral-2508",
-    "context_window": 256000,
-    "input_per_1m": 0.3,
-    "output_per_1m": 0.8999999999999999,
-    "capabilities": [
-      "json_mode",
-      "tools"
-    ],
-    "modalities_in": [
-      "text"
-    ]
-  },
-  {
-    "provider": "mistral",
-    "model_id": "devstral-2512",
-    "context_window": 262144,
-    "input_per_1m": 0.39999999999999997,
-    "output_per_1m": 2.0,
-    "capabilities": [
-      "json_mode",
-      "tools"
-    ],
-    "modalities_in": [
-      "text"
-    ]
-  },
-  {
-    "provider": "mistral",
-    "model_id": "devstral-medium",
-    "context_window": 131072,
-    "input_per_1m": 0.39999999999999997,
-    "output_per_1m": 2.0,
-    "capabilities": [
-      "json_mode",
-      "tools"
-    ],
-    "modalities_in": [
-      "text"
-    ]
-  },
-  {
-    "provider": "mistral",
-    "model_id": "devstral-small",
-    "context_window": 131072,
-    "input_per_1m": 0.09999999999999999,
-    "output_per_1m": 0.3,
-    "capabilities": [
-      "json_mode",
-      "tools"
-    ],
-    "modalities_in": [
-      "text"
-    ]
-  },
-  {
-    "provider": "mistral",
-    "model_id": "ministral-14b-2512",
-    "context_window": 262144,
-    "input_per_1m": 0.19999999999999998,
-    "output_per_1m": 0.19999999999999998,
-    "capabilities": [
-      "json_mode",
-      "tools",
-      "vision"
-    ],
-    "modalities_in": [
-      "text",
-      "image"
-    ]
-  },
-  {
-    "provider": "mistral",
-    "model_id": "ministral-3b-2512",
-    "context_window": 131072,
-    "input_per_1m": 0.09999999999999999,
-    "output_per_1m": 0.09999999999999999,
-    "capabilities": [
-      "json_mode",
-      "tools",
-      "vision"
-    ],
-    "modalities_in": [
-      "text",
-      "image"
-    ]
-  },
-  {
-    "provider": "mistral",
-    "model_id": "ministral-8b-2512",
-    "context_window": 262144,
-    "input_per_1m": 0.15,
-    "output_per_1m": 0.15,
-    "capabilities": [
-      "json_mode",
-      "tools",
-      "vision"
-    ],
-    "modalities_in": [
-      "text",
-      "image"
-    ]
-  },
-  {
-    "provider": "mistral",
-    "model_id": "mistral-7b-instruct-v0.1",
-    "context_window": 2824,
-    "input_per_1m": 0.11,
-    "output_per_1m": 0.19,
-    "capabilities": [],
-    "modalities_in": [
-      "text"
-    ]
-  },
-  {
-    "provider": "mistral",
-    "model_id": "mistral-large",
-    "context_window": 128000,
-    "input_per_1m": 2.0,
-    "output_per_1m": 6.0,
-    "capabilities": [
-      "json_mode",
-      "tools"
-    ],
-    "modalities_in": [
-      "text"
-    ]
-  },
-  {
-    "provider": "mistral",
-    "model_id": "mistral-large-2407",
-    "context_window": 131072,
-    "input_per_1m": 2.0,
-    "output_per_1m": 6.0,
-    "capabilities": [
-      "json_mode",
-      "tools"
-    ],
-    "modalities_in": [
-      "text"
-    ]
-  },
-  {
-    "provider": "mistral",
-    "model_id": "mistral-large-2411",
-    "context_window": 131072,
-    "input_per_1m": 2.0,
-    "output_per_1m": 6.0,
-    "capabilities": [
-      "json_mode",
-      "tools"
-    ],
-    "modalities_in": [
-      "text"
-    ]
-  },
-  {
-    "provider": "mistral",
-    "model_id": "mistral-large-2512",
-    "context_window": 262144,
-    "input_per_1m": 0.5,
-    "output_per_1m": 1.5,
-    "capabilities": [
-      "json_mode",
-      "tools",
-      "vision"
-    ],
-    "modalities_in": [
-      "text",
-      "image"
-    ]
-  },
-  {
-    "provider": "mistral",
-    "model_id": "mistral-medium-3",
-    "context_window": 131072,
-    "input_per_1m": 0.39999999999999997,
-    "output_per_1m": 2.0,
-    "capabilities": [
-      "json_mode",
-      "tools",
-      "vision"
-    ],
-    "modalities_in": [
-      "text",
-      "image"
-    ]
-  },
-  {
-    "provider": "mistral",
-    "model_id": "mistral-medium-3.1",
-    "context_window": 131072,
-    "input_per_1m": 0.39999999999999997,
-    "output_per_1m": 2.0,
-    "capabilities": [
-      "json_mode",
-      "tools",
-      "vision"
-    ],
-    "modalities_in": [
-      "text",
-      "image"
-    ]
-  },
-  {
-    "provider": "mistral",
-    "model_id": "mistral-nemo",
-    "context_window": 131072,
-    "input_per_1m": 0.02,
-    "output_per_1m": 0.03,
-    "capabilities": [
-      "json_mode",
-      "tools"
-    ],
-    "modalities_in": [
-      "text"
-    ]
-  },
-  {
-    "provider": "mistral",
-    "model_id": "mistral-saba",
-    "context_window": 32768,
-    "input_per_1m": 0.19999999999999998,
-    "output_per_1m": 0.6,
-    "capabilities": [
-      "json_mode",
-      "tools"
-    ],
-    "modalities_in": [
-      "text"
-    ]
-  },
-  {
-    "provider": "mistral",
-    "model_id": "mistral-small-24b-instruct-2501",
-    "context_window": 32768,
-    "input_per_1m": 0.049999999999999996,
-    "output_per_1m": 0.08,
-    "capabilities": [
-      "json_mode"
-    ],
-    "modalities_in": [
-      "text"
-    ]
-  },
-  {
-    "provider": "mistral",
-    "model_id": "mistral-small-2603",
-    "context_window": 262144,
-    "input_per_1m": 0.15,
-    "output_per_1m": 0.6,
-    "capabilities": [
-      "json_mode",
-      "tools",
-      "vision"
-    ],
-    "modalities_in": [
-      "text",
-      "image"
-    ]
-  },
-  {
-    "provider": "mistral",
-    "model_id": "mistral-small-3.1-24b-instruct",
-    "context_window": 128000,
-    "input_per_1m": 0.35,
-    "output_per_1m": 0.56,
-    "capabilities": [
-      "vision"
-    ],
-    "modalities_in": [
-      "text",
-      "image"
-    ]
-  },
-  {
-    "provider": "mistral",
-    "model_id": "mistral-small-3.2-24b-instruct",
-    "context_window": 128000,
-    "input_per_1m": 0.075,
-    "output_per_1m": 0.19999999999999998,
-    "capabilities": [
-      "json_mode",
-      "tools",
-      "vision"
-    ],
-    "modalities_in": [
-      "image",
-      "text"
-    ]
-  },
-  {
-    "provider": "mistral",
-    "model_id": "mixtral-8x22b-instruct",
-    "context_window": 65536,
-    "input_per_1m": 2.0,
-    "output_per_1m": 6.0,
-    "capabilities": [
-      "json_mode",
-      "tools"
-    ],
-    "modalities_in": [
-      "text"
-    ]
-  },
-  {
-    "provider": "mistral",
-    "model_id": "mixtral-8x7b-instruct",
-    "context_window": 32768,
-    "input_per_1m": 0.54,
-    "output_per_1m": 0.54,
-    "capabilities": [
-      "json_mode",
-      "tools"
-    ],
-    "modalities_in": [
-      "text"
-    ]
-  },
-  {
-    "provider": "mistral",
-    "model_id": "pixtral-large-2411",
-    "context_window": 131072,
-    "input_per_1m": 2.0,
-    "output_per_1m": 6.0,
-    "capabilities": [
-      "json_mode",
-      "tools",
-      "vision"
     ],
     "modalities_in": [
       "text",
@@ -4637,7 +4260,8 @@
     "modalities_in": [
       "text",
       "image"
-    ]
+    ],
+    "notes": "no public pricing \u2014 runtime tier may resolve"
   },
   {
     "provider": "openrouter",
@@ -4649,7 +4273,8 @@
     ],
     "modalities_in": [
       "text"
-    ]
+    ],
+    "notes": "no public pricing \u2014 runtime tier may resolve"
   },
   {
     "provider": "openrouter",
@@ -5834,12 +5459,25 @@
     "input_per_1m": 3.0,
     "output_per_1m": 15.0,
     "capabilities": [
-      "json_mode",
-      "tools"
+      "tools",
+      "vision",
+      "streaming",
+      "thinking"
     ],
-    "modalities_in": [
-      "text"
-    ]
+    "speed_tps": 65,
+    "aliases": [
+      "grok-3"
+    ],
+    "benchmarks": {
+      "quality_index": 72,
+      "mmlu": 87.5,
+      "gpqa": 75.4,
+      "humaneval": 86.5,
+      "math": 89.3,
+      "sources": [
+        "xai-grok-3-blog"
+      ]
+    }
   },
   {
     "provider": "xai",
@@ -6008,173 +5646,6 @@
     "modalities_in": [
       "text",
       "image"
-    ]
-  },
-  {
-    "provider": "xai",
-    "model_id": "grok-3",
-    "context_window": 131072,
-    "input_per_1m": 3.0,
-    "output_per_1m": 15.0,
-    "capabilities": [
-      "tools",
-      "vision",
-      "streaming",
-      "thinking"
-    ],
-    "speed_tps": 65,
-    "aliases": [
-      "grok-3"
-    ],
-    "benchmarks": {
-      "quality_index": 72,
-      "mmlu": 87.5,
-      "gpqa": 75.4,
-      "humaneval": 86.5,
-      "math": 89.3,
-      "sources": [
-        "xai-grok-3-blog"
-      ]
-    }
-  },
-  {
-    "provider": "xai",
-    "model_id": "grok-3-beta",
-    "context_window": 131072,
-    "input_per_1m": 3.0,
-    "output_per_1m": 15.0,
-    "capabilities": [
-      "json_mode",
-      "tools"
-    ],
-    "modalities_in": [
-      "text"
-    ]
-  },
-  {
-    "provider": "xai",
-    "model_id": "grok-3-mini",
-    "context_window": 131072,
-    "input_per_1m": 0.3,
-    "output_per_1m": 0.5,
-    "capabilities": [
-      "json_mode",
-      "tools"
-    ],
-    "modalities_in": [
-      "text"
-    ]
-  },
-  {
-    "provider": "xai",
-    "model_id": "grok-3-mini-beta",
-    "context_window": 131072,
-    "input_per_1m": 0.3,
-    "output_per_1m": 0.5,
-    "capabilities": [
-      "json_mode",
-      "tools"
-    ],
-    "modalities_in": [
-      "text"
-    ]
-  },
-  {
-    "provider": "xai",
-    "model_id": "grok-4",
-    "context_window": 256000,
-    "input_per_1m": 3.0,
-    "output_per_1m": 15.0,
-    "capabilities": [
-      "json_mode",
-      "tools",
-      "vision"
-    ],
-    "modalities_in": [
-      "image",
-      "text",
-      "file"
-    ]
-  },
-  {
-    "provider": "xai",
-    "model_id": "grok-4-fast",
-    "context_window": 2000000,
-    "input_per_1m": 0.19999999999999998,
-    "output_per_1m": 0.5,
-    "capabilities": [
-      "json_mode",
-      "tools",
-      "vision"
-    ],
-    "modalities_in": [
-      "text",
-      "image",
-      "file"
-    ]
-  },
-  {
-    "provider": "xai",
-    "model_id": "grok-4.1-fast",
-    "context_window": 2000000,
-    "input_per_1m": 0.19999999999999998,
-    "output_per_1m": 0.5,
-    "capabilities": [
-      "json_mode",
-      "tools",
-      "vision"
-    ],
-    "modalities_in": [
-      "text",
-      "image",
-      "file"
-    ]
-  },
-  {
-    "provider": "xai",
-    "model_id": "grok-4.20",
-    "context_window": 2000000,
-    "input_per_1m": 2.0,
-    "output_per_1m": 6.0,
-    "capabilities": [
-      "json_mode",
-      "tools",
-      "vision"
-    ],
-    "modalities_in": [
-      "text",
-      "image",
-      "file"
-    ]
-  },
-  {
-    "provider": "xai",
-    "model_id": "grok-4.20-multi-agent",
-    "context_window": 2000000,
-    "input_per_1m": 2.0,
-    "output_per_1m": 6.0,
-    "capabilities": [
-      "json_mode",
-      "vision"
-    ],
-    "modalities_in": [
-      "text",
-      "image",
-      "file"
-    ]
-  },
-  {
-    "provider": "xai",
-    "model_id": "grok-code-fast-1",
-    "context_window": 256000,
-    "input_per_1m": 0.19999999999999998,
-    "output_per_1m": 1.5,
-    "capabilities": [
-      "json_mode",
-      "tools"
-    ],
-    "modalities_in": [
-      "text"
     ]
   },
   {

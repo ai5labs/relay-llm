@@ -134,9 +134,7 @@ relay providers                          # list all supported providers
 
 **OpenAI-compatible** (one adapter): OpenAI, Groq, Together, DeepSeek, xAI, Mistral, Fireworks, Perplexity, OpenRouter, Ollama, vLLM, LM Studio.
 
-**Native** (proper, lossless adapters): Anthropic.
-
-**Scaffolded for v0.2**: Azure OpenAI, Google Gemini direct, Vertex AI, AWS Bedrock, Cohere.
+**Native** (proper, lossless adapters): Anthropic, Azure OpenAI, AWS Bedrock, Cohere, Google Gemini direct, Vertex AI.
 
 ## Pricing & cost tracking
 
@@ -203,7 +201,7 @@ models:
 
 ## Status
 
-**v0.1 (alpha)** — chat + streaming + tool calls + cost tracking + the OpenAI-compatible adapter (12 providers) + native Anthropic. Bedrock / Azure / Vertex / direct Gemini / Cohere are scaffolded and slated for v0.2.
+**v0.1 (alpha)** — chat + streaming + tool calls + cost tracking + the OpenAI-compatible adapter (12 providers) + native adapters for Anthropic, Azure OpenAI, AWS Bedrock, Cohere, Google Gemini direct, and Vertex AI.
 
 API surface is stable; everything under `_internal/` and `_*` modules is not.
 
