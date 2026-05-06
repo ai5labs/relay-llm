@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file. Format foll
 
 <!-- towncrier release notes start -->
 
+## [0.2.0] — Unreleased
+
+### Added
+
+- `relay.routing` — public extension point for picking a model per call.
+  - `Router` Protocol; `RouteRequest`, `RouteConstraints`, `RouteDecision` data types.
+  - `RuleBasedRouter` — deterministic, constraint-based ranking against the
+    catalog (same logic as `relay models recommend`).
+  - `SemanticRouter` — HTTP client for the wire protocol at
+    `docs/routing/api-spec.md`. Default endpoint targets the future hosted
+    router service.
+- `Hub.attach_router(router)` and `Hub.chat_routed(messages, ...)` — opt-in;
+  existing `chat()` is unchanged.
+
 ## [0.1.0] — 2026-05-01
 
 First public release.

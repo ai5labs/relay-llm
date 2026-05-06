@@ -136,6 +136,15 @@ relay providers                          # list all supported providers
 
 **Native** (proper, lossless adapters): Anthropic, Azure OpenAI, AWS Bedrock, Cohere, Google Gemini direct, Vertex AI.
 
+## Routing
+
+`relay.routing` is the public extension point for picking a model per call. Two implementations ship with v0.2:
+
+- `RuleBasedRouter` — deterministic, constraint-driven, in-process. Same scoring logic as `relay models recommend`, free.
+- `SemanticRouter` — HTTP client for the hosted semantic router (paid, optional). Wire protocol documented in [`docs/routing/api-spec.md`](docs/routing/api-spec.md).
+
+Attach a router and call `chat_routed` instead of `chat` — Relay picks the alias, falls back through alternates on error, and stamps the decision onto `response.metadata["routing"]`. Custom routers satisfying the `Router` Protocol are accepted. See [`docs/routing/usage.md`](docs/routing/usage.md) for examples.
+
 ## Pricing & cost tracking
 
 Every response carries a `Cost` object with full provenance:

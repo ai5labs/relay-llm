@@ -36,6 +36,12 @@ from relay.errors import ConfigError
 from relay.guardrails import Guardrail, GuardrailError, evaluate_post, evaluate_pre
 from relay.providers import Provider, make_provider
 from relay.redaction import Redactor
+from relay.routing import (
+    NoCandidatesError,
+    RouteConstraints,
+    Router,
+    RouteRequest,
+)
 from relay.types import (
     ChatRequest,
     ChatResponse,
@@ -124,6 +130,7 @@ class Hub:
         self._breaker = CircuitBreaker()
         self._cache: Cache | None = cache
         self._mcp: Any = None
+        self._router: Router | None = None
         self._redactor: Redactor | None = redactor
         self._guardrails: list[Guardrail] = list(guardrails or [])
         self._audit_sinks: list[AuditSink] = list(audit_sinks or [])
@@ -232,6 +239,85 @@ class Hub:
             await self._mcp.dispatch(name, arguments)
             if hasattr(self._mcp, "dispatch")
             else await self._mcp.call_tool(name, arguments)
+        )
+
+    def attach_router(self, router: Router) -> None:
+        """Attach a :class:`relay.routing.Router` for use with :meth:`chat_routed`.
+
+        Idempotent — calling again replaces the previously attached router.
+        The hub does **not** take ownership: callers are responsible for
+        closing routers that own external resources (e.g. ``SemanticRouter``)
+        unless they want the lifetime tied to the hub, in which case they
+        can close it manually after :meth:`aclose`.
+        """
+        self._router = router
+
+    async def chat_routed(
+        self,
+        messages: list[Message] | list[Mapping[str, Any]],
+        candidates: list[str] | None = None,
+        constraints: RouteConstraints | None = None,
+        **kwargs: Any,
+    ) -> ChatResponse:
+        """Route to a model via the attached :class:`Router`, then dispatch.
+
+        If the chosen alias errors, falls through ``decision.alternates`` in
+        order until one succeeds or the list is exhausted (in which case the
+        last error is re-raised). The successful :class:`RouteDecision` is
+        attached to the response under ``response.metadata['routing']``.
+
+        Raises :class:`relay.errors.ConfigError` when no router is attached.
+        When ``candidates`` is ``None``, defaults to every non-deprecated
+        alias declared in the loaded YAML (groups are excluded).
+        """
+        if self._router is None:
+            raise ConfigError(
+                "No router attached. Call hub.attach_router() first."
+            )
+
+        normalized_messages = _coerce_messages(messages)
+        if candidates is None:
+            # Default: every model alias defined in the YAML config. We don't
+            # include groups since downstream dispatch is per-alias.
+            candidates = list(self._config.models.keys())
+
+        request = RouteRequest(
+            messages=normalized_messages,
+            candidates=candidates,
+            constraints=constraints,
+        )
+        decision = await self._router.route(request)
+
+        order: list[str] = [decision.alias] + [a for a, _score in decision.alternates]
+        last_error: Exception | None = None
+        for alias in order:
+            if alias not in self._config.models:
+                # Decision returned an alias the hub doesn't know about (catalog
+                # slug rather than YAML alias). Skip rather than crash — the
+                # rule-based router can return catalog slugs in default-catalog
+                # mode, which we don't try to resolve here.
+                continue
+            try:
+                response = await self.chat(
+                    alias, messages=normalized_messages, **kwargs
+                )
+            except Exception as e:
+                last_error = e
+                continue
+
+            # Annotate the response with the routing decision. ChatResponse is
+            # frozen but allows extras, so model_copy can stamp the metadata.
+            existing_meta: dict[str, Any] = {}
+            for src in (getattr(response, "metadata", None),):
+                if isinstance(src, dict):
+                    existing_meta.update(src)
+            existing_meta["routing"] = decision
+            return response.model_copy(update={"metadata": existing_meta})
+
+        if last_error is not None:
+            raise last_error
+        raise NoCandidatesError(
+            "router returned no candidate that matches a configured model alias"
         )
 
     def get(self, alias: str) -> Model:

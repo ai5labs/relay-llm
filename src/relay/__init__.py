@@ -22,6 +22,19 @@ from relay.errors import (
     ToolSchemaError,
 )
 from relay.hub import Hub, Model
+from relay.routing import (
+    NoCandidatesError,
+    RouteConstraints,
+    RouteDecision,
+    Router,
+    RouterAuthError,
+    RouteRequest,
+    RouterQuotaError,
+    RouterTimeoutError,
+    RoutingError,
+    RuleBasedRouter,
+    SemanticRouter,
+)
 from relay.structured import request_structured
 from relay.types import (
     ChatRequest,
@@ -52,9 +65,20 @@ __all__ = [
     "MemoryCache",
     "Message",
     "Model",
+    "NoCandidatesError",
     "ProviderError",
     "RateLimitError",
     "RelayError",
+    "RouteConstraints",
+    "RouteDecision",
+    "RouteRequest",
+    "Router",
+    "RouterAuthError",
+    "RouterQuotaError",
+    "RouterTimeoutError",
+    "RoutingError",
+    "RuleBasedRouter",
+    "SemanticRouter",
     "StreamEvent",
     "ThinkingBlock",
     "TimeoutError",
