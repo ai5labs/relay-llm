@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file. Format foll
 
 <!-- towncrier release notes start -->
 
+## [0.2.1] — Unreleased
+
+### Fixed
+
+- `Message.content` now coerces `None` to `""` at the validation boundary
+  (OpenAI spec compliance for assistant messages with `tool_calls`).
+  Downstream adapters (Anthropic / Gemini / Bedrock) all require a
+  non-null `str | list`, so the conversion belongs at the input boundary
+  instead of forcing every caller to pre-coerce.
+
 ## [0.2.0] — Unreleased
 
 ### Added

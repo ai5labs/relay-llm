@@ -16,7 +16,7 @@ from __future__ import annotations
 
 from typing import Any, Literal, TypeAlias
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class _Frozen(BaseModel):
@@ -111,6 +111,19 @@ class Message(_Loose):
     role: Role
     content: str | list[ContentBlock]
     name: str | None = None
+
+    @field_validator("content", mode="before")
+    @classmethod
+    def _coerce_none_content(cls, v: Any) -> Any:
+        # OpenAI's Chat Completions spec documents content as nullable when
+        # tool_calls is present. Most SDKs emit assistant tool-call turns as
+        # ``{"role": "assistant", "content": null, "tool_calls": [...]}``.
+        # Coerce to "" so downstream provider adapters (Anthropic, Gemini,
+        # Bedrock — all of which require a non-null string|list) don't need
+        # to special-case it.
+        if v is None:
+            return ""
+        return v
 
 
 # ---------------------------------------------------------------------------
