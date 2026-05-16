@@ -4,81 +4,55 @@ All notable changes to this project will be documented in this file. Format foll
 
 <!-- towncrier release notes start -->
 
-## [0.2.5] — Unreleased
+## [0.2.1] — 2026-05-16
 
-### Security — post-PR-7 re-audit follow-ups (PR 8)
+Security hardening pass (audit at `AUDIT_2026_05_16.md`) plus an OpenAI
+spec-compliance fix on `Message.content`.
 
-- **base_url SSRF — alternate IPv4 encoding bypass** (re-opened AUTH-1).
-  `ipaddress.ip_address` only recognizes the strict dotted-quad form, so
-  decimal `2852039166`, hex `0xa9fea9fe`, and short-form `169.254.43518`
-  all snuck past the private-range check while the OS resolver routed
-  the request to 169.254.169.254. `_normalize_ip_literal` now falls
-  through to `socket.inet_aton` so every form the resolver accepts is
-  fenced.
-- **Tool-arg schema validator silently accepted non-trivial schemas**.
-  The fast-path skipped any schema without `properties` / `type` /
-  `required` / `anyOf` / `oneOf` — meaning `allOf`, `enum`, `$ref`, and
-  `additionalProperties: false` schemas effectively disabled validation.
-  Only literally empty `{}` schemas now short-circuit.
-- **Streaming deadline leaked the inner provider generator**. `wait_for`
-  cancels the `__anext__` task but leaves the underlying async generator
-  for GC; the httpx SSE socket stayed open. `_stream_one` now `aclose()`s
-  the inner iterator in a `finally:` so the connection tears down
-  promptly. Deadline also now bracketed before `__aiter__()` so
-  connect-stage hangs count against it.
-- **Unknown tool name in response now hard-fails**. A model that called a
-  tool name not in the declared tools list previously skipped validation
-  and reached the caller's dispatcher; now raises `ToolSchemaError`.
-- **`RelayError.message` is also scrubbed**, not just `.raw`. Providers
-  build the message from upstream body snippets, which can contain
-  echoed bearer tokens.
-- **Additional secret patterns**: GitHub PATs (`ghp_…` etc.), JWTs,
-  Google `AIza…` keys, PEM private-key blocks, Slack tokens.
-- **`CallbackSink` sync-warning** now uses `iscoroutinefunction` alone
-  (was also gated on `isfunction`, which missed callable classes,
-  `functools.partial`, and lambdas).
-- **MCP stdio re-validation at connect time** now runs *before* the
-  `mcp` SDK import so the defense fires (and is testable in CI) even
-  when the optional `mcp` extra is not installed.
-- Docs: streaming threat-model limit (deltas leak before post-guardrail),
-  `strict_audit` failure semantics, alt-IPv4 encoding coverage, DNS-time
-  exfiltration as a known sync-validator limit.
+### Security
 
-## [0.2.4] — Unreleased
+**MCP stdio command injection** (same class as CVE-2026-30623, F1).
+- `MCP_STDIO_ALLOWED_COMMANDS` allowlist (`npx`, `uvx`, `python`,
+  `python3`, `node`, `docker`, `deno`, `bun`). `MCPManager.add_stdio`
+  rejects anything else; `MCPServer.connect` re-validates at spawn so
+  deserialized configs can't bypass. Escape hatch: `allow_arbitrary=True`.
+  Connect-time re-validation runs *before* the `mcp` SDK import, so the
+  defense fires (and is testable in CI) even when the optional `mcp`
+  extra is not installed.
+- MCP tool arguments validated against the declared JSON Schema before
+  dispatch; violations raise `ToolSchemaError`.
+- MCP tool results capped at 256 KB with a truncation sentinel.
 
-### Security — AUTH-8 + F9/F10/F12 (PR 6)
+**base_url SSRF + credential exfiltration** (F2, F4, F11, AUTH-1).
+- `ModelEntry.base_url` validator rejects plaintext `http://` against
+  non-loopback hosts and any address resolving into RFC1918 / link-local
+  / metadata / CGNAT / ULA ranges (opt back in per entry with
+  `allow_private_hosts: true`).
+- IPv4 alt-encoding bypass closed: decimal (`2852039166`), hex
+  (`0xa9fea9fe`), and short forms (`169.254.43518`) are now normalized
+  via `socket.inet_aton` so every form the OS resolver accepts is
+  fenced. Loopback alt-encodings (`127.1`, `0177.0.0.1`) stay allowed
+  — they're the local-vLLM use case.
+- `google/*` targets require `https://` unconditionally; Gemini API key
+  moved from `?key=` query string to `x-goog-api-key` header.
+- `RelayConfig` detects group cycles at load time via DFS rather than
+  blowing the Python recursion limit at request time.
+- `GroupMember.weight` rejects negative and non-finite values.
 
-- Provider-returned `ToolCall.arguments` validated against the originating
-  `ToolDefinition.parameters`; mismatch raises `ToolSchemaError` so callers
-  can fail closed.
-- Audit-sink failures logged via `logger.warning("audit_sink_failed")`
-  and counted at `relay.audit.audit_sink_failures` instead of being
-  swallowed. New `Hub.from_yaml(..., strict_audit=True)` re-raises.
-- `CallbackSink` warns when handed a sync callback (blocks the event loop).
-- `CircuitBreaker` switched to `time.monotonic` — NTP steps no longer
-  perturb open-circuit cooldown.
+**Streaming guardrails + deadline** (AUTH-2, F3).
+- `Hub._stream_one` runs the redactor and pre/post guardrails on the
+  streaming path. Post-violation buffers replaced with a block marker;
+  terminating `StreamErrorEvent` emitted so callers never receive
+  blocked content as the final response object. Threat-model limit:
+  individual `TextDelta` events ship before post-guardrails fire — see
+  `docs/production/security.md`.
+- New `GlobalDefaults.stream_overall_timeout` (default 300 s) caps
+  wall-clock time on streaming calls. The inner provider generator is
+  `aclose()`d on deadline so the httpx SSE socket tears down promptly
+  rather than waiting for GC. Deadline bracketed before `__aiter__()`
+  so connect-stage hangs count against it too.
 
-## [0.2.3] — Unreleased
-
-### Security — AUTH-5/6/7 + F7/F8 (PR 5)
-
-- `Hub.chat(..., trust_system=False)` and `StripUserSystem` guardrail
-  reject `role="system"` entries from untrusted message lists.
-- `RelayError.raw` scrubs `Authorization` / `x-api-key` / `sk-…` shaped
-  substrings; `str(err)` carries a `<raw redacted>` marker; opt-in
-  `err.raw_unsafe()`.
-- `relay models inspect` redacts `LiteralCredential.value` in text and
-  JSON output.
-- `capture_messages="never"` sanitizes audit `error_message` to
-  `{error_type}: status={code}` so provider response bodies (which often
-  echo the prompt back) don't leak.
-- OTel `capture_messages="full"` events emitted from post-redaction
-  messages.
-
-## [0.2.2] — Unreleased
-
-### Security — AUTH-3/4 + F5 (PR 4)
-
+**Cache hardening** (AUTH-3, AUTH-4, F5).
 - `Hub` cache-hit path runs `evaluate_post` against cached responses
   before returning — a tightened guardrail no longer lets stale-but-
   now-blocked content through.
@@ -89,39 +63,51 @@ All notable changes to this project will be documented in this file. Format foll
   cached). Two users with distinct PII no longer collide on a single
   cached response.
 
-### Security — AUTH-2 + F3 (PR 3)
+**Redaction sweep** (AUTH-5, AUTH-6, AUTH-7, F7, F8).
+- `Hub.chat(..., trust_system=False)` and `StripUserSystem` guardrail
+  reject `role="system"` entries from untrusted message lists.
+- `RelayError.raw` and `RelayError.message` both scrub `Authorization` /
+  `Bearer` / `x-api-key` / `sk-…` / GitHub PAT / JWT / Google `AIza…` /
+  PEM private-key / Slack-token shaped substrings. `str(err)` carries a
+  `<raw redacted>` marker; opt-in `err.raw_unsafe()`.
+- `relay models inspect` redacts `LiteralCredential.value` in text and
+  JSON output.
+- `capture_messages="never"` sanitizes audit `error_message` to
+  `{error_type}: status={code}` so provider response bodies (which
+  often echo the prompt back) don't leak.
+- OTel `capture_messages="full"` events emitted from post-redaction
+  messages.
 
-- `Hub._stream_one` runs the redactor and pre/post guardrails on the
-  streaming path. Post-violation buffers replaced with a block marker;
-  terminating `StreamErrorEvent` emitted so callers never receive
-  blocked content as the final response object.
-- New `GlobalDefaults.stream_overall_timeout` (default 300 s) caps
-  wall-clock time on streaming calls — slow-loris providers are killed
-  by `relay.errors.TimeoutError`.
+**Tool-call validation + audit + clock hygiene** (AUTH-8, F9, F10, F12).
+- Provider-returned `ToolCall.arguments` validated against the
+  originating `ToolDefinition.parameters`; mismatch raises
+  `ToolSchemaError`. Schema validator no longer skips on shape — only
+  literally empty `{}` short-circuits, so `allOf` / `enum` / `$ref` /
+  `additionalProperties: false` schemas are now enforced.
+- Unknown tool name in a response (model hallucinated a tool not in
+  the declared list) hard-raises `ToolSchemaError` rather than silently
+  reaching the caller's dispatcher.
+- Audit-sink failures logged via `logger.warning("audit_sink_failed")`
+  and counted at `relay.audit.audit_sink_failures` instead of being
+  swallowed. New `Hub.from_yaml(..., strict_audit=True)` re-raises.
+- `CallbackSink` warns on any non-async callable (lambdas, callable
+  classes, `functools.partial` over sync) — blocks the event loop.
+- `CircuitBreaker` switched to `time.monotonic` — NTP steps no longer
+  perturb open-circuit cooldown.
 
-## [0.2.1] — Unreleased
+**Docs.** `docs/production/security.md` gains a trust-boundaries
+section: `base_url`, MCP stdio allowlist, multi-tenant cache scoping,
+streaming threat-model limit, `capture_messages="full"` warnings,
+`strict_audit` failure semantics, DNS-time exfiltration as a known
+sync-validator limit.
 
-### Security — F2 + F4 + F11 + AUTH-1 (PR 2)
+### Fixed
 
-- `ModelEntry.base_url` validator rejects plaintext `http://` against
-  non-loopback hosts and any address resolving into RFC1918 / link-local
-  / metadata / CGNAT / ULA ranges (opt back in per entry with
-  `allow_private_hosts: true`).
-- `google/*` targets require `https://` unconditionally; Gemini API key
-  moved from `?key=` query string to `x-goog-api-key` header.
-- `RelayConfig` detects group cycles at load time via DFS rather than
-  blowing the Python recursion limit at request time.
-- `GroupMember.weight` rejects negative and non-finite values.
-
-### Security — F1 (PR 1; same class as CVE-2026-30623)
-
-- `MCP_STDIO_ALLOWED_COMMANDS` allowlist (`npx`, `uvx`, `python`,
-  `python3`, `node`, `docker`, `deno`, `bun`). `MCPManager.add_stdio`
-  rejects anything else; `MCPServer.connect` re-validates at spawn so
-  deserialized configs can't bypass. Escape hatch: `allow_arbitrary=True`.
-- MCP tool arguments validated against the declared JSON Schema before
-  dispatch; violations raise `ToolSchemaError`.
-- MCP tool results capped at 256 KB with a truncation sentinel.
+- `Message.content` now coerces `None` to `""` at the validation
+  boundary (OpenAI spec compliance for assistant messages with
+  `tool_calls`). Downstream adapters (Anthropic / Gemini / Bedrock) all
+  require a non-null `str | list`, so the conversion belongs at the
+  input boundary instead of forcing every caller to pre-coerce.
 
 ## [0.2.0] — Unreleased
 
