@@ -154,3 +154,192 @@ def test_layered_config_overrides() -> None:
         """
     )
     assert cfg.models["x"].credential == "value"
+
+
+# ---------------------------------------------------------------------------
+# PR 2: base_url SSRF + group-cycle + weight validators
+# ---------------------------------------------------------------------------
+
+
+def test_base_url_rejects_metadata_ip(monkeypatch: pytest.MonkeyPatch) -> None:
+    """169.254.169.254 (cloud metadata) must be rejected without opt-in."""
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-test-123")
+    with pytest.raises(ConfigError, match=r"private/link-local|http://"):
+        load_str(
+            """
+            version: 1
+            models:
+              evil:
+                target: openai/gpt-4o
+                credential: $env.OPENAI_API_KEY
+                base_url: http://169.254.169.254/latest
+            """
+        )
+
+
+def test_base_url_rejects_rfc1918_without_opt_in(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-test-123")
+    with pytest.raises(ConfigError, match="private/link-local"):
+        load_str(
+            """
+            version: 1
+            models:
+              internal:
+                target: openai/gpt-4o
+                credential: $env.OPENAI_API_KEY
+                base_url: https://10.0.0.1/v1
+            """
+        )
+
+
+def test_base_url_rejects_plain_http_for_remote(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-test-123")
+    with pytest.raises(ConfigError, match="http://"):
+        load_str(
+            """
+            version: 1
+            models:
+              evil:
+                target: openai/gpt-4o
+                credential: $env.OPENAI_API_KEY
+                base_url: http://attacker.example/v1
+            """
+        )
+
+
+def test_base_url_allows_https_external(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-test-123")
+    cfg = load_str(
+        """
+        version: 1
+        models:
+          ok:
+            target: openai/gpt-4o
+            credential: $env.OPENAI_API_KEY
+            base_url: https://api.openai.com/v1
+        """
+    )
+    assert cfg.models["ok"].base_url == "https://api.openai.com/v1"
+
+
+def test_base_url_allows_loopback_http(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Self-hosted vLLM / Ollama on localhost is the legitimate http use case."""
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-test-123")
+    cfg = load_str(
+        """
+        version: 1
+        models:
+          vllm:
+            target: openai/llama-3
+            credential: $env.OPENAI_API_KEY
+            base_url: http://127.0.0.1:8000/v1
+        """
+    )
+    assert cfg.models["vllm"].base_url == "http://127.0.0.1:8000/v1"
+
+
+def test_base_url_allows_private_when_opted_in(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-test-123")
+    cfg = load_str(
+        """
+        version: 1
+        models:
+          internal:
+            target: openai/gpt-4o
+            credential: $env.OPENAI_API_KEY
+            base_url: https://10.0.0.5/v1
+            allow_private_hosts: true
+        """
+    )
+    assert cfg.models["internal"].allow_private_hosts is True
+
+
+def test_base_url_google_requires_https(monkeypatch: pytest.MonkeyPatch) -> None:
+    """google/* targets must use https even on loopback — defense-in-depth
+    against query-string-key style mistakes."""
+    monkeypatch.setenv("GOOGLE_API_KEY", "g-test")
+    with pytest.raises(ConfigError, match="google models require https"):
+        load_str(
+            """
+            version: 1
+            models:
+              g:
+                target: google/gemini-2.5-flash
+                credential: $env.GOOGLE_API_KEY
+                base_url: http://127.0.0.1:9000
+            """
+        )
+
+
+def test_group_cycle_detected(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-test-123")
+    with pytest.raises(ConfigError, match="cycle detected"):
+        load_str(
+            """
+            version: 1
+            models:
+              m:
+                target: openai/gpt-4o
+                credential: $env.OPENAI_API_KEY
+            groups:
+              A:
+                members: [B]
+              B:
+                members: [A]
+            """
+        )
+
+
+def test_group_no_cycle_passes(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-test-123")
+    cfg = load_str(
+        """
+        version: 1
+        models:
+          m:
+            target: openai/gpt-4o
+            credential: $env.OPENAI_API_KEY
+        groups:
+          A:
+            members: [B]
+          B:
+            members: [m]
+        """
+    )
+    assert "A" in cfg.groups
+
+
+def test_weight_negative_rejected(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-test-123")
+    with pytest.raises(ConfigError, match="non-negative"):
+        load_str(
+            """
+            version: 1
+            models:
+              m:
+                target: openai/gpt-4o
+                credential: $env.OPENAI_API_KEY
+            groups:
+              g:
+                members:
+                  - {name: m, weight: -1.0}
+            """
+        )
+
+
+def test_weight_infinity_rejected(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-test-123")
+    with pytest.raises(ConfigError, match="finite"):
+        load_str(
+            """
+            version: 1
+            models:
+              m:
+                target: openai/gpt-4o
+                credential: $env.OPENAI_API_KEY
+            groups:
+              g:
+                members:
+                  - {name: m, weight: .inf}
+            """
+        )
