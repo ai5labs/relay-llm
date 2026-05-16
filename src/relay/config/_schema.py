@@ -401,6 +401,15 @@ class GlobalDefaults(_Strict):
     pool_max_keepalive: int = 50
     pool_max_connections: int = 200
     keepalive_expiry: float = 30.0
+    stream_overall_timeout: float = 300.0
+    """Wall-clock cap on a single streaming call.
+
+    ``httpx.Timeout`` applies *per read*, so a slow-loris provider that emits
+    one SSE byte just inside the per-read deadline can keep a stream alive
+    forever. ``_stream_one`` wraps the SSE loop in ``asyncio.timeout`` set to
+    this value (or the per-entry ``timeout`` when explicitly set) so the
+    request cannot run past it.
+    """
 
 
 class CatalogSettings(_Strict):

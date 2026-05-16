@@ -19,6 +19,7 @@ The Hub composes:
 
 from __future__ import annotations
 
+import asyncio
 import time
 from collections.abc import AsyncIterator, Mapping
 from pathlib import Path
@@ -33,6 +34,7 @@ from relay.catalog._pricing import PricingResolver
 from relay.config import load as load_config
 from relay.config._schema import ModelEntry, RelayConfig
 from relay.errors import ConfigError
+from relay.errors import TimeoutError as RelayTimeoutError
 from relay.guardrails import Guardrail, GuardrailError, evaluate_post, evaluate_pre
 from relay.providers import Provider, make_provider
 from relay.redaction import Redactor
@@ -48,6 +50,7 @@ from relay.types import (
     Cost,
     Message,
     StreamEnd,
+    StreamErrorEvent,
     StreamEvent,
 )
 
@@ -514,12 +517,77 @@ class Hub:
         request = self._build_request(messages=messages, stream=True, **kwargs)
         provider = self._get_provider(entry.provider, api_style=entry.api_style)
 
+        # Redaction (pre-call), mirroring _chat_one. Mutates the request so
+        # downstream provider never sees the pre-redaction content.
+        if self._redactor is not None:
+            result = self._redactor.redact(request.messages)
+            request = request.model_copy(update={"messages": result.messages})
+
+        # Pre-call guardrails — raise *before* opening the SSE socket so
+        # blocked prompts never reach the model.
+        pre_violation = evaluate_pre(self._guardrails, request.messages)
+        if pre_violation is not None:
+            raise GuardrailError(pre_violation)
+
+        # Wall-clock deadline. Per-entry timeout wins when explicitly set;
+        # otherwise fall back to the global stream_overall_timeout. A
+        # malicious slow-loris provider that emits one byte per N seconds
+        # can otherwise stall forever inside provider.stream's aiter_lines.
+        overall_deadline = (
+            entry.timeout
+            if entry.timeout is not None
+            else self._config.defaults.stream_overall_timeout
+        )
+
         async def gen() -> AsyncIterator[StreamEvent]:
-            async for ev in provider.stream(  # type: ignore[attr-defined]
+            # Manual wall-clock deadline implemented with per-iteration
+            # wait_for — asyncio.timeout would be cleaner but only landed in
+            # Python 3.11, and Relay supports 3.10.
+            inner = provider.stream(  # type: ignore[attr-defined]
                 entry=entry, request=request, clients=self._clients
-            ):
+            ).__aiter__()
+            deadline = time.monotonic() + overall_deadline
+            while True:
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    raise RelayTimeoutError(
+                        f"stream exceeded overall deadline of {overall_deadline}s",
+                        provider=entry.provider,
+                        model=entry.model_id,
+                    )
+                try:
+                    ev = await asyncio.wait_for(inner.__anext__(), timeout=remaining)
+                except StopAsyncIteration:
+                    return
+                except asyncio.TimeoutError as e:
+                    raise RelayTimeoutError(
+                        f"stream exceeded overall deadline of {overall_deadline}s "
+                        "(set defaults.stream_overall_timeout or per-model timeout)",
+                        provider=entry.provider,
+                        model=entry.model_id,
+                    ) from e
+
                 if isinstance(ev, StreamEnd):
                     priced = await self._apply_cost(ev.response, entry)
+                    # Post-call guardrails on the assembled response. On block
+                    # we replace the buffered text with a marker and emit a
+                    # terminating StreamErrorEvent so the caller never
+                    # receives blocked content as a final response.
+                    post_violation = evaluate_post(self._guardrails, priced)
+                    if post_violation is not None:
+                        # Marker carries only the rule id — the violation
+                        # message itself often quotes the blocked term back,
+                        # which would defeat the redaction.
+                        priced = _strip_blocked_text(priced, post_violation.rule)
+                        yield StreamErrorEvent(
+                            error=post_violation.message,
+                            code=post_violation.rule,
+                        )
+                        yield StreamEnd(
+                            finish_reason="content_filter",
+                            response=priced,
+                        )
+                        return
                     yield StreamEnd(finish_reason=ev.finish_reason, response=priced)
                 else:
                     yield ev
@@ -658,6 +726,25 @@ class Hub:
         if row is None:
             return None
         return getattr(row, key, None)
+
+
+def _strip_blocked_text(response: ChatResponse, reason: str) -> ChatResponse:
+    """Replace the assistant text in every choice with a block marker.
+
+    Called when post-guardrails fire on a streamed response: the caller has
+    already received text deltas, but we still owe them a final response
+    object that doesn't carry the blocked content.
+    """
+    marker = f"[blocked by guardrail: {reason}]"
+    new_choices = []
+    for ch in response.choices:
+        new_message = ch.message.model_copy(update={"content": marker})
+        new_choices.append(
+            ch.model_copy(
+                update={"message": new_message, "finish_reason": "content_filter"}
+            )
+        )
+    return response.model_copy(update={"choices": new_choices})
 
 
 def _extract_user_id(kwargs: dict[str, Any]) -> str | None:
