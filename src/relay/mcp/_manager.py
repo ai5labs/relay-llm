@@ -16,9 +16,11 @@ chat path can consume.
 from __future__ import annotations
 
 import asyncio
+import os
 from contextlib import AsyncExitStack
 from typing import TYPE_CHECKING, Any
 
+from relay._internal.schema_validate import validate_tool_arguments as _validate_tool_arguments
 from relay.errors import ConfigError, RelayError
 from relay.types import ToolDefinition
 
@@ -31,6 +33,37 @@ class MCPToolError(RelayError):
 
 
 _NAME_SEP = "__"
+
+# Allowlist of basenames permitted as the stdio `command` for an MCP server.
+# Mirrors the LiteLLM mitigation for CVE-2026-30623 (MCP stdio command injection).
+# Operators with a justified need can bypass this by passing
+# ``allow_arbitrary=True`` to :meth:`MCPManager.add_stdio` (intended for tests
+# and tightly-controlled deployments where the command source is trusted).
+MCP_STDIO_ALLOWED_COMMANDS: frozenset[str] = frozenset(
+    {"npx", "uvx", "python", "python3", "node", "docker", "deno", "bun"}
+)
+
+# Cap on the concatenated text returned by an MCP tool call. Past this the
+# remainder is dropped and a sentinel is appended so the model can still reason
+# about the truncation.
+MCP_TOOL_RESULT_MAX_BYTES = 256 * 1024
+
+
+def _validate_stdio_command(command: str, *, allow_arbitrary: bool) -> None:
+    """Reject MCP stdio commands whose basename is not on the allowlist."""
+    if allow_arbitrary:
+        return
+    basename = os.path.basename(command).lower()
+    # Strip a trailing ``.exe`` so Windows callers using e.g. ``npx.exe`` still pass.
+    if basename.endswith(".exe"):
+        basename = basename[:-4]
+    if basename not in MCP_STDIO_ALLOWED_COMMANDS:
+        allowed = ", ".join(sorted(MCP_STDIO_ALLOWED_COMMANDS))
+        raise ConfigError(
+            f"MCP stdio command {command!r} is not in the allowlist ({allowed}). "
+            "Pass allow_arbitrary=True if you fully trust the source of this "
+            "command (CVE-2026-30623-class command injection if untrusted)."
+        )
 
 
 class MCPServer:
@@ -46,10 +79,14 @@ class MCPServer:
         name: str,
         transport: str,
         config: dict[str, Any],
+        allow_arbitrary_command: bool = False,
     ) -> None:
         self.name = name
         self.transport = transport
         self.config = config
+        # Carried into connect() so a serialized config from a less-trusted
+        # source cannot bypass the allowlist by mutating the dict.
+        self.allow_arbitrary_command = allow_arbitrary_command
         self._session: Any = None
         self._exit_stack: AsyncExitStack | None = None
         self._tools_cache: list[ToolDefinition] | None = None
@@ -80,6 +117,13 @@ class MCPServer:
                         stdio_client,  # type: ignore[import-not-found,import-untyped]
                     )
 
+                    # Re-validate at spawn time so a config that was constructed
+                    # bypassing add_stdio (e.g. deserialized YAML, hand-built
+                    # MCPServer) still cannot launch an arbitrary binary.
+                    _validate_stdio_command(
+                        self.config["command"],
+                        allow_arbitrary=self.allow_arbitrary_command,
+                    )
                     params = StdioServerParameters(
                         command=self.config["command"],
                         args=self.config.get("args") or [],
@@ -168,7 +212,16 @@ class MCPServer:
             text = getattr(block, "text", None)
             if text:
                 out_parts.append(text)
-        return "\n".join(out_parts)
+        joined = "\n".join(out_parts)
+        # Cap result size so a malicious / runaway server cannot blow the LLM's
+        # context (or our memory). UTF-8 bytes, not characters.
+        encoded = joined.encode("utf-8")
+        if len(encoded) > MCP_TOOL_RESULT_MAX_BYTES:
+            truncated = encoded[:MCP_TOOL_RESULT_MAX_BYTES].decode("utf-8", errors="ignore")
+            return (
+                f"{truncated}\n[result truncated at {MCP_TOOL_RESULT_MAX_BYTES} bytes]"
+            )
+        return joined
 
     async def aclose(self) -> None:
         if self._exit_stack is not None:
@@ -198,14 +251,23 @@ class MCPManager:
         command: str,
         args: list[str] | None = None,
         env: dict[str, str] | None = None,
+        allow_arbitrary: bool = False,
     ) -> None:
-        """Connect to an MCP server over stdio (most servers ship as binaries)."""
+        """Connect to an MCP server over stdio (most servers ship as binaries).
+
+        ``command`` is checked against :data:`MCP_STDIO_ALLOWED_COMMANDS` to
+        defend against the CVE-2026-30623 class of command-injection bugs.
+        Pass ``allow_arbitrary=True`` only for tests or trusted operators —
+        ``add_stdio`` must never receive untrusted input regardless.
+        """
         if name in self._servers:
             raise ConfigError(f"MCP server {name!r} already added")
+        _validate_stdio_command(command, allow_arbitrary=allow_arbitrary)
         server = MCPServer(
             name=name,
             transport="stdio",
             config={"command": command, "args": args or [], "env": env},
+            allow_arbitrary_command=allow_arbitrary,
         )
         await server.connect()
         self._servers[name] = server
@@ -257,7 +319,13 @@ class MCPManager:
         return out
 
     async def call_tool(self, name: str, arguments: dict[str, Any]) -> str:
-        """Dispatch a tool call by its prefixed name to the right server."""
+        """Dispatch a tool call by its prefixed name to the right server.
+
+        Arguments are validated against the originating tool's JSON Schema
+        before dispatch. A schema violation raises :class:`ToolSchemaError`
+        so callers can fail closed rather than forwarding garbage to a tool
+        that might trust its inputs.
+        """
         if _NAME_SEP not in name:
             raise MCPToolError(
                 f"tool name {name!r} is not server-prefixed; "
@@ -267,7 +335,22 @@ class MCPManager:
         server = self._servers.get(server_name)
         if server is None:
             raise MCPToolError(f"unknown MCP server {server_name!r}")
+
+        # Validate against the declared parameter schema before invoking.
+        schema = await self._tool_schema(server, tool_name)
+        if schema is not None:
+            _validate_tool_arguments(name, arguments, schema)
+
         return await server.call_tool(tool_name, arguments)
+
+    async def _tool_schema(
+        self, server: MCPServer, tool_name: str
+    ) -> dict[str, Any] | None:
+        """Return the declared JSON Schema for ``tool_name`` on ``server``."""
+        for t in await server.list_tools():
+            if t.name == tool_name:
+                return t.parameters
+        return None
 
     async def aclose(self) -> None:
         results = await asyncio.gather(

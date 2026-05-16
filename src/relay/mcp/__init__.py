@@ -44,6 +44,18 @@ Design notes
 * **Schema translation** is reused from :mod:`relay.tools` — no duplication.
 """
 
-from relay.mcp._manager import MCPManager, MCPServer, MCPToolError
+from relay.mcp._manager import (
+    MCP_STDIO_ALLOWED_COMMANDS,
+    MCP_TOOL_RESULT_MAX_BYTES,
+    MCPManager,
+    MCPServer,
+    MCPToolError,
+)
 
-__all__ = ["MCPManager", "MCPServer", "MCPToolError"]
+__all__ = [
+    "MCP_STDIO_ALLOWED_COMMANDS",
+    "MCP_TOOL_RESULT_MAX_BYTES",
+    "MCPManager",
+    "MCPServer",
+    "MCPToolError",
+]
