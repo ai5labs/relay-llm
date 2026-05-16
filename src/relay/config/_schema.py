@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import ipaddress
 import math
+import socket
 from typing import Annotated, Any, Literal
 from urllib.parse import urlsplit
 
@@ -27,27 +28,53 @@ from pydantic import (
 _LOOPBACK_HOSTNAMES = {"localhost", "ip6-localhost", "ip6-loopback"}
 
 
+def _normalize_ip_literal(host: str) -> ipaddress.IPv4Address | ipaddress.IPv6Address | None:
+    """Return ``host`` as an IPv4/IPv6 object using *all* the forms a system
+    resolver accepts.
+
+    ``ipaddress.ip_address`` only recognizes the strict dotted-quad form, so
+    a YAML author could write ``2852039166`` (decimal-encoded
+    169.254.169.254), ``0xa9fea9fe`` (hex), or ``127.1`` (short form) and
+    sneak past a private-range check while ``httpx`` / the OS resolver
+    still routes the request to the original address. ``socket.inet_aton``
+    normalizes all three. Pure-host strings (``api.openai.com``) return
+    None — they're not IP literals.
+    """
+    try:
+        return ipaddress.ip_address(host)
+    except ValueError:
+        pass
+    # Heuristic: ipaddress rejected it, but if the host parses as an IPv4
+    # literal under inet_aton (decimal / hex / octal / short forms), it is
+    # one and we must treat it as such.
+    try:
+        packed = socket.inet_aton(host)
+    except OSError:
+        return None
+    return ipaddress.IPv4Address(int.from_bytes(packed, "big"))
+
+
 def _host_is_loopback_literal(host: str) -> bool:
     if host.lower() in _LOOPBACK_HOSTNAMES:
         return True
-    try:
-        return ipaddress.ip_address(host).is_loopback
-    except ValueError:
-        return False
+    ip = _normalize_ip_literal(host)
+    return ip is not None and ip.is_loopback
 
 
 def _host_is_private_ip(host: str) -> bool:
     """True if ``host`` is an IP literal in a non-routable range we should fence.
 
     Covers RFC1918, loopback, link-local (incl. 169.254.169.254 metadata),
-    CGNAT 100.64.0.0/10, ULA fc00::/7, and unspecified addresses. Hostnames
-    that don't parse as IPs return False — DNS-time exfiltration is out of
-    scope for a sync field validator (callers can layer DNS pinning at the
-    HTTP transport).
+    CGNAT 100.64.0.0/10, ULA fc00::/7, and unspecified addresses. Accepts
+    every IPv4 encoding the OS resolver does (dotted-quad, decimal, hex,
+    octal, short forms) — see :func:`_normalize_ip_literal`.
+
+    Hostnames that don't parse as IPs return False — DNS-time exfiltration
+    is out of scope for a sync field validator (callers can layer DNS
+    pinning at the HTTP transport).
     """
-    try:
-        ip = ipaddress.ip_address(host)
-    except ValueError:
+    ip = _normalize_ip_literal(host)
+    if ip is None:
         return False
     if ip.is_loopback or ip.is_link_local or ip.is_private or ip.is_unspecified:
         return True

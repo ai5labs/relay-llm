@@ -25,6 +25,19 @@ _SECRET_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"\bAKIA[0-9A-Z]{16}\b"),
     # Long OpenAI / Anthropic style keys (sk-..., sk-ant-...).
     re.compile(r"\bsk-(?:ant-)?[A-Za-z0-9\-_]{20,}\b"),
+    # GitHub PATs / installation tokens — all have a 4-letter prefix.
+    re.compile(r"\bgh[pousr]_[A-Za-z0-9]{30,}\b"),
+    # Google API keys (Maps / Cloud / Gemini direct).
+    re.compile(r"\bAIza[0-9A-Za-z\-_]{35}\b"),
+    # JWTs: three base64url segments separated by dots.
+    re.compile(r"\beyJ[A-Za-z0-9_\-]+\.[A-Za-z0-9_\-]+\.[A-Za-z0-9_\-]+\b"),
+    # PEM private keys — collapse the whole armored block.
+    re.compile(
+        r"-----BEGIN [A-Z ]*PRIVATE KEY-----.*?-----END [A-Z ]*PRIVATE KEY-----",
+        re.DOTALL,
+    ),
+    # Slack tokens.
+    re.compile(r"\bxox[abprs]-[A-Za-z0-9\-]{10,}\b"),
 )
 
 
@@ -66,16 +79,18 @@ class RelayError(Exception):
         request_id: str | None = None,
         raw: Any = None,
     ) -> None:
-        super().__init__(message)
-        self.message = message
+        # Providers often build the ``message`` from a snippet of the upstream
+        # body (see openai_compat._raise_for_status). Scrub both fields so
+        # neither ``str(err)`` nor ``err.raw`` carries a credential.
+        scrubbed_message = _scrub_secrets(message) if isinstance(message, str) else message
+        super().__init__(scrubbed_message)
+        self.message = scrubbed_message
         self.provider = provider
         self.model = model
         self.status_code = status_code
         self.request_id = request_id
-        # Scrub bearer tokens / API keys / sk-... values out of any provider-
-        # echoed body before it sticks to the exception. ``raw_unsafe()`` is
-        # the opt-in escape hatch for callers that explicitly want the
-        # unredacted value.
+        # ``raw_unsafe()`` is the opt-in escape hatch for callers that
+        # explicitly want the unredacted body.
         self._raw_unsafe = raw
         self.raw = _scrub_secrets(raw)
 

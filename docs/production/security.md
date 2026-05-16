@@ -62,6 +62,16 @@ models:
     allow_private_hosts: true   # required: internal sidecar address
 ```
 
+The IP-literal check uses `socket.inet_aton` after `ipaddress.ip_address`,
+so non-dotted-quad forms the OS resolver still accepts (decimal
+`2852039166`, hex `0xa9fea9fe`, short-form `169.254.43518`) are caught.
+
+**Known limit — DNS-time exfiltration.** A hostname that resolves into a
+private range at request time (e.g. `internal.example.com` with an A
+record pointing at `10.0.0.5`) passes the sync validator. If you need
+DNS-pinning, layer it at the httpx transport. Auditing the catalog of
+allowed `base_url` hostnames at deploy time is the easier mitigation.
+
 ## MCP stdio command allowlist
 
 `MCPManager.add_stdio(command=...)` only accepts binaries whose basename is in
@@ -112,10 +122,20 @@ now-blocked response will not bypass a policy tightened after caching.
   `StreamErrorEvent` is emitted — the caller never gets the blocked content
   as a final response object.
 
+> **Limit of the streaming threat model.** Post-guardrails fire on the
+> *assembled* response, after individual `TextDelta` events have already
+> been yielded. A consumer that rendered each delta to a user has already
+> shown blocked content by the time the terminating `StreamErrorEvent`
+> arrives. Treat a trailing `StreamErrorEvent` as "discard rendered
+> output." If you need character-level filtering, layer a per-delta check
+> on the consumer side — Relay only guarantees terminal-state sanitization.
+
 `GlobalDefaults.stream_overall_timeout` (default 300 s) caps wall-clock time
 on a single streaming call. `httpx.Timeout` applies per read, so without
 this cap a slow-loris provider that emits one byte just inside the read
-deadline could keep a stream alive forever.
+deadline could keep a stream alive forever. When the deadline fires, Relay
+also calls `aclose()` on the underlying provider generator so the SSE
+socket is torn down promptly rather than waiting for GC.
 
 ## `capture_messages="full"` and telemetry
 
@@ -162,6 +182,13 @@ Sink failures are logged (`relay.audit.audit_sink_failures` counter +
 environments where missing an audit row is itself a compliance violation,
 construct the hub with `Hub.from_yaml(..., strict_audit=True)` — sink
 exceptions then re-raise rather than getting absorbed.
+
+Note: under `strict_audit=True`, a sink that fails during success-path
+emission discards the otherwise-successful `ChatResponse` — the caller
+sees the sink's exception. This is the fail-closed behavior compliance
+regimes typically want, but means a flaky sink can take down working
+chat traffic. Use it only when "no audit row = abort the call" is the
+right policy.
 
 `CallbackSink` emits a `UserWarning` at construction when handed a plain
 sync callback (which would block the event loop and serialize concurrent

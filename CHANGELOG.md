@@ -4,6 +4,46 @@ All notable changes to this project will be documented in this file. Format foll
 
 <!-- towncrier release notes start -->
 
+## [0.2.5] — Unreleased
+
+### Security — post-PR-7 re-audit follow-ups (PR 8)
+
+- **base_url SSRF — alternate IPv4 encoding bypass** (re-opened AUTH-1).
+  `ipaddress.ip_address` only recognizes the strict dotted-quad form, so
+  decimal `2852039166`, hex `0xa9fea9fe`, and short-form `169.254.43518`
+  all snuck past the private-range check while the OS resolver routed
+  the request to 169.254.169.254. `_normalize_ip_literal` now falls
+  through to `socket.inet_aton` so every form the resolver accepts is
+  fenced.
+- **Tool-arg schema validator silently accepted non-trivial schemas**.
+  The fast-path skipped any schema without `properties` / `type` /
+  `required` / `anyOf` / `oneOf` — meaning `allOf`, `enum`, `$ref`, and
+  `additionalProperties: false` schemas effectively disabled validation.
+  Only literally empty `{}` schemas now short-circuit.
+- **Streaming deadline leaked the inner provider generator**. `wait_for`
+  cancels the `__anext__` task but leaves the underlying async generator
+  for GC; the httpx SSE socket stayed open. `_stream_one` now `aclose()`s
+  the inner iterator in a `finally:` so the connection tears down
+  promptly. Deadline also now bracketed before `__aiter__()` so
+  connect-stage hangs count against it.
+- **Unknown tool name in response now hard-fails**. A model that called a
+  tool name not in the declared tools list previously skipped validation
+  and reached the caller's dispatcher; now raises `ToolSchemaError`.
+- **`RelayError.message` is also scrubbed**, not just `.raw`. Providers
+  build the message from upstream body snippets, which can contain
+  echoed bearer tokens.
+- **Additional secret patterns**: GitHub PATs (`ghp_…` etc.), JWTs,
+  Google `AIza…` keys, PEM private-key blocks, Slack tokens.
+- **`CallbackSink` sync-warning** now uses `iscoroutinefunction` alone
+  (was also gated on `isfunction`, which missed callable classes,
+  `functools.partial`, and lambdas).
+- **MCP stdio re-validation at connect time** now runs *before* the
+  `mcp` SDK import so the defense fires (and is testable in CI) even
+  when the optional `mcp` extra is not installed.
+- Docs: streaming threat-model limit (deltas leak before post-guardrail),
+  `strict_audit` failure semantics, alt-IPv4 encoding coverage, DNS-time
+  exfiltration as a known sync-validator limit.
+
 ## [0.2.4] — Unreleased
 
 ### Security — AUTH-8 + F9/F10/F12 (PR 6)

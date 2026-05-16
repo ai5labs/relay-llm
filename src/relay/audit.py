@@ -151,7 +151,12 @@ class CallbackSink:
         self,
         callback: Callable[[AuditEvent], Awaitable[None] | None],
     ) -> None:
-        if not inspect.iscoroutinefunction(callback) and inspect.isfunction(callback):
+        # Warn when the callback is unambiguously sync. ``iscoroutinefunction``
+        # also returns True for ``functools.partial`` over an async function
+        # and bound methods of async-def, which is what we want. Anything
+        # else (lambdas, plain ``def``, callable classes whose ``__call__``
+        # is sync) gets the warning.
+        if not inspect.iscoroutinefunction(callback):
             warnings.warn(
                 "CallbackSink received a sync callback; it will block the event "
                 "loop and serialize concurrent audit emissions. Prefer "

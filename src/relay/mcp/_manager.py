@@ -99,6 +99,15 @@ class MCPServer:
         async with self._lock:
             if self._session is not None:  # type: ignore[unreachable]
                 return  # type: ignore[unreachable]
+            # Re-validate the stdio command BEFORE importing the mcp SDK so
+            # this defense fires (and is testable in CI) even when ``mcp``
+            # is not installed. A deserialized YAML or hand-built MCPServer
+            # cannot launch an arbitrary binary regardless of SDK presence.
+            if self.transport == "stdio":
+                _validate_stdio_command(
+                    self.config["command"],
+                    allow_arbitrary=self.allow_arbitrary_command,
+                )
             try:
                 from mcp import ClientSession  # type: ignore[import-not-found,import-untyped]
             except ImportError as e:
@@ -117,13 +126,6 @@ class MCPServer:
                         stdio_client,  # type: ignore[import-not-found,import-untyped]
                     )
 
-                    # Re-validate at spawn time so a config that was constructed
-                    # bypassing add_stdio (e.g. deserialized YAML, hand-built
-                    # MCPServer) still cannot launch an arbitrary binary.
-                    _validate_stdio_command(
-                        self.config["command"],
-                        allow_arbitrary=self.allow_arbitrary_command,
-                    )
                     params = StdioServerParameters(
                         command=self.config["command"],
                         args=self.config.get("args") or [],

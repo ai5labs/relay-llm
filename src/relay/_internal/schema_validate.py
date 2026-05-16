@@ -24,19 +24,14 @@ def validate_tool_arguments(
 ) -> None:
     """Validate ``arguments`` against the JSON Schema ``schema``.
 
-    Raises :class:`ToolSchemaError` on failure. A trivial / empty schema
-    (``{}`` or one with no ``properties`` and no ``type``) is treated as
-    "accept anything" and short-circuits without importing jsonschema.
+    Raises :class:`ToolSchemaError` on failure. Only a literally empty
+    schema (``{}``) is skipped — anything else (incl. ``allOf`` / ``enum``
+    / ``$ref`` / ``additionalProperties`` / ``not`` schemas that the old
+    fast-path silently waved through) goes through jsonschema. jsonschema
+    is a hard runtime dependency so there's no import-cost reason to
+    short-circuit on shape.
     """
-    # Cheap fast-path for the no-op case so we don't import jsonschema unless
-    # there's actually a schema to enforce.
-    if not schema or (
-        "properties" not in schema
-        and "type" not in schema
-        and "required" not in schema
-        and "anyOf" not in schema
-        and "oneOf" not in schema
-    ):
+    if not schema:
         return
 
     try:

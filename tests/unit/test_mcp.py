@@ -156,10 +156,11 @@ async def test_stdio_allowlist_accepts_npx(monkeypatch: pytest.MonkeyPatch) -> N
 
 @pytest.mark.asyncio
 async def test_stdio_allowlist_connect_revalidates() -> None:
-    """A hand-built MCPServer with a bad command must still be rejected at connect()."""
+    """A hand-built MCPServer with a bad command must still be rejected at
+    connect() — and this defense must fire even when the `mcp` SDK is not
+    installed (the validator runs before the import)."""
     from relay.mcp._manager import MCPServer
 
-    pytest.importorskip("mcp")
     server = MCPServer(
         name="evil",
         transport="stdio",

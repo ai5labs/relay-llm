@@ -20,6 +20,7 @@ The Hub composes:
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import time
 from collections.abc import AsyncIterator, Mapping
 from pathlib import Path
@@ -34,7 +35,7 @@ from relay.cache import Cache, cache_key
 from relay.catalog._pricing import PricingResolver
 from relay.config import load as load_config
 from relay.config._schema import ModelEntry, RelayConfig
-from relay.errors import ConfigError
+from relay.errors import ConfigError, ToolSchemaError
 from relay.errors import TimeoutError as RelayTimeoutError
 from relay.guardrails import Guardrail, GuardrailError, evaluate_post, evaluate_pre
 from relay.providers import Provider, make_provider
@@ -597,56 +598,72 @@ class Hub:
         async def gen() -> AsyncIterator[StreamEvent]:
             # Manual wall-clock deadline implemented with per-iteration
             # wait_for — asyncio.timeout would be cleaner but only landed in
-            # Python 3.11, and Relay supports 3.10.
+            # Python 3.11, and Relay supports 3.10. ``deadline`` is computed
+            # BEFORE constructing the inner iterator so any work the provider
+            # does inside ``stream(...)`` (typically the SSE connect) counts
+            # against the cap too — otherwise a hang during connection
+            # setup would escape the wall-clock guard.
+            deadline = time.monotonic() + overall_deadline
             inner = provider.stream(  # type: ignore[attr-defined]
                 entry=entry, request=request, clients=self._clients
             ).__aiter__()
-            deadline = time.monotonic() + overall_deadline
-            while True:
-                remaining = deadline - time.monotonic()
-                if remaining <= 0:
-                    raise RelayTimeoutError(
-                        f"stream exceeded overall deadline of {overall_deadline}s",
-                        provider=entry.provider,
-                        model=entry.model_id,
-                    )
-                try:
-                    ev = await asyncio.wait_for(inner.__anext__(), timeout=remaining)
-                except StopAsyncIteration:
-                    return
-                except asyncio.TimeoutError as e:
-                    raise RelayTimeoutError(
-                        f"stream exceeded overall deadline of {overall_deadline}s "
-                        "(set defaults.stream_overall_timeout or per-model timeout)",
-                        provider=entry.provider,
-                        model=entry.model_id,
-                    ) from e
-
-                if isinstance(ev, StreamEnd):
-                    _validate_response_tool_calls(ev.response, request.tools)
-                    priced = await self._apply_cost(ev.response, entry)
-                    # Post-call guardrails on the assembled response. On block
-                    # we replace the buffered text with a marker and emit a
-                    # terminating StreamErrorEvent so the caller never
-                    # receives blocked content as a final response.
-                    post_violation = evaluate_post(self._guardrails, priced)
-                    if post_violation is not None:
-                        # Marker carries only the rule id — the violation
-                        # message itself often quotes the blocked term back,
-                        # which would defeat the redaction.
-                        priced = _strip_blocked_text(priced, post_violation.rule)
-                        yield StreamErrorEvent(
-                            error=post_violation.message,
-                            code=post_violation.rule,
+            try:
+                while True:
+                    remaining = deadline - time.monotonic()
+                    if remaining <= 0:
+                        raise RelayTimeoutError(
+                            f"stream exceeded overall deadline of {overall_deadline}s",
+                            provider=entry.provider,
+                            model=entry.model_id,
                         )
-                        yield StreamEnd(
-                            finish_reason="content_filter",
-                            response=priced,
-                        )
+                    try:
+                        ev = await asyncio.wait_for(inner.__anext__(), timeout=remaining)
+                    except StopAsyncIteration:
                         return
-                    yield StreamEnd(finish_reason=ev.finish_reason, response=priced)
-                else:
-                    yield ev
+                    except asyncio.TimeoutError as e:
+                        raise RelayTimeoutError(
+                            f"stream exceeded overall deadline of {overall_deadline}s "
+                            "(set defaults.stream_overall_timeout or per-model timeout)",
+                            provider=entry.provider,
+                            model=entry.model_id,
+                        ) from e
+
+                    if isinstance(ev, StreamEnd):
+                        _validate_response_tool_calls(ev.response, request.tools)
+                        priced = await self._apply_cost(ev.response, entry)
+                        # Post-call guardrails on the assembled response.
+                        # NOTE: any text deltas were already yielded to the
+                        # caller before this point — the final ``StreamEnd``
+                        # is sanitized but consumers must treat a trailing
+                        # ``StreamErrorEvent`` as "discard rendered output"
+                        # (see docs/production/security.md).
+                        post_violation = evaluate_post(self._guardrails, priced)
+                        if post_violation is not None:
+                            # Marker carries only the rule id — the
+                            # violation message itself often quotes the
+                            # blocked term back, defeating the redaction.
+                            priced = _strip_blocked_text(priced, post_violation.rule)
+                            yield StreamErrorEvent(
+                                error=post_violation.message,
+                                code=post_violation.rule,
+                            )
+                            yield StreamEnd(
+                                finish_reason="content_filter",
+                                response=priced,
+                            )
+                            return
+                        yield StreamEnd(finish_reason=ev.finish_reason, response=priced)
+                    else:
+                        yield ev
+            finally:
+                # ``wait_for`` cancels the ``__anext__`` task on timeout but
+                # leaves the underlying async generator (and its httpx SSE
+                # socket) hanging until GC. Explicitly close it so a
+                # slow-loris provider socket is torn down promptly.
+                aclose = getattr(inner, "aclose", None)
+                if aclose is not None:
+                    with contextlib.suppress(Exception):
+                        await aclose()
 
         return gen()
 
@@ -797,9 +814,12 @@ def _validate_response_tool_calls(
     caller wiring ``tool_calls`` straight into ``subprocess`` would dispatch
     garbage. Raising ToolSchemaError lets the caller fail closed.
 
-    No-op when the request carried no tools (provider can still hallucinate
-    a tool call, but with no declared schema to check it against there's
-    nothing to do).
+    Also rejects tool calls whose ``name`` was not in the declared tools
+    list — a hallucinated tool name with no schema would otherwise flow
+    straight through to the caller's dispatcher, where it could be confused
+    for a legitimate call.
+
+    No-op when the request carried no tools.
     """
     if not tools:
         return
@@ -813,7 +833,11 @@ def _validate_response_tool_calls(
         for tc in choice.tool_calls:
             schema = schema_by_name.get(tc.name)
             if schema is None:
-                continue
+                raise ToolSchemaError(
+                    f"model called undeclared tool {tc.name!r}; "
+                    f"declared tools: {sorted(schema_by_name)}",
+                    raw={"tool_call": {"name": tc.name, "arguments": tc.arguments}},
+                )
             validate_tool_arguments(tc.name, tc.arguments, schema)
 
 
