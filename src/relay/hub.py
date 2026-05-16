@@ -348,10 +348,17 @@ class Hub:
         alias: str,
         *,
         messages: list[Message] | list[Mapping[str, Any]],
+        trust_system: bool = True,
         **kwargs: Any,
     ) -> ChatResponse:
-        """Call a model or group by alias and return the assembled response."""
-        normalized_messages = _coerce_messages(messages)
+        """Call a model or group by alias and return the assembled response.
+
+        Set ``trust_system=False`` when ``messages`` originates from
+        untrusted user input. Any ``role="system"`` entry then raises
+        :class:`relay.errors.ConfigError` — set the developer's system
+        prompt in code instead of forwarding it through.
+        """
+        normalized_messages = _coerce_messages(messages, trust_system=trust_system)
         if alias in self._config.models:
             return await self._chat_one(
                 self._config.models[alias], messages=normalized_messages, **kwargs
@@ -380,14 +387,18 @@ class Hub:
         alias: str,
         *,
         messages: list[Message] | list[Mapping[str, Any]],
+        trust_system: bool = True,
         **kwargs: Any,
     ) -> AsyncIterator[StreamEvent]:
         """Stream events from a single model. Group streaming with fallback is v0.2.
 
         Returns an async iterator directly — callers use ``async for ev in
         hub.stream(...)`` without an ``await``.
+
+        ``trust_system=False`` rejects any ``role="system"`` entry; see
+        :meth:`chat` for the rationale.
         """
-        normalized_messages = _coerce_messages(messages)
+        normalized_messages = _coerce_messages(messages, trust_system=trust_system)
         if alias in self._config.groups:
             raise ConfigError(
                 f"{alias!r} is a group; group streaming with fallback is planned for v0.2. "
@@ -788,17 +799,27 @@ def _extract_user_id(kwargs: dict[str, Any]) -> str | None:
 
 def _coerce_messages(
     messages: list[Message] | list[Mapping[str, Any]] | None,
+    *,
+    trust_system: bool = True,
 ) -> list[Message]:
     if messages is None:
         return []
     out: list[Message] = []
     for m in messages:
         if isinstance(m, Message):
-            out.append(m)
+            msg = m
         elif isinstance(m, Mapping):
-            out.append(Message.model_validate(m))
+            msg = Message.model_validate(m)
         else:
             raise ConfigError(f"invalid message type: {type(m).__name__}")
+        if not trust_system and msg.role == "system":
+            raise ConfigError(
+                "messages contain a role='system' entry but trust_system=False; "
+                "set the system prompt in code rather than forwarding it from "
+                "untrusted user input (or call hub.chat with trust_system=True "
+                "if the messages list is fully under your control)."
+            )
+        out.append(msg)
     return out
 
 

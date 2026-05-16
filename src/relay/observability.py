@@ -80,7 +80,7 @@ def instrument(hub: Hub, *, capture_messages: CaptureMode = "metadata_only") -> 
 
     async def _chat_one_instrumented(entry: ModelEntry, **kwargs: Any) -> ChatResponse:
         with tracer.start_as_current_span(f"chat {entry.target}") as span:
-            _set_request_attrs(span, entry, kwargs, capture_messages)
+            _set_request_attrs(span, entry, kwargs, capture_messages, hub=hub)
             start = time.perf_counter()
             try:
                 resp = await original_chat_one(entry, **kwargs)
@@ -103,7 +103,7 @@ def instrument(hub: Hub, *, capture_messages: CaptureMode = "metadata_only") -> 
     def _stream_one_instrumented(entry: ModelEntry, **kwargs: Any) -> AsyncIterator[StreamEvent]:
         async def gen() -> AsyncIterator[StreamEvent]:
             with tracer.start_as_current_span(f"chat {entry.target}") as span:
-                _set_request_attrs(span, entry, kwargs, capture_messages)
+                _set_request_attrs(span, entry, kwargs, capture_messages, hub=hub)
                 span.set_attribute("gen_ai.operation.name", "chat")
                 start = time.perf_counter()
                 final_resp: ChatResponse | None = None
@@ -141,9 +141,19 @@ def instrument(hub: Hub, *, capture_messages: CaptureMode = "metadata_only") -> 
 
 
 def _set_request_attrs(
-    span: Any, entry: ModelEntry, kwargs: dict[str, Any], capture: CaptureMode
+    span: Any,
+    entry: ModelEntry,
+    kwargs: dict[str, Any],
+    capture: CaptureMode,
+    *,
+    hub: Hub | None = None,
 ) -> None:
-    """Populate the request side of a GenAI span."""
+    """Populate the request side of a GenAI span.
+
+    When ``hub`` carries a redactor, ``capture="full"`` emits the
+    post-redaction message list so OTel exporters never receive PII the
+    redactor was configured to scrub from the upstream provider call.
+    """
     span.set_attribute("gen_ai.system", entry.provider)
     span.set_attribute("gen_ai.request.model", entry.model_id)
     span.set_attribute("gen_ai.operation.name", "chat")
@@ -165,11 +175,21 @@ def _set_request_attrs(
         if roles:
             span.set_attribute("gen_ai.request.roles", ",".join(r for r in roles if r))
     elif capture == "full":
+        captured_messages: Any = messages
+        # Apply the hub's redactor so the prompt attribute never carries
+        # secrets the upstream call wouldn't carry either.
+        redactor = getattr(hub, "_redactor", None) if hub is not None else None
+        if redactor is not None:
+            with suppress(Exception):
+                from relay.hub import _coerce_messages  # local: avoid cycle at import
+
+                coerced = _coerce_messages(messages)
+                captured_messages = redactor.redact(coerced).messages
         with suppress(Exception):
             span.add_event(
                 "gen_ai.content.prompt",
                 attributes={
-                    "gen_ai.prompt": str(messages)[:8000],  # truncate to keep span sane
+                    "gen_ai.prompt": str(captured_messages)[:8000],
                 },
             )
 

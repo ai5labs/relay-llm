@@ -226,7 +226,16 @@ def build_event(
         reasoning = response.usage.reasoning_tokens
 
     err_type = type(error).__name__ if error else None
-    err_msg = str(error) if error else None
+    if error is None:
+        err_msg = None
+    elif capture_messages == "never":
+        # Don't let provider response bodies attached to RelayError.raw bleed
+        # into the audit row. A model could trigger a 400 whose error body
+        # echoes the prompt back; ``str(error)`` would carry it along.
+        status = getattr(error, "status_code", None)
+        err_msg = f"{err_type}: status={status}" if status is not None else f"{err_type}"
+    else:
+        err_msg = str(error)
 
     return AuditEvent(
         timestamp_ns=time.time_ns(),
