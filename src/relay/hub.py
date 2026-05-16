@@ -27,8 +27,9 @@ from typing import TYPE_CHECKING, Any, Literal
 
 from relay._internal.circuit_breaker import CircuitBreaker
 from relay._internal.router import call_group
+from relay._internal.schema_validate import validate_tool_arguments
 from relay._internal.transport import HttpClientManager
-from relay.audit import AuditSink, build_event
+from relay.audit import AuditSink, _record_sink_failure, build_event
 from relay.cache import Cache, cache_key
 from relay.catalog._pricing import PricingResolver
 from relay.config import load as load_config
@@ -122,6 +123,7 @@ class Hub:
         redactor: Redactor | None = None,
         guardrails: list[Guardrail] | None = None,
         audit_sinks: list[AuditSink] | None = None,
+        strict_audit: bool = False,
     ) -> None:
         self._config = config
         self._clients = HttpClientManager(config.defaults)
@@ -137,6 +139,10 @@ class Hub:
         self._redactor: Redactor | None = redactor
         self._guardrails: list[Guardrail] = list(guardrails or [])
         self._audit_sinks: list[AuditSink] = list(audit_sinks or [])
+        self._strict_audit = strict_audit
+        """When True, an audit-sink emit/aclose error re-raises instead of
+        being logged and swallowed. Use in environments where missing an
+        audit row is itself a compliance violation."""
         from relay.batch import BatchManager
 
         self.batch = BatchManager(self)
@@ -154,6 +160,7 @@ class Hub:
         redactor: Redactor | None = None,
         guardrails: list[Guardrail] | None = None,
         audit_sinks: list[AuditSink] | None = None,
+        strict_audit: bool = False,
     ) -> Hub:
         """Load YAML config from one or more paths and build a Hub.
 
@@ -166,6 +173,7 @@ class Hub:
             redactor=redactor,
             guardrails=guardrails,
             audit_sinks=audit_sinks,
+            strict_audit=strict_audit,
         )
 
     @classmethod
@@ -177,6 +185,7 @@ class Hub:
         redactor: Redactor | None = None,
         guardrails: list[Guardrail] | None = None,
         audit_sinks: list[AuditSink] | None = None,
+        strict_audit: bool = False,
     ) -> Hub:
         return cls(
             config,
@@ -184,6 +193,7 @@ class Hub:
             redactor=redactor,
             guardrails=guardrails,
             audit_sinks=audit_sinks,
+            strict_audit=strict_audit,
         )
 
     # ------------------------------------------------------------------
@@ -205,7 +215,10 @@ class Hub:
         for sink in self._audit_sinks:
             try:
                 await sink.aclose()
-            except Exception:  # noqa: S112
+            except Exception as e:
+                _record_sink_failure(sink, e)
+                if self._strict_audit:
+                    raise
                 continue
 
     # ------------------------------------------------------------------
@@ -500,6 +513,7 @@ class Hub:
         provider = self._get_provider(entry.provider, api_style=entry.api_style)
         try:
             resp = await provider.chat(entry=entry, request=request, clients=self._clients)
+            _validate_response_tool_calls(resp, request.tools)
             priced = await self._apply_cost(resp, entry)
         except Exception as e:
             await self._emit_audit(
@@ -609,6 +623,7 @@ class Hub:
                     ) from e
 
                 if isinstance(ev, StreamEnd):
+                    _validate_response_tool_calls(ev.response, request.tools)
                     priced = await self._apply_cost(ev.response, entry)
                     # Post-call guardrails on the assembled response. On block
                     # we replace the buffered text with a marker and emit a
@@ -686,7 +701,10 @@ class Hub:
         for sink in self._audit_sinks:
             try:
                 await sink.emit(ev)
-            except Exception:  # noqa: S112
+            except Exception as e:
+                _record_sink_failure(sink, e)
+                if self._strict_audit:
+                    raise
                 continue
 
     def _get_provider(self, name: str, *, api_style: str | None = None) -> Provider:
@@ -767,6 +785,36 @@ class Hub:
         if row is None:
             return None
         return getattr(row, key, None)
+
+
+def _validate_response_tool_calls(
+    response: ChatResponse, tools: list[Any] | None
+) -> None:
+    """Validate each tool_call's arguments against the originating tool schema.
+
+    Provider parsers don't enforce this — the model could return arguments
+    that violate the declared schema (extra fields, wrong types) and a
+    caller wiring ``tool_calls`` straight into ``subprocess`` would dispatch
+    garbage. Raising ToolSchemaError lets the caller fail closed.
+
+    No-op when the request carried no tools (provider can still hallucinate
+    a tool call, but with no declared schema to check it against there's
+    nothing to do).
+    """
+    if not tools:
+        return
+    schema_by_name: dict[str, dict[str, Any]] = {}
+    for t in tools:
+        name = getattr(t, "name", None)
+        params = getattr(t, "parameters", None)
+        if name and isinstance(params, dict):
+            schema_by_name[name] = params
+    for choice in response.choices:
+        for tc in choice.tool_calls:
+            schema = schema_by_name.get(tc.name)
+            if schema is None:
+                continue
+            validate_tool_arguments(tc.name, tc.arguments, schema)
 
 
 def _strip_blocked_text(response: ChatResponse, reason: str) -> ChatResponse:

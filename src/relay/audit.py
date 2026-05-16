@@ -25,13 +25,35 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
+import inspect
 import json
+import logging
 import time
+import warnings
+from collections.abc import Awaitable, Callable
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Literal, Protocol, runtime_checkable
 
 from relay.types import ChatResponse, Message
+
+logger = logging.getLogger("relay.audit")
+
+# Module-level counter exposed for ops to scrape — incremented every time an
+# attached sink raises out of emit(). Hub.from_yaml(..., strict_audit=True)
+# re-raises instead of swallowing.
+audit_sink_failures: int = 0
+
+
+def _record_sink_failure(sink: object, exc: BaseException) -> None:
+    """Log a sink failure and bump the global counter."""
+    global audit_sink_failures
+    audit_sink_failures += 1
+    logger.warning(
+        "audit_sink_failed",
+        extra={"sink": type(sink).__name__, "error_type": type(exc).__name__},
+        exc_info=exc,
+    )
 
 CaptureMode = Literal["never", "metadata_only", "full"]
 
@@ -117,10 +139,26 @@ class FileSink:
 
 
 class CallbackSink:
-    """Forward events to a user-provided async callback. Useful for tests +
-    custom in-process processing pipelines."""
+    """Forward events to a user-provided callback. Useful for tests + custom
+    in-process processing pipelines.
 
-    def __init__(self, callback: Any) -> None:
+    Prefer an async callback — a blocking sync callback runs on the event
+    loop and blocks every concurrent request. If a sync callback is passed,
+    a :class:`UserWarning` is emitted at construction so callers see it.
+    """
+
+    def __init__(
+        self,
+        callback: Callable[[AuditEvent], Awaitable[None] | None],
+    ) -> None:
+        if not inspect.iscoroutinefunction(callback) and inspect.isfunction(callback):
+            warnings.warn(
+                "CallbackSink received a sync callback; it will block the event "
+                "loop and serialize concurrent audit emissions. Prefer "
+                "``async def cb(event): ...`` for production sinks.",
+                UserWarning,
+                stacklevel=2,
+            )
         self._callback = callback
 
     async def emit(self, event: AuditEvent) -> None:
