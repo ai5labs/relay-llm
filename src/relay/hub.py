@@ -141,6 +141,9 @@ class Hub:
         self._guardrails: list[Guardrail] = list(guardrails or [])
         self._audit_sinks: list[AuditSink] = list(audit_sinks or [])
         self._strict_audit = strict_audit
+        # Keep strong refs to fire-and-forget audit tasks (otherwise the
+        # event loop drops them mid-emit — RUF006).
+        self._background_tasks: set[asyncio.Task[None]] = set()
         """When True, an audit-sink emit/aclose error re-raises instead of
         being logged and swallowed. Use in environments where missing an
         audit row is itself a compliance violation."""
@@ -288,9 +291,7 @@ class Hub:
         alias declared in the loaded YAML (groups are excluded).
         """
         if self._router is None:
-            raise ConfigError(
-                "No router attached. Call hub.attach_router() first."
-            )
+            raise ConfigError("No router attached. Call hub.attach_router() first.")
 
         normalized_messages = _coerce_messages(messages)
         if candidates is None:
@@ -315,9 +316,7 @@ class Hub:
                 # mode, which we don't try to resolve here.
                 continue
             try:
-                response = await self.chat(
-                    alias, messages=normalized_messages, **kwargs
-                )
+                response = await self.chat(alias, messages=normalized_messages, **kwargs)
             except Exception as e:
                 last_error = e
                 continue
@@ -572,18 +571,38 @@ class Hub:
     ) -> AsyncIterator[StreamEvent]:
         request = self._build_request(messages=messages, stream=True, **kwargs)
         provider = self._get_provider(entry.provider, api_style=entry.api_style)
+        user_id = _extract_user_id(kwargs)
 
         # Redaction (pre-call), mirroring _chat_one. Mutates the request so
         # downstream provider never sees the pre-redaction content.
+        redaction_count = 0
+        redaction_kinds: tuple[str, ...] = ()
         if self._redactor is not None:
             result = self._redactor.redact(request.messages)
             request = request.model_copy(update={"messages": result.messages})
+            redaction_count = result.redactions
+            redaction_kinds = result.matched_kinds
 
         # Pre-call guardrails — raise *before* opening the SSE socket so
         # blocked prompts never reach the model.
         pre_violation = evaluate_pre(self._guardrails, request.messages)
         if pre_violation is not None:
-            raise GuardrailError(pre_violation)
+            err = GuardrailError(pre_violation)
+            # Pre-block needs its own audit row — caller can't await our
+            # async-gen if we never enter it. Use create_task so the audit
+            # emission doesn't block the raise.
+            self._fire_audit_background(
+                operation="stream",
+                entry=entry,
+                messages=request.messages,
+                response=None,
+                error=err,
+                duration_ms=None,
+                redaction_count=redaction_count,
+                redaction_kinds=redaction_kinds,
+                user_id=user_id,
+            )
+            raise err
 
         # Wall-clock deadline. Per-entry timeout wins when explicitly set;
         # otherwise fall back to the global stream_overall_timeout. A
@@ -596,6 +615,9 @@ class Hub:
         )
 
         async def gen() -> AsyncIterator[StreamEvent]:
+            stream_start = time.monotonic()
+            audit_response: ChatResponse | None = None
+            audit_error: BaseException | None = None
             # Manual wall-clock deadline implemented with per-iteration
             # wait_for — asyncio.timeout would be cleaner but only landed in
             # Python 3.11, and Relay supports 3.10. ``deadline`` is computed
@@ -643,6 +665,8 @@ class Hub:
                             # violation message itself often quotes the
                             # blocked term back, defeating the redaction.
                             priced = _strip_blocked_text(priced, post_violation.rule)
+                            audit_response = priced
+                            audit_error = GuardrailError(post_violation)
                             yield StreamErrorEvent(
                                 error=post_violation.message,
                                 code=post_violation.rule,
@@ -652,9 +676,14 @@ class Hub:
                                 response=priced,
                             )
                             return
+                        audit_response = priced
                         yield StreamEnd(finish_reason=ev.finish_reason, response=priced)
                     else:
                         yield ev
+            except BaseException as e:
+                # Track for the audit row below. Re-raise after audit emit.
+                audit_error = e
+                raise
             finally:
                 # ``wait_for`` cancels the ``__anext__`` task on timeout but
                 # leaves the underlying async generator (and its httpx SSE
@@ -664,6 +693,21 @@ class Hub:
                 if aclose is not None:
                     with contextlib.suppress(Exception):
                         await aclose()
+                # Audit emit on every exit path — success, post-guardrail
+                # block, provider error, deadline. Streaming traffic must
+                # not be invisible to SOC2 / billing reconstruction.
+                duration_ms = (time.monotonic() - stream_start) * 1000.0
+                await self._emit_audit(
+                    operation="stream",
+                    entry=entry,
+                    messages=request.messages,
+                    response=audit_response,
+                    error=audit_error,
+                    duration_ms=duration_ms,
+                    redaction_count=redaction_count,
+                    redaction_kinds=redaction_kinds,
+                    user_id=user_id,
+                )
 
         return gen()
 
@@ -685,6 +729,44 @@ class Hub:
             stream=stream,
             **kwargs,
         )
+
+    def _fire_audit_background(
+        self,
+        *,
+        operation: Literal["chat", "stream"],
+        entry: ModelEntry,
+        messages: list[Message],
+        response: ChatResponse | None,
+        error: BaseException | None,
+        duration_ms: float | None,
+        redaction_count: int,
+        redaction_kinds: tuple[str, ...],
+        user_id: str | None,
+    ) -> None:
+        """Fire-and-forget audit emit for code paths that need to raise
+        synchronously (e.g. ``_stream_one`` blocking before its generator
+        is awaited)."""
+        if not self._audit_sinks:
+            return
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            return
+        task = loop.create_task(
+            self._emit_audit(
+                operation=operation,
+                entry=entry,
+                messages=messages,
+                response=response,
+                error=error,
+                duration_ms=duration_ms,
+                redaction_count=redaction_count,
+                redaction_kinds=redaction_kinds,
+                user_id=user_id,
+            )
+        )
+        self._background_tasks.add(task)
+        task.add_done_callback(self._background_tasks.discard)
 
     async def _emit_audit(
         self,
@@ -804,9 +886,7 @@ class Hub:
         return getattr(row, key, None)
 
 
-def _validate_response_tool_calls(
-    response: ChatResponse, tools: list[Any] | None
-) -> None:
+def _validate_response_tool_calls(response: ChatResponse, tools: list[Any] | None) -> None:
     """Validate each tool_call's arguments against the originating tool schema.
 
     Provider parsers don't enforce this — the model could return arguments
@@ -838,7 +918,7 @@ def _validate_response_tool_calls(
                     f"declared tools: {sorted(schema_by_name)}",
                     raw={"tool_call": {"name": tc.name, "arguments": tc.arguments}},
                 )
-            validate_tool_arguments(tc.name, tc.arguments, schema)
+            validate_tool_arguments(tc.name, tc.arguments, schema, response_side=True)
 
 
 def _strip_blocked_text(response: ChatResponse, reason: str) -> ChatResponse:
@@ -853,9 +933,7 @@ def _strip_blocked_text(response: ChatResponse, reason: str) -> ChatResponse:
     for ch in response.choices:
         new_message = ch.message.model_copy(update={"content": marker})
         new_choices.append(
-            ch.model_copy(
-                update={"message": new_message, "finish_reason": "content_filter"}
-            )
+            ch.model_copy(update={"message": new_message, "finish_reason": "content_filter"})
         )
     return response.model_copy(update={"choices": new_choices})
 

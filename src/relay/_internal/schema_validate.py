@@ -17,10 +17,35 @@ from typing import Any
 from relay.errors import ToolSchemaError
 
 
+def _relax_for_response(schema: Any) -> Any:
+    """Return a copy of ``schema`` with ``additionalProperties`` /
+    ``unevaluatedProperties`` stripped recursively.
+
+    Used for validating *response* tool-call args. The defense we care
+    about is "required fields present, types right" — providers routinely
+    add their own metadata fields (``__reasoning``, OpenAI strict-mode
+    injected keys, vendor extensions), and a request-side schema with
+    ``additionalProperties: false`` would otherwise reject every
+    legitimate response. Request-side validation is unchanged.
+    """
+    if isinstance(schema, dict):
+        out: dict[str, Any] = {}
+        for k, v in schema.items():
+            if k in ("additionalProperties", "unevaluatedProperties"):
+                continue
+            out[k] = _relax_for_response(v)
+        return out
+    if isinstance(schema, list):
+        return [_relax_for_response(v) for v in schema]
+    return schema
+
+
 def validate_tool_arguments(
     tool_name: str,
     arguments: dict[str, Any],
     schema: dict[str, Any],
+    *,
+    response_side: bool = False,
 ) -> None:
     """Validate ``arguments`` against the JSON Schema ``schema``.
 
@@ -30,6 +55,12 @@ def validate_tool_arguments(
     fast-path silently waved through) goes through jsonschema. jsonschema
     is a hard runtime dependency so there's no import-cost reason to
     short-circuit on shape.
+
+    ``response_side=True`` strips ``additionalProperties`` /
+    ``unevaluatedProperties`` from the schema before validating: providers
+    legitimately inject their own metadata fields and rejecting them via
+    closed-schema enforcement would break working callers. Outbound
+    request-side validation (MCP server dispatch) keeps the full schema.
     """
     if not schema:
         return
@@ -42,8 +73,10 @@ def validate_tool_arguments(
             "install ai5labs-relay with the default extras"
         ) from e
 
+    effective = _relax_for_response(schema) if response_side else schema
+
     try:
-        jsonschema.validate(instance=arguments, schema=schema)
+        jsonschema.validate(instance=arguments, schema=effective)
     except jsonschema.ValidationError as e:
         raise ToolSchemaError(
             f"tool {tool_name!r} arguments do not match declared schema: {e.message}",

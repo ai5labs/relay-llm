@@ -38,8 +38,28 @@ class HttpClientManager:
         timeout: float | None = None,
         extra_headers: dict[str, str] | None = None,
     ) -> httpx.AsyncClient:
+        """Return a pooled httpx client keyed on ``(provider, base_url)``.
+
+        IMPORTANT: ``extra_headers`` is now ignored — passing credentials here
+        bakes them into the pooled client and they leak across tenants on the
+        next request. Auth must be passed per-request via the adapter's
+        ``client.post(..., headers=...)`` / ``client.stream(..., headers=...)``
+        calls. The parameter is retained as a deprecation no-op so any out-
+        of-tree adapters don't crash on upgrade.
+        """
         if self._closed:
             raise RuntimeError("HttpClientManager has been closed")
+        if extra_headers:
+            import warnings
+
+            warnings.warn(
+                "HttpClientManager.get(extra_headers=...) is ignored as of "
+                "v0.2.2 to prevent cross-tenant credential leaks via pooled "
+                "clients. Pass auth headers per-request: client.post(..., "
+                "headers=...) / client.stream(..., headers=...).",
+                DeprecationWarning,
+                stacklevel=2,
+            )
         key = (provider, base_url)
         if key in self._clients:
             return self._clients[key]
@@ -55,10 +75,9 @@ class HttpClientManager:
                     max_connections=self._defaults.pool_max_connections,
                     keepalive_expiry=self._defaults.keepalive_expiry,
                 ),
-                headers={
-                    "user-agent": "relay-py/0.1",
-                    **(extra_headers or {}),
-                },
+                # ONLY non-secret headers go on the pooled client. Auth must
+                # be per-request — see ``get`` docstring.
+                headers={"user-agent": "relay-py/0.1"},
             )
             self._clients[key] = client
             return client

@@ -71,8 +71,8 @@ class AzureOpenAIProvider(OpenAICompatibleProvider):
             provider=self.name,
             base_url=base_url,
             timeout=entry.timeout,
-            extra_headers={"api-key": api_key},
         )
+        auth = {"api-key": api_key}
 
         body = self._build_body(entry, request, stream=False)
         # Azure's deployment URL doesn't take 'model' in the body — strip it.
@@ -82,7 +82,7 @@ class AzureOpenAIProvider(OpenAICompatibleProvider):
 
         start = time.perf_counter()
         try:
-            resp = await client.post(url, json=body, params=params)
+            resp = await client.post(url, json=body, params=params, headers=auth)
         except httpx.TimeoutException as e:
             raise TimeoutError(
                 "Azure OpenAI request timed out", provider=self.name, model=entry.model_id
@@ -117,8 +117,8 @@ class AzureOpenAIProvider(OpenAICompatibleProvider):
             provider=self.name,
             base_url=base_url,
             timeout=entry.timeout,
-            extra_headers={"api-key": api_key},
         )
+        auth = {"api-key": api_key}
 
         body = self._build_body(entry, request, stream=True)
         body.pop("model", None)
@@ -153,7 +153,7 @@ class AzureOpenAIProvider(OpenAICompatibleProvider):
         start = _time.perf_counter()
 
         try:
-            async with client.stream("POST", url, json=body, params=params) as resp:
+            async with client.stream("POST", url, json=body, params=params, headers=auth) as resp:
                 self._raise_for_status(resp, entry, stream=True)
                 yield StreamStart(
                     id=resp.headers.get("x-request-id") or uuid.uuid4().hex,

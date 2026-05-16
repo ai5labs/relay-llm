@@ -142,7 +142,9 @@ async def test_stdio_allowlist_rejects_unknown() -> None:
 
 @pytest.mark.asyncio
 async def test_stdio_allowlist_accepts_npx(monkeypatch: pytest.MonkeyPatch) -> None:
-    """An allowlisted basename like ``npx`` passes the validator."""
+    """An allowlisted basename like ``npx`` passes the validator. Since args
+    name a package that will be downloaded + executed, the caller must
+    explicitly assert trust via allow_arbitrary=True."""
     from relay.mcp import _manager as mcp_manager
 
     async def _fake_connect(self: Any) -> None:
@@ -150,8 +152,51 @@ async def test_stdio_allowlist_accepts_npx(monkeypatch: pytest.MonkeyPatch) -> N
 
     monkeypatch.setattr(mcp_manager.MCPServer, "connect", _fake_connect)
     mgr = MCPManager()
-    await mgr.add_stdio("github", command="npx", args=["-y", "@x/y"])
+    await mgr.add_stdio(
+        "github", command="npx", args=["-y", "@x/y"], allow_arbitrary=True
+    )
     assert "github" in mgr.list_servers()
+
+
+@pytest.mark.asyncio
+async def test_stdio_npx_args_blocked_without_opt_in() -> None:
+    """`npx -y attacker-pkg` ships arbitrary code from npm. The command
+    allowlist isn't enough — args must also be confirmed."""
+    mgr = MCPManager()
+    with pytest.raises(ConfigError, match="fetch and execute package"):
+        await mgr.add_stdio("evil", command="npx", args=["-y", "attacker-pkg"])
+
+
+@pytest.mark.asyncio
+async def test_stdio_uvx_args_blocked_without_opt_in() -> None:
+    mgr = MCPManager()
+    with pytest.raises(ConfigError, match="fetch and execute package"):
+        await mgr.add_stdio("evil", command="uvx", args=["evil-tool"])
+
+
+@pytest.mark.asyncio
+async def test_stdio_docker_run_image_blocked_without_opt_in() -> None:
+    mgr = MCPManager()
+    with pytest.raises(ConfigError, match="fetch and execute package"):
+        await mgr.add_stdio(
+            "evil", command="docker", args=["run", "--rm", "attacker/image:latest"]
+        )
+
+
+@pytest.mark.asyncio
+async def test_stdio_python_flag_only_args_allowed(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Non-package-runner commands like python aren't gated on args. ``python
+    -m mymodule`` is the user's responsibility to vet, but it doesn't fetch
+    code from a registry."""
+    from relay.mcp import _manager as mcp_manager
+
+    async def _fake_connect(self: Any) -> None:
+        self._session = object()
+
+    monkeypatch.setattr(mcp_manager.MCPServer, "connect", _fake_connect)
+    mgr = MCPManager()
+    await mgr.add_stdio("local", command="python", args=["-m", "mymodule"])
+    assert "local" in mgr.list_servers()
 
 
 @pytest.mark.asyncio

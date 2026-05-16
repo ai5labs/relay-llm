@@ -43,20 +43,31 @@ MCP_STDIO_ALLOWED_COMMANDS: frozenset[str] = frozenset(
     {"npx", "uvx", "python", "python3", "node", "docker", "deno", "bun"}
 )
 
+# Commands that fetch + execute code named in args (package runners, image
+# pullers, etc.). For these, allowlisting the *command* is not enough — the
+# args also need explicit operator confirmation because `npx -y attacker-pkg`
+# is just as much a command-injection vector as `command=/bin/sh`.
+_PACKAGE_RUNNER_COMMANDS: frozenset[str] = frozenset({"npx", "uvx", "bunx", "docker"})
+
 # Cap on the concatenated text returned by an MCP tool call. Past this the
 # remainder is dropped and a sentinel is appended so the model can still reason
 # about the truncation.
 MCP_TOOL_RESULT_MAX_BYTES = 256 * 1024
 
 
+def _basename_lower(command: str) -> str:
+    """Filesystem basename, lowercased, with trailing ``.exe`` stripped."""
+    base = os.path.basename(command).lower()
+    if base.endswith(".exe"):
+        base = base[:-4]
+    return base
+
+
 def _validate_stdio_command(command: str, *, allow_arbitrary: bool) -> None:
     """Reject MCP stdio commands whose basename is not on the allowlist."""
     if allow_arbitrary:
         return
-    basename = os.path.basename(command).lower()
-    # Strip a trailing ``.exe`` so Windows callers using e.g. ``npx.exe`` still pass.
-    if basename.endswith(".exe"):
-        basename = basename[:-4]
+    basename = _basename_lower(command)
     if basename not in MCP_STDIO_ALLOWED_COMMANDS:
         allowed = ", ".join(sorted(MCP_STDIO_ALLOWED_COMMANDS))
         raise ConfigError(
@@ -64,6 +75,70 @@ def _validate_stdio_command(command: str, *, allow_arbitrary: bool) -> None:
             "Pass allow_arbitrary=True if you fully trust the source of this "
             "command (CVE-2026-30623-class command injection if untrusted)."
         )
+
+
+def _extract_package_arg(command: str, args: list[str]) -> str | None:
+    """For commands that fetch + execute code named in ``args`` (npx, uvx,
+    docker), return the first positional argument — that's the package/image
+    name that will be downloaded and run.
+
+    Returns ``None`` for commands that don't fetch external code.
+    """
+    basename = _basename_lower(command)
+    if basename not in _PACKAGE_RUNNER_COMMANDS:
+        return None
+    if basename == "docker":
+        # ``docker run <image>`` / ``docker exec <ctr>``. Find the verb, then
+        # the first non-flag arg after it.
+        verbs = {"run", "exec", "start", "create"}
+        for i, a in enumerate(args):
+            if a in verbs:
+                for follow in args[i + 1 :]:
+                    if not follow.startswith("-"):
+                        return follow
+        return None
+    # npx / uvx / bunx — first positional that isn't a flag is the package.
+    skip_next = False
+    for a in args:
+        if skip_next:
+            skip_next = False
+            continue
+        if a.startswith("-"):
+            # ``--from foo`` style: the following token is a value, not the package.
+            if a in {"--from", "--with", "--package", "-p"}:
+                skip_next = True
+            continue
+        return a
+    return None
+
+
+def _validate_stdio_args(command: str, args: list[str], *, allow_arbitrary: bool) -> None:
+    """Reject package-runner commands that ship an external package via args
+    unless the operator opts in.
+
+    ``allow_arbitrary=True`` is the single kill-switch — it says "I trust the
+    full ``command + args`` tuple, including any package name that will be
+    fetched and executed." Setting it is necessary for legitimate uses like
+    ``add_stdio("github", command="npx", args=["-y",
+    "@modelcontextprotocol/server-github"], allow_arbitrary=True)``.
+
+    Without this gate, the allowlist on ``command`` alone is bypassable:
+    ``command="npx", args=["-y", "attacker-pkg"]`` ships arbitrary npm code
+    even though ``npx`` is allowlisted (the same bypass class as
+    CVE-2026-30623 but on the args axis).
+    """
+    if allow_arbitrary:
+        return
+    pkg = _extract_package_arg(command, args)
+    if pkg is None:
+        return
+    raise ConfigError(
+        f"MCP stdio command {command!r} would fetch and execute package "
+        f"{pkg!r} from external args. Pass allow_arbitrary=True if the args "
+        "are hardcoded in trusted code and you understand that any positional "
+        "argument here is treated as code-to-execute (npx, uvx, docker run, "
+        "etc.). Never wire add_stdio to untrusted input."
+    )
 
 
 class MCPServer:
@@ -106,6 +181,11 @@ class MCPServer:
             if self.transport == "stdio":
                 _validate_stdio_command(
                     self.config["command"],
+                    allow_arbitrary=self.allow_arbitrary_command,
+                )
+                _validate_stdio_args(
+                    self.config["command"],
+                    self.config.get("args") or [],
                     allow_arbitrary=self.allow_arbitrary_command,
                 )
             try:
@@ -220,9 +300,7 @@ class MCPServer:
         encoded = joined.encode("utf-8")
         if len(encoded) > MCP_TOOL_RESULT_MAX_BYTES:
             truncated = encoded[:MCP_TOOL_RESULT_MAX_BYTES].decode("utf-8", errors="ignore")
-            return (
-                f"{truncated}\n[result truncated at {MCP_TOOL_RESULT_MAX_BYTES} bytes]"
-            )
+            return f"{truncated}\n[result truncated at {MCP_TOOL_RESULT_MAX_BYTES} bytes]"
         return joined
 
     async def aclose(self) -> None:
@@ -257,14 +335,23 @@ class MCPManager:
     ) -> None:
         """Connect to an MCP server over stdio (most servers ship as binaries).
 
-        ``command`` is checked against :data:`MCP_STDIO_ALLOWED_COMMANDS` to
-        defend against the CVE-2026-30623 class of command-injection bugs.
+        Two defenses run, both gated by ``allow_arbitrary=True``:
+
+        * ``command`` basename must be in :data:`MCP_STDIO_ALLOWED_COMMANDS`
+          (CVE-2026-30623 class).
+        * If ``command`` is a package runner (``npx``, ``uvx``, ``bunx``,
+          ``docker``) and ``args`` contains a positional argument, that
+          argument is the package/image that will be fetched and executed —
+          equivalent to a fresh ``command``. Reject unless
+          ``allow_arbitrary=True``.
+
         Pass ``allow_arbitrary=True`` only for tests or trusted operators —
         ``add_stdio`` must never receive untrusted input regardless.
         """
         if name in self._servers:
             raise ConfigError(f"MCP server {name!r} already added")
         _validate_stdio_command(command, allow_arbitrary=allow_arbitrary)
+        _validate_stdio_args(command, args or [], allow_arbitrary=allow_arbitrary)
         server = MCPServer(
             name=name,
             transport="stdio",
@@ -345,9 +432,7 @@ class MCPManager:
 
         return await server.call_tool(tool_name, arguments)
 
-    async def _tool_schema(
-        self, server: MCPServer, tool_name: str
-    ) -> dict[str, Any] | None:
+    async def _tool_schema(self, server: MCPServer, tool_name: str) -> dict[str, Any] | None:
         """Return the declared JSON Schema for ``tool_name`` on ``server``."""
         for t in await server.list_tools():
             if t.name == tool_name:

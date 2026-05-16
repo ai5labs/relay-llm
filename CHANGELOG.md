@@ -4,7 +4,85 @@ All notable changes to this project will be documented in this file. Format foll
 
 <!-- towncrier release notes start -->
 
-## [0.2.1] — 2026-05-16
+## [0.2.2] — 2026-05-17
+
+**Security release.** A post-v0.2.1 adversarial re-audit found four
+critical bypasses and three high-severity regressions in v0.2.1. **All
+v0.2.1 users should upgrade immediately**; v0.2.1 is being yanked from
+PyPI alongside this release.
+
+### Security — critical
+
+- **Multi-tenant credential pool leak.** v0.2.1's pooled `httpx.AsyncClient`
+  was keyed only on `(provider, base_url)` and the `Authorization` header
+  was baked into the client on first use via `extra_headers=`. Tenant A's
+  API key was therefore sent on every subsequent Tenant B request to the
+  same provider — silent cross-tenant credential leakage. Every native
+  adapter (OpenAI-compat, Anthropic, Azure, Cohere, Vertex, Responses)
+  affected. Fix: auth is now passed per-request via `client.post(...,
+  headers=...)` and `client.stream(..., headers=...)`. The pooled client
+  only carries non-secret headers (`user-agent`). `HttpClientManager.get`
+  still accepts `extra_headers=` for back-compat but warns + ignores.
+- **MCP `args` bypassed the stdio command allowlist.** v0.2.1 only
+  validated `command=`; `args=["-y", "attacker-pkg"]` (npx / uvx / bunx)
+  or `args=["run", "attacker/image"]` (docker) downloaded and executed
+  arbitrary code from the npm / OCI registry. Same exploit class as the
+  CVE-2026-30623 fix v0.2.1 was supposed to close. Fix: package-runner
+  commands with positional args require `allow_arbitrary=True`. Existing
+  `add_stdio("github", command="npx", args=["-y", "@x/y"])` calls must
+  add `allow_arbitrary=True` (or the args must be removed).
+- **Secret scrubber leaked Basic / Token / AWS-Sig credentials.** v0.2.1
+  regex made `bearer\s+` optional, so `Authorization: Basic <base64>`
+  redacted to `Authorization: *** <base64>` — scheme word eaten, secret
+  preserved. Tightened: scheme name (Basic / Token / Digest / AWS4-HMAC
+  / Negotiate / Signature / HMAC / APIKey) is now matched as part of the
+  redaction span. Added patterns for Stripe (`sk_live_`, `pk_test_`,
+  `rk_…`), GitHub fine-grained PATs (`github_pat_…`), HuggingFace
+  (`hf_…`), AWS STS-temporary (`ASIA…`), Anthropic admin keys
+  (`sk-ant-admin01-…`), Slack config/refresh tokens.
+- **`base_url` userinfo SSRF bypass.** `https://attacker.com@api.openai.com/v1`
+  passed the hostname-private check (urlsplit returns `api.openai.com`)
+  but httpx routes the request to `attacker.com`. v0.2.2 rejects any
+  `base_url` whose URL contains userinfo.
+
+### Security — high (regression fixes)
+
+- **Streaming path emitted zero audit events.** Every `hub.stream()`
+  call was invisible to SOC2 / billing / abuse reconstruction in v0.2.1.
+  `_stream_one` now emits an audit row on every exit path: success,
+  pre-guardrail block, post-guardrail block, deadline timeout, provider
+  error.
+- **Response-side tool-call validator too aggressive.** v0.2.1's
+  `_validate_response_tool_calls` enforced the full declared schema
+  including `additionalProperties: false`, rejecting any response with
+  provider-injected metadata (OpenAI strict-mode fields, vendor
+  extensions). Silent v0.2.0 → v0.2.1 breakage. v0.2.2 strips
+  `additionalProperties` / `unevaluatedProperties` recursively for
+  *response*-side validation; request-side validation (MCP dispatch) is
+  unchanged.
+- **`request_structured` retry loop broken.** The structured-output
+  retry only caught `StructuredOutputError`; the new
+  `_validate_response_tool_calls` raised `ToolSchemaError`, which
+  bypassed the retry and surfaced to the caller unchanged. Now catches
+  `ToolSchemaError` too and appends a corrective turn before retrying.
+
+### Migration notes
+
+- `HttpClientManager.get(extra_headers=...)` is a deprecated no-op. Any
+  out-of-tree provider adapter must pass auth per-request.
+- `MCPManager.add_stdio(command="npx", args=[...], ...)` requires
+  `allow_arbitrary=True` when args contain a package name. Equivalent
+  for `uvx`, `bunx`, and `docker run`.
+- `Message.content` continues to coerce `None` → `""` (v0.2.1 behavior).
+
+## [0.2.1] — 2026-05-16 (YANKED)
+
+**This release is yanked due to the four critical issues fixed in v0.2.2 above.**
+Use v0.2.2.
+
+Original v0.2.1 notes below.
+
+
 
 Security hardening pass (audit at `AUDIT_2026_05_16.md`) plus an OpenAI
 spec-compliance fix on `Message.content`.

@@ -314,8 +314,17 @@ class ModelEntry(_Strict):
         scheme = (parsed.scheme or "").lower()
         if scheme not in ("http", "https"):
             raise ValueError(
-                f"base_url scheme must be http or https, got {scheme!r} "
-                f"in {self.base_url!r}"
+                f"base_url scheme must be http or https, got {scheme!r} in {self.base_url!r}"
+            )
+        # URL userinfo (https://user:pass@host) is a classic SSRF bypass:
+        # some HTTP libs route to the userinfo host, others to the hostname,
+        # and most operators didn't intend either. Reject outright.
+        if parsed.username or parsed.password:
+            raise ValueError(
+                f"base_url must not contain userinfo (user:pass@host); got "
+                f"{self.base_url!r}. Use a credential field instead — userinfo "
+                "in URLs is a documented SSRF bypass and library behavior on "
+                "user-info routing is not consistent across HTTP clients."
             )
         host = (parsed.hostname or "").lower()
         if not host:
@@ -347,9 +356,7 @@ class ModelEntry(_Strict):
         # showed up in proxy logs. Even though we now use x-goog-api-key
         # (PR2), keep the http rejection unconditional for google targets.
         if self.target.startswith("google/") and scheme != "https":
-            raise ValueError(
-                f"google models require https:// for base_url, got {self.base_url!r}"
-            )
+            raise ValueError(f"google models require https:// for base_url, got {self.base_url!r}")
         return self
 
     @property
@@ -383,13 +390,9 @@ class GroupMember(_Strict):
     @classmethod
     def _validate_weight(cls, v: float) -> float:
         if not math.isfinite(v):
-            raise ValueError(
-                f"GroupMember.weight must be finite, got {v!r}"
-            )
+            raise ValueError(f"GroupMember.weight must be finite, got {v!r}")
         if v < 0:
-            raise ValueError(
-                f"GroupMember.weight must be non-negative, got {v!r}"
-            )
+            raise ValueError(f"GroupMember.weight must be non-negative, got {v!r}")
         return v
 
 
@@ -518,9 +521,7 @@ class RelayConfig(_Strict):
                 return
             if name in visiting:
                 cycle = [*path[path.index(name) :], name]
-                raise ValueError(
-                    "group cycle detected: " + " -> ".join(cycle)
-                )
+                raise ValueError("group cycle detected: " + " -> ".join(cycle))
             visiting.add(name)
             path.append(name)
             group = self.groups.get(name)

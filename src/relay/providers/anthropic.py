@@ -80,17 +80,17 @@ class AnthropicProvider(BaseProvider):
             provider=self.name,
             base_url=entry.base_url or _DEFAULT_BASE,
             timeout=entry.timeout,
-            extra_headers={
-                "x-api-key": api_key,
-                "anthropic-version": _API_VERSION,
-                "content-type": "application/json",
-            },
         )
+        auth = {
+            "x-api-key": api_key,
+            "anthropic-version": _API_VERSION,
+            "content-type": "application/json",
+        }
 
         body = self._build_body(entry, request, stream=False)
         start = time.perf_counter()
         try:
-            resp = await client.post("/v1/messages", json=body)
+            resp = await client.post("/v1/messages", json=body, headers=auth)
         except httpx.TimeoutException as e:
             raise TimeoutError(
                 "Anthropic request timed out", provider=self.name, model=entry.model_id
@@ -116,12 +116,12 @@ class AnthropicProvider(BaseProvider):
             provider=self.name,
             base_url=entry.base_url or _DEFAULT_BASE,
             timeout=entry.timeout,
-            extra_headers={
-                "x-api-key": api_key,
-                "anthropic-version": _API_VERSION,
-                "content-type": "application/json",
-            },
         )
+        auth = {
+            "x-api-key": api_key,
+            "anthropic-version": _API_VERSION,
+            "content-type": "application/json",
+        }
 
         body = self._build_body(entry, request, stream=True)
         start = time.perf_counter()
@@ -135,7 +135,7 @@ class AnthropicProvider(BaseProvider):
         provider_model = entry.model_id
 
         try:
-            async with client.stream("POST", "/v1/messages", json=body) as resp:
+            async with client.stream("POST", "/v1/messages", json=body, headers=auth) as resp:
                 self._raise_for_status(resp, entry, stream=True)
                 yield StreamStart(
                     id=resp.headers.get("request-id") or uuid.uuid4().hex,

@@ -92,13 +92,13 @@ class OpenAICompatibleProvider(BaseProvider):
             provider=self.name,
             base_url=base_url,
             timeout=entry.timeout,
-            extra_headers=self._auth_headers(api_key),
         )
+        auth = self._auth_headers(api_key)
 
         body = self._build_body(entry, request, stream=False)
         start = time.perf_counter()
         try:
-            resp = await client.post("/chat/completions", json=body)
+            resp = await client.post("/chat/completions", json=body, headers=auth)
         except httpx.TimeoutException as e:
             raise TimeoutError(
                 f"{self.name} request timed out", provider=self.name, model=entry.model_id
@@ -130,8 +130,8 @@ class OpenAICompatibleProvider(BaseProvider):
             provider=self.name,
             base_url=base_url,
             timeout=entry.timeout,
-            extra_headers=self._auth_headers(api_key),
         )
+        auth = self._auth_headers(api_key)
 
         body = self._build_body(entry, request, stream=True)
         body["stream_options"] = {"include_usage": True}
@@ -145,7 +145,7 @@ class OpenAICompatibleProvider(BaseProvider):
         provider_model: str = entry.model_id
 
         try:
-            async with client.stream("POST", "/chat/completions", json=body) as resp:
+            async with client.stream("POST", "/chat/completions", json=body, headers=auth) as resp:
                 self._raise_for_status(resp, entry, stream=True)
                 yield StreamStart(
                     id=resp.headers.get("x-request-id") or uuid.uuid4().hex,

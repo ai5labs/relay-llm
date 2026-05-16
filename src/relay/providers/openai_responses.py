@@ -85,13 +85,13 @@ class OpenAIResponsesProvider(BaseProvider):
             provider=self.name,
             base_url=entry.base_url or _DEFAULT_BASE,
             timeout=entry.timeout,
-            extra_headers={"authorization": f"Bearer {api_key}"},
         )
+        auth = {"authorization": f"Bearer {api_key}"}
 
         body = self._build_body(entry, request, stream=False)
         start = time.perf_counter()
         try:
-            resp = await client.post("/responses", json=body)
+            resp = await client.post("/responses", json=body, headers=auth)
         except httpx.TimeoutException as e:
             raise TimeoutError(
                 "OpenAI Responses timed out", provider=self.name, model=entry.model_id
@@ -119,8 +119,8 @@ class OpenAIResponsesProvider(BaseProvider):
             provider=self.name,
             base_url=entry.base_url or _DEFAULT_BASE,
             timeout=entry.timeout,
-            extra_headers={"authorization": f"Bearer {api_key}"},
         )
+        auth = {"authorization": f"Bearer {api_key}"}
 
         body = self._build_body(entry, request, stream=True)
         start = time.perf_counter()
@@ -134,7 +134,7 @@ class OpenAIResponsesProvider(BaseProvider):
         finish_reason: str | None = None
 
         try:
-            async with client.stream("POST", "/responses", json=body) as resp:
+            async with client.stream("POST", "/responses", json=body, headers=auth) as resp:
                 self._raise_for_status(resp, entry, stream=True)
                 yield StreamStart(
                     id=resp.headers.get("x-request-id") or uuid.uuid4().hex,

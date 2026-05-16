@@ -29,7 +29,7 @@ from typing import Any, TypeVar
 import orjson
 from pydantic import BaseModel, ValidationError
 
-from relay.errors import ProviderError, RelayError
+from relay.errors import ProviderError, RelayError, ToolSchemaError
 from relay.types import ChatResponse, ToolDefinition
 
 T = TypeVar("T", bound=BaseModel)
@@ -221,6 +221,24 @@ async def request_structured(
             resp = await hub.chat(alias, messages=history, **merged_kwargs)
         except ProviderError as e:
             last_err = e
+            continue
+        except ToolSchemaError as e:
+            # Hub._validate_response_tool_calls fired against the synthetic
+            # tool we registered for the structured-output single-tool trick.
+            # Treat the same as a parse failure: append a corrective turn and
+            # retry, matching the StructuredOutputError branch below.
+            last_err = e
+            history = [
+                *history,
+                {
+                    "role": "user",
+                    "content": (
+                        f"Your previous tool call did not match the declared "
+                        f"schema: {e}. Return a tool call whose arguments "
+                        f"validate against the schema exactly."
+                    ),
+                },
+            ]
             continue
         try:
             return parse_response(schema, resp)

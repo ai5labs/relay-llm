@@ -68,15 +68,15 @@ class CohereProvider(BaseProvider):
             provider=self.name,
             base_url=entry.base_url or _DEFAULT_BASE,
             timeout=entry.timeout,
-            extra_headers={
-                "authorization": f"Bearer {api_key}",
-                "content-type": "application/json",
-            },
         )
+        auth = {
+            "authorization": f"Bearer {api_key}",
+            "content-type": "application/json",
+        }
         body = self._build_body(entry, request, stream=False)
         start = time.perf_counter()
         try:
-            resp = await client.post("/v2/chat", json=body)
+            resp = await client.post("/v2/chat", json=body, headers=auth)
         except httpx.TimeoutException as e:
             raise TimeoutError(
                 "Cohere request timed out", provider=self.name, model=entry.model_id
@@ -102,11 +102,11 @@ class CohereProvider(BaseProvider):
             provider=self.name,
             base_url=entry.base_url or _DEFAULT_BASE,
             timeout=entry.timeout,
-            extra_headers={
-                "authorization": f"Bearer {api_key}",
-                "content-type": "application/json",
-            },
         )
+        auth = {
+            "authorization": f"Bearer {api_key}",
+            "content-type": "application/json",
+        }
         body = self._build_body(entry, request, stream=True)
         start = time.perf_counter()
 
@@ -117,7 +117,7 @@ class CohereProvider(BaseProvider):
         provider_model = entry.model_id
 
         try:
-            async with client.stream("POST", "/v2/chat", json=body) as resp:
+            async with client.stream("POST", "/v2/chat", json=body, headers=auth) as resp:
                 self._raise_for_status(resp, entry, stream=True)
                 yield StreamStart(
                     id=resp.headers.get("x-cohere-request-id") or uuid.uuid4().hex,

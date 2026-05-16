@@ -63,8 +63,8 @@ class VertexProvider(GoogleProvider):
             provider=self.name,
             base_url=base_url,
             timeout=entry.timeout,
-            extra_headers={"authorization": f"Bearer {token}"},
         )
+        auth = {"authorization": f"Bearer {token}"}
 
         body = self._build_body(entry, request)
         url = (
@@ -74,7 +74,7 @@ class VertexProvider(GoogleProvider):
 
         start = time.perf_counter()
         try:
-            resp = await client.post(url, json=body)
+            resp = await client.post(url, json=body, headers=auth)
         except httpx.TimeoutException as e:
             raise TimeoutError(
                 "Vertex request timed out", provider=self.name, model=entry.model_id
@@ -100,8 +100,8 @@ class VertexProvider(GoogleProvider):
             provider=self.name,
             base_url=base_url,
             timeout=entry.timeout,
-            extra_headers={"authorization": f"Bearer {token}"},
         )
+        auth = {"authorization": f"Bearer {token}"}
 
         body = self._build_body(entry, request)
         url = (
@@ -134,7 +134,9 @@ class VertexProvider(GoogleProvider):
         start = time.perf_counter()
 
         try:
-            async with client.stream("POST", url, json=body, params={"alt": "sse"}) as resp:
+            async with client.stream(
+                "POST", url, json=body, params={"alt": "sse"}, headers=auth
+            ) as resp:
                 self._raise_for_status(resp, entry, stream=True)
                 yield StreamStart(
                     id=resp.headers.get("x-request-id") or uuid.uuid4().hex,

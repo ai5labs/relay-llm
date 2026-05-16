@@ -15,18 +15,36 @@ from typing import Any
 # the redacted value still looks like a header / token to whatever log
 # pipeline inspects it.
 _SECRET_PATTERNS: tuple[re.Pattern[str], ...] = (
-    # Authorization header values: "Authorization: Bearer ABCDEF..."
-    re.compile(r"(?i)(authorization\s*[:=]\s*(?:bearer\s+)?)[\w\-\.~+/=]+"),
-    # x-api-key / api-key / x-goog-api-key — header forms.
-    re.compile(r"(?i)((?:x[-_])?(?:goog[-_])?api[-_]?key\s*[:=]\s*)[\w\-\.~+/=]+"),
+    # Authorization header values. Match the scheme explicitly so a body
+    # without a scheme word ("Authorization: deadbeef") still gets scrubbed,
+    # and so 'Basic <base64>' / 'Token <opaque>' / 'AWS4-HMAC-SHA256 ...'
+    # don't slip past a "bearer is optional" fallback. The credential is
+    # everything from the scheme through to whitespace/quote/EOL.
+    re.compile(
+        r"(?i)(authorization\s*[:=]\s*)"
+        r"(?:bearer|basic|token|digest|negotiate|"
+        r"aws4-hmac-sha256|signature|hmac|apikey)?\s*"
+        r"[\w\-\.~+/=]+",
+    ),
+    # x-api-key / api-key / x-goog-api-key / anthropic-api-key — header forms.
+    re.compile(
+        r"(?i)((?:x[-_])?(?:goog[-_]|anthropic[-_])?api[-_]?key\s*[:=]\s*)"
+        r"[\w\-\.~+/=]+"
+    ),
     # Bare bearer tokens.
     re.compile(r"(?i)(bearer\s+)[\w\-\.~+/=]{8,}"),
-    # AWS access keys.
-    re.compile(r"\bAKIA[0-9A-Z]{16}\b"),
-    # Long OpenAI / Anthropic style keys (sk-..., sk-ant-...).
-    re.compile(r"\bsk-(?:ant-)?[A-Za-z0-9\-_]{20,}\b"),
-    # GitHub PATs / installation tokens — all have a 4-letter prefix.
+    # AWS access keys (long-lived + STS-temporary).
+    re.compile(r"\b(?:AKIA|ASIA)[0-9A-Z]{16}\b"),
+    # OpenAI / Anthropic / Anthropic-admin style keys.
+    re.compile(r"\bsk-(?:ant-)?(?:admin[0-9]+-)?[A-Za-z0-9\-_]{20,}\b"),
+    # Stripe live + restricted keys.
+    re.compile(r"\b(?:sk|pk|rk)_(?:live|test)_[A-Za-z0-9]{24,}\b"),
+    # GitHub classic PATs / installation tokens — short prefix family.
     re.compile(r"\bgh[pousr]_[A-Za-z0-9]{30,}\b"),
+    # GitHub fine-grained PATs.
+    re.compile(r"\bgithub_pat_[A-Za-z0-9_]{20,}\b"),
+    # Hugging Face access tokens.
+    re.compile(r"\bhf_[A-Za-z0-9]{30,}\b"),
     # Google API keys (Maps / Cloud / Gemini direct).
     re.compile(r"\bAIza[0-9A-Za-z\-_]{35}\b"),
     # JWTs: three base64url segments separated by dots.
@@ -36,8 +54,8 @@ _SECRET_PATTERNS: tuple[re.Pattern[str], ...] = (
         r"-----BEGIN [A-Z ]*PRIVATE KEY-----.*?-----END [A-Z ]*PRIVATE KEY-----",
         re.DOTALL,
     ),
-    # Slack tokens.
-    re.compile(r"\bxox[abprs]-[A-Za-z0-9\-]{10,}\b"),
+    # Slack tokens (bot / user / app / refresh / config).
+    re.compile(r"\bxox[abprsoe]-[A-Za-z0-9\-]{10,}\b"),
 )
 
 
