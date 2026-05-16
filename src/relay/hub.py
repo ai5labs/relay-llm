@@ -411,14 +411,20 @@ class Hub:
     ) -> ChatResponse:
         request = self._build_request(messages=messages, stream=False, **kwargs)
 
-        # Redaction (pre-call). Modifies the message list in place on the request.
+        # Redaction (pre-call). Mutates the request; we keep the pre-redaction
+        # messages around to fold into the cache key so two users whose
+        # distinct PII redacts to the same placeholder don't collide.
         redaction_count = 0
         redaction_kinds: tuple[str, ...] = ()
+        pre_redaction_messages: list[Message] | None = None
         if self._redactor is not None:
+            pre_redaction_messages = list(request.messages)
             result = self._redactor.redact(request.messages)
             request = request.model_copy(update={"messages": result.messages})
             redaction_count = result.redactions
             redaction_kinds = result.matched_kinds
+
+        user_id = _extract_user_id(kwargs)
 
         # Pre-call guardrails.
         violation = evaluate_pre(self._guardrails, request.messages)
@@ -433,16 +439,40 @@ class Hub:
                 duration_ms=None,
                 redaction_count=redaction_count,
                 redaction_kinds=redaction_kinds,
-                user_id=_extract_user_id(kwargs),
+                user_id=user_id,
             )
             raise err
 
         cached_resp: ChatResponse | None = None
         ck: str | None = None
         if self._cache is not None:
-            ck = cache_key(entry.target, request)
+            ck = cache_key(
+                entry.target,
+                request,
+                scope=user_id,
+                pre_redaction_messages=pre_redaction_messages,
+            )
             cached_resp = await self._cache.get(ck)
             if cached_resp is not None:
+                # Post-guardrails MUST run against the cached response: if a
+                # rule was tightened (new banned term, new safety policy)
+                # after the entry was cached, a stale-but-now-blocked
+                # response would otherwise leak. Cheap — no provider call.
+                cached_violation = evaluate_post(self._guardrails, cached_resp)
+                if cached_violation is not None:
+                    err = GuardrailError(cached_violation)
+                    await self._emit_audit(
+                        operation="chat",
+                        entry=entry,
+                        messages=request.messages,
+                        response=cached_resp,
+                        error=err,
+                        duration_ms=0.0,
+                        redaction_count=redaction_count,
+                        redaction_kinds=redaction_kinds,
+                        user_id=user_id,
+                    )
+                    raise err
                 await self._emit_audit(
                     operation="chat",
                     entry=entry,
@@ -452,7 +482,7 @@ class Hub:
                     duration_ms=0.0,
                     redaction_count=redaction_count,
                     redaction_kinds=redaction_kinds,
-                    user_id=_extract_user_id(kwargs),
+                    user_id=user_id,
                 )
                 return cached_resp
 
@@ -470,7 +500,7 @@ class Hub:
                 duration_ms=None,
                 redaction_count=redaction_count,
                 redaction_kinds=redaction_kinds,
-                user_id=_extract_user_id(kwargs),
+                user_id=user_id,
             )
             raise
 
@@ -487,7 +517,7 @@ class Hub:
                 duration_ms=priced.latency_ms,
                 redaction_count=redaction_count,
                 redaction_kinds=redaction_kinds,
-                user_id=_extract_user_id(kwargs),
+                user_id=user_id,
             )
             raise err
 
@@ -503,7 +533,7 @@ class Hub:
             duration_ms=priced.latency_ms,
             redaction_count=redaction_count,
             redaction_kinds=redaction_kinds,
-            user_id=_extract_user_id(kwargs),
+            user_id=user_id,
         )
         return priced
 

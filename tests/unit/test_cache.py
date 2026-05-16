@@ -194,3 +194,81 @@ async def test_hub_serves_from_cache_on_second_call(env_key: None) -> None:
         assert cache.misses == 1  # first call missed
     finally:
         await hub.aclose()
+
+
+# ---------------------------------------------------------------------------
+# PR 4: post-guardrail on cache hit + cross-tenant scoping
+# ---------------------------------------------------------------------------
+
+
+def test_cache_key_includes_user_id_when_present() -> None:
+    """Same prompt + different scope (e.g. user_id) must hash to different keys."""
+    req = ChatRequest(messages=[Message(role="user", content="hi")])
+    k_a = cache_key("openai/gpt-4o", req, scope="alice")
+    k_b = cache_key("openai/gpt-4o", req, scope="bob")
+    k_none = cache_key("openai/gpt-4o", req)
+    assert k_a != k_b
+    assert k_a != k_none
+    assert k_b != k_none
+
+
+def test_cache_no_collision_after_redaction() -> None:
+    """If two users have distinct PII that redacts to the same placeholder,
+    the pre-redaction content baked into the key must prevent a collision."""
+    redacted = [Message(role="user", content="my SSN is [REDACTED:ssn]")]
+    req_a = ChatRequest(messages=list(redacted))
+    req_b = ChatRequest(messages=list(redacted))
+
+    pre_a = [Message(role="user", content="my SSN is 111-11-1111")]
+    pre_b = [Message(role="user", content="my SSN is 222-22-2222")]
+
+    k_a = cache_key("openai/gpt-4o", req_a, pre_redaction_messages=pre_a)
+    k_b = cache_key("openai/gpt-4o", req_b, pre_redaction_messages=pre_b)
+    assert k_a != k_b
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_cache_post_guardrail_blocks_stale_response(env_key: None) -> None:
+    """A response cached under an old policy must be re-checked against today's
+    post-guardrails — never returned verbatim."""
+    from relay.guardrails import BlockedKeywords, GuardrailError
+
+    route = respx.post("https://api.openai.com/v1/chat/completions").mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "id": "x",
+                "model": "gpt-4o-mini",
+                "created": 1700000000,
+                "choices": [
+                    {
+                        "index": 0,
+                        "message": {"role": "assistant", "content": "contains hunter2 secret"},
+                        "finish_reason": "stop",
+                    }
+                ],
+                "usage": {"prompt_tokens": 1, "completion_tokens": 4, "total_tokens": 5},
+            },
+        )
+    )
+    cache = MemoryCache()
+    msgs = [{"role": "user", "content": "tell me"}]
+
+    # First call: no guardrail, response gets cached.
+    hub = Hub.from_config(load_str(_yaml()), cache=cache)
+    r1 = await hub.chat("m", messages=msgs)
+    assert "hunter2" in r1.text
+    assert route.call_count == 1
+
+    # Now tighten policy on the running Hub — emulates an operator adding
+    # a guardrail after a response was cached under the old rules. Cache
+    # hit must NOT bypass evaluate_post.
+    hub._guardrails = [BlockedKeywords(["hunter2"], check_response=True)]
+    try:
+        with pytest.raises(GuardrailError, match="blocked term"):
+            await hub.chat("m", messages=msgs)
+    finally:
+        await hub.aclose()
+    # No new provider call — the guardrail fired on the cached response.
+    assert route.call_count == 1

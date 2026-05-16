@@ -59,16 +59,39 @@ class Cache(Protocol):
     async def aclose(self) -> None: ...
 
 
-def cache_key(alias: str, request: ChatRequest) -> str:
+def cache_key(
+    alias: str,
+    request: ChatRequest,
+    *,
+    scope: str | None = None,
+    pre_redaction_messages: list[Message] | None = None,
+) -> str:
     """Hash a chat request to a stable cache key.
 
     Includes: alias, messages, sampling params, tools, tool_choice, response_format.
     Excludes: ``stream``, timeout, metadata.
+
+    ``scope`` partitions the key — pass ``metadata.user_id`` (or a stable
+    hash thereof, or a tenant id) so two tenants submitting the same prompt
+    do not share a cached response. Hub.chat does this automatically when
+    ``metadata.user_id`` is present.
+
+    ``pre_redaction_messages`` is a defense-in-depth knob: when set, the
+    pre-redaction content is hashed into the key while we still cache the
+    post-redaction response. Two users whose distinct PII redacts to the
+    same placeholder will not collide on the cached response.
     """
+    keying_messages = (
+        pre_redaction_messages
+        if pre_redaction_messages is not None
+        else request.messages
+    )
     payload: dict[str, Any] = {
         "alias": alias,
-        "messages": [_msg_to_hashable(m) for m in request.messages],
+        "messages": [_msg_to_hashable(m) for m in keying_messages],
     }
+    if scope is not None:
+        payload["scope"] = scope
     for k in (
         "max_tokens",
         "temperature",
