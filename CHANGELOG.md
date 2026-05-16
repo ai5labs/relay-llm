@@ -4,6 +4,85 @@ All notable changes to this project will be documented in this file. Format foll
 
 <!-- towncrier release notes start -->
 
+## [0.2.4] — Unreleased
+
+### Security — AUTH-8 + F9/F10/F12 (PR 6)
+
+- Provider-returned `ToolCall.arguments` validated against the originating
+  `ToolDefinition.parameters`; mismatch raises `ToolSchemaError` so callers
+  can fail closed.
+- Audit-sink failures logged via `logger.warning("audit_sink_failed")`
+  and counted at `relay.audit.audit_sink_failures` instead of being
+  swallowed. New `Hub.from_yaml(..., strict_audit=True)` re-raises.
+- `CallbackSink` warns when handed a sync callback (blocks the event loop).
+- `CircuitBreaker` switched to `time.monotonic` — NTP steps no longer
+  perturb open-circuit cooldown.
+
+## [0.2.3] — Unreleased
+
+### Security — AUTH-5/6/7 + F7/F8 (PR 5)
+
+- `Hub.chat(..., trust_system=False)` and `StripUserSystem` guardrail
+  reject `role="system"` entries from untrusted message lists.
+- `RelayError.raw` scrubs `Authorization` / `x-api-key` / `sk-…` shaped
+  substrings; `str(err)` carries a `<raw redacted>` marker; opt-in
+  `err.raw_unsafe()`.
+- `relay models inspect` redacts `LiteralCredential.value` in text and
+  JSON output.
+- `capture_messages="never"` sanitizes audit `error_message` to
+  `{error_type}: status={code}` so provider response bodies (which often
+  echo the prompt back) don't leak.
+- OTel `capture_messages="full"` events emitted from post-redaction
+  messages.
+
+## [0.2.2] — Unreleased
+
+### Security — AUTH-3/4 + F5 (PR 4)
+
+- `Hub` cache-hit path runs `evaluate_post` against cached responses
+  before returning — a tightened guardrail no longer lets stale-but-
+  now-blocked content through.
+- `cache_key(scope=...)` partitions by tenant; `Hub` bakes
+  `metadata.user_id` in automatically when present.
+- When the redactor mutated the request, the pre-redaction content is
+  hashed into the cache key (post-redaction response is what gets
+  cached). Two users with distinct PII no longer collide on a single
+  cached response.
+
+### Security — AUTH-2 + F3 (PR 3)
+
+- `Hub._stream_one` runs the redactor and pre/post guardrails on the
+  streaming path. Post-violation buffers replaced with a block marker;
+  terminating `StreamErrorEvent` emitted so callers never receive
+  blocked content as the final response object.
+- New `GlobalDefaults.stream_overall_timeout` (default 300 s) caps
+  wall-clock time on streaming calls — slow-loris providers are killed
+  by `relay.errors.TimeoutError`.
+
+## [0.2.1] — Unreleased
+
+### Security — F2 + F4 + F11 + AUTH-1 (PR 2)
+
+- `ModelEntry.base_url` validator rejects plaintext `http://` against
+  non-loopback hosts and any address resolving into RFC1918 / link-local
+  / metadata / CGNAT / ULA ranges (opt back in per entry with
+  `allow_private_hosts: true`).
+- `google/*` targets require `https://` unconditionally; Gemini API key
+  moved from `?key=` query string to `x-goog-api-key` header.
+- `RelayConfig` detects group cycles at load time via DFS rather than
+  blowing the Python recursion limit at request time.
+- `GroupMember.weight` rejects negative and non-finite values.
+
+### Security — F1 (PR 1; same class as CVE-2026-30623)
+
+- `MCP_STDIO_ALLOWED_COMMANDS` allowlist (`npx`, `uvx`, `python`,
+  `python3`, `node`, `docker`, `deno`, `bun`). `MCPManager.add_stdio`
+  rejects anything else; `MCPServer.connect` re-validates at spawn so
+  deserialized configs can't bypass. Escape hatch: `allow_arbitrary=True`.
+- MCP tool arguments validated against the declared JSON Schema before
+  dispatch; violations raise `ToolSchemaError`.
+- MCP tool results capped at 256 KB with a truncation sentinel.
+
 ## [0.2.0] — Unreleased
 
 ### Added
