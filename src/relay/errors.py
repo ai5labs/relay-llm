@@ -7,7 +7,63 @@ back off on RateLimitError, surface AuthenticationError immediately).
 
 from __future__ import annotations
 
+import re
 from typing import Any
+
+# Patterns that should never appear in a logged error body. Matched
+# case-insensitively. The replacement is `"***"` rather than a sentinel so
+# the redacted value still looks like a header / token to whatever log
+# pipeline inspects it.
+_SECRET_PATTERNS: tuple[re.Pattern[str], ...] = (
+    # Authorization header values: "Authorization: Bearer ABCDEF..."
+    re.compile(r"(?i)(authorization\s*[:=]\s*(?:bearer\s+)?)[\w\-\.~+/=]+"),
+    # x-api-key / api-key / x-goog-api-key — header forms.
+    re.compile(r"(?i)((?:x[-_])?(?:goog[-_])?api[-_]?key\s*[:=]\s*)[\w\-\.~+/=]+"),
+    # Bare bearer tokens.
+    re.compile(r"(?i)(bearer\s+)[\w\-\.~+/=]{8,}"),
+    # AWS access keys.
+    re.compile(r"\bAKIA[0-9A-Z]{16}\b"),
+    # Long OpenAI / Anthropic style keys (sk-..., sk-ant-...).
+    re.compile(r"\bsk-(?:ant-)?[A-Za-z0-9\-_]{20,}\b"),
+    # GitHub PATs / installation tokens — all have a 4-letter prefix.
+    re.compile(r"\bgh[pousr]_[A-Za-z0-9]{30,}\b"),
+    # Google API keys (Maps / Cloud / Gemini direct).
+    re.compile(r"\bAIza[0-9A-Za-z\-_]{35}\b"),
+    # JWTs: three base64url segments separated by dots.
+    re.compile(r"\beyJ[A-Za-z0-9_\-]+\.[A-Za-z0-9_\-]+\.[A-Za-z0-9_\-]+\b"),
+    # PEM private keys — collapse the whole armored block.
+    re.compile(
+        r"-----BEGIN [A-Z ]*PRIVATE KEY-----.*?-----END [A-Z ]*PRIVATE KEY-----",
+        re.DOTALL,
+    ),
+    # Slack tokens.
+    re.compile(r"\bxox[abprs]-[A-Za-z0-9\-]{10,}\b"),
+)
+
+
+def _scrub_secrets(value: Any) -> Any:
+    """Strip credential-shaped substrings out of an arbitrary value.
+
+    Walks dicts / lists / tuples; leaves non-strings untouched. The point is
+    not to catch every possible secret — it's to keep the obvious ones
+    (Authorization header echoes, ``sk-`` keys) from ending up in audit
+    rows, third-party log pipelines, and ``logger.error("%s", exc.raw)``.
+    """
+    if isinstance(value, str):
+        scrubbed = value
+        for pat in _SECRET_PATTERNS:
+            scrubbed = pat.sub(
+                lambda m: (m.group(1) + "***") if m.lastindex else "***",
+                scrubbed,
+            )
+        return scrubbed
+    if isinstance(value, dict):
+        return {k: _scrub_secrets(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [_scrub_secrets(v) for v in value]
+    if isinstance(value, tuple):
+        return tuple(_scrub_secrets(v) for v in value)
+    return value
 
 
 class RelayError(Exception):
@@ -23,13 +79,30 @@ class RelayError(Exception):
         request_id: str | None = None,
         raw: Any = None,
     ) -> None:
-        super().__init__(message)
-        self.message = message
+        # Providers often build the ``message`` from a snippet of the upstream
+        # body (see openai_compat._raise_for_status). Scrub both fields so
+        # neither ``str(err)`` nor ``err.raw`` carries a credential.
+        scrubbed_message = _scrub_secrets(message) if isinstance(message, str) else message
+        super().__init__(scrubbed_message)
+        self.message = scrubbed_message
         self.provider = provider
         self.model = model
         self.status_code = status_code
         self.request_id = request_id
-        self.raw = raw
+        # ``raw_unsafe()`` is the opt-in escape hatch for callers that
+        # explicitly want the unredacted body.
+        self._raw_unsafe = raw
+        self.raw = _scrub_secrets(raw)
+
+    def raw_unsafe(self) -> Any:
+        """Return the unscrubbed raw payload. Use sparingly — secret-shaped
+        substrings will be present."""
+        return self._raw_unsafe
+
+    def __str__(self) -> str:
+        if self.raw is not None:
+            return f"{self.message} <raw redacted; use err.raw_unsafe() to access>"
+        return self.message
 
     def __repr__(self) -> str:  # pragma: no cover - debug aid
         parts = [f"message={self.message!r}"]

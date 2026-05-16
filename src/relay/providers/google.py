@@ -82,11 +82,15 @@ class GoogleProvider(BaseProvider):
 
         body = self._build_body(entry, request)
         url = f"/v1beta/models/{entry.model_id}:generateContent"
-        params = {"key": api_key}
+        # Send the API key in the documented x-goog-api-key header instead of
+        # the ``?key=`` query string. Query-string secrets land in proxy access
+        # logs and reverse-proxy buffers; the header form is the recommended
+        # auth path (https://ai.google.dev/api/rest, Authentication).
+        headers = {"x-goog-api-key": api_key}
 
         start = time.perf_counter()
         try:
-            resp = await client.post(url, json=body, params=params)
+            resp = await client.post(url, json=body, headers=headers)
         except httpx.TimeoutException as e:
             raise TimeoutError(
                 "Gemini request timed out", provider=self.name, model=entry.model_id
@@ -116,7 +120,10 @@ class GoogleProvider(BaseProvider):
 
         body = self._build_body(entry, request)
         url = f"/v1beta/models/{entry.model_id}:streamGenerateContent"
-        params = {"key": api_key, "alt": "sse"}
+        # ``alt=sse`` stays in the query string (it's not a secret); only the
+        # API key moves to the header.
+        params = {"alt": "sse"}
+        headers = {"x-goog-api-key": api_key}
         start = time.perf_counter()
 
         text_buf: list[str] = []
@@ -126,7 +133,9 @@ class GoogleProvider(BaseProvider):
         tool_call_args: dict[int, dict[str, Any]] = {}
 
         try:
-            async with client.stream("POST", url, json=body, params=params) as resp:
+            async with client.stream(
+                "POST", url, json=body, params=params, headers=headers
+            ) as resp:
                 self._raise_for_status(resp, entry, stream=True)
                 yield StreamStart(
                     id=resp.headers.get("x-request-id") or uuid.uuid4().hex,

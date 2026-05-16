@@ -7,7 +7,11 @@ to schema-driven IDE autocomplete. See README for the rationale.
 
 from __future__ import annotations
 
+import ipaddress
+import math
+import socket
 from typing import Annotated, Any, Literal
+from urllib.parse import urlsplit
 
 from pydantic import (
     BaseModel,
@@ -16,6 +20,67 @@ from pydantic import (
     field_validator,
     model_validator,
 )
+
+# Hostnames that are unambiguously loopback — treated as the local-development
+# escape hatch (no allow_private_hosts opt-in needed for these). Anything else
+# that resolves to a private/link-local/CGNAT/cloud-metadata range requires
+# explicit opt-in via ``ModelEntry.allow_private_hosts``.
+_LOOPBACK_HOSTNAMES = {"localhost", "ip6-localhost", "ip6-loopback"}
+
+
+def _normalize_ip_literal(host: str) -> ipaddress.IPv4Address | ipaddress.IPv6Address | None:
+    """Return ``host`` as an IPv4/IPv6 object using *all* the forms a system
+    resolver accepts.
+
+    ``ipaddress.ip_address`` only recognizes the strict dotted-quad form, so
+    a YAML author could write ``2852039166`` (decimal-encoded
+    169.254.169.254), ``0xa9fea9fe`` (hex), or ``127.1`` (short form) and
+    sneak past a private-range check while ``httpx`` / the OS resolver
+    still routes the request to the original address. ``socket.inet_aton``
+    normalizes all three. Pure-host strings (``api.openai.com``) return
+    None — they're not IP literals.
+    """
+    try:
+        return ipaddress.ip_address(host)
+    except ValueError:
+        pass
+    # Heuristic: ipaddress rejected it, but if the host parses as an IPv4
+    # literal under inet_aton (decimal / hex / octal / short forms), it is
+    # one and we must treat it as such.
+    try:
+        packed = socket.inet_aton(host)
+    except OSError:
+        return None
+    return ipaddress.IPv4Address(int.from_bytes(packed, "big"))
+
+
+def _host_is_loopback_literal(host: str) -> bool:
+    if host.lower() in _LOOPBACK_HOSTNAMES:
+        return True
+    ip = _normalize_ip_literal(host)
+    return ip is not None and ip.is_loopback
+
+
+def _host_is_private_ip(host: str) -> bool:
+    """True if ``host`` is an IP literal in a non-routable range we should fence.
+
+    Covers RFC1918, loopback, link-local (incl. 169.254.169.254 metadata),
+    CGNAT 100.64.0.0/10, ULA fc00::/7, and unspecified addresses. Accepts
+    every IPv4 encoding the OS resolver does (dotted-quad, decimal, hex,
+    octal, short forms) — see :func:`_normalize_ip_literal`.
+
+    Hostnames that don't parse as IPs return False — DNS-time exfiltration
+    is out of scope for a sync field validator (callers can layer DNS
+    pinning at the HTTP transport).
+    """
+    ip = _normalize_ip_literal(host)
+    if ip is None:
+        return False
+    if ip.is_loopback or ip.is_link_local or ip.is_private or ip.is_unspecified:
+        return True
+    # 100.64.0.0/10 — CGNAT, used by some cloud providers for internal hops.
+    cgnat = ipaddress.IPv4Network("100.64.0.0/10")
+    return isinstance(ip, ipaddress.IPv4Address) and ip in cgnat
 
 
 class _Strict(BaseModel):
@@ -166,7 +231,22 @@ class ModelEntry(_Strict):
     """Either a credential object or a ``$env.VAR`` shorthand string."""
 
     base_url: str | None = None
-    """Override the provider's default base URL (e.g. for self-hosted vLLM, custom Azure)."""
+    """Override the provider's default base URL (e.g. for self-hosted vLLM, custom Azure).
+
+    Validated to keep the provider credential from being shipped to an
+    arbitrary internal address or over plaintext HTTP. Use
+    ``allow_private_hosts: true`` on the same entry to opt back in for
+    self-hosted vLLM / Ollama / k8s service mesh deployments.
+    """
+
+    allow_private_hosts: bool = False
+    """Permit ``base_url`` to point at a private / link-local / metadata host.
+
+    Off by default. Turn on per-entry when you genuinely want to route this
+    model at an internal address (self-hosted vLLM, sidecar, etc.). Loopback
+    (``127.0.0.1``, ``::1``, ``localhost``) is always allowed and does not
+    require this flag.
+    """
 
     api_version: str | None = None
     """Azure OpenAI API version, etc."""
@@ -226,6 +306,52 @@ class ModelEntry(_Strict):
             )
         return v
 
+    @model_validator(mode="after")
+    def _validate_base_url(self) -> ModelEntry:
+        if self.base_url is None:
+            return self
+        parsed = urlsplit(self.base_url)
+        scheme = (parsed.scheme or "").lower()
+        if scheme not in ("http", "https"):
+            raise ValueError(
+                f"base_url scheme must be http or https, got {scheme!r} "
+                f"in {self.base_url!r}"
+            )
+        host = (parsed.hostname or "").lower()
+        if not host:
+            raise ValueError(f"base_url has no host: {self.base_url!r}")
+
+        is_loopback = _host_is_loopback_literal(host)
+        is_private = _host_is_private_ip(host)
+
+        # Plaintext http is permitted only against loopback. Any other host
+        # leaks the provider credential across the wire.
+        if scheme == "http" and not is_loopback:
+            raise ValueError(
+                f"base_url uses http:// for non-loopback host {host!r}; "
+                "use https:// or change the host to 127.0.0.1/::1/localhost. "
+                "Credentials would otherwise traverse the network in clear text."
+            )
+
+        # Private / link-local / CGNAT / cloud-metadata hosts are fenced unless
+        # the operator explicitly opts in. Loopback is always allowed.
+        if is_private and not is_loopback and not self.allow_private_hosts:
+            raise ValueError(
+                f"base_url {self.base_url!r} resolves to a private/link-local "
+                f"host ({host!r}). Set allow_private_hosts: true on this "
+                "ModelEntry to opt in (intended for self-hosted vLLM, internal "
+                "sidecars, etc.). See docs/security.md."
+            )
+
+        # Gemini is uniquely sensitive — the legacy query-string-key form
+        # showed up in proxy logs. Even though we now use x-goog-api-key
+        # (PR2), keep the http rejection unconditional for google targets.
+        if self.target.startswith("google/") and scheme != "https":
+            raise ValueError(
+                f"google models require https:// for base_url, got {self.base_url!r}"
+            )
+        return self
+
     @property
     def provider(self) -> str:
         return self.target.split("/", 1)[0]
@@ -247,9 +373,24 @@ class GroupMember(_Strict):
     name: str
     """Reference to a key in ``models``."""
     weight: float = 1.0
-    """Used by ``weighted`` strategy."""
+    """Used by ``weighted`` strategy. Must be finite and non-negative —
+    negatives flip ``random.uniform`` bounds and infinities monopolize the
+    distribution."""
     when: dict[str, Any] | None = None
     """Used by ``conditional`` — a predicate over the request."""
+
+    @field_validator("weight")
+    @classmethod
+    def _validate_weight(cls, v: float) -> float:
+        if not math.isfinite(v):
+            raise ValueError(
+                f"GroupMember.weight must be finite, got {v!r}"
+            )
+        if v < 0:
+            raise ValueError(
+                f"GroupMember.weight must be non-negative, got {v!r}"
+            )
+        return v
 
 
 class GroupSpec(_Strict):
@@ -287,6 +428,15 @@ class GlobalDefaults(_Strict):
     pool_max_keepalive: int = 50
     pool_max_connections: int = 200
     keepalive_expiry: float = 30.0
+    stream_overall_timeout: float = 300.0
+    """Wall-clock cap on a single streaming call.
+
+    ``httpx.Timeout`` applies *per read*, so a slow-loris provider that emits
+    one SSE byte just inside the per-read deadline can keep a stream alive
+    forever. ``_stream_one`` wraps the SSE loop in ``asyncio.timeout`` set to
+    this value (or the per-entry ``timeout`` when explicitly set) so the
+    request cannot run past it.
+    """
 
 
 class CatalogSettings(_Strict):
@@ -352,7 +502,41 @@ class RelayConfig(_Strict):
                 raise ValueError(
                     f"model {alias!r} references unknown pricing_profile {m.pricing_profile!r}"
                 )
+
+        # Group-graph cycle detection. Routing recurses into nested groups, so
+        # ``A -> B -> A`` would otherwise blow the recursion limit at request
+        # time. DFS with a path stack so the error names the actual cycle.
+        self._detect_group_cycles()
         return self
+
+    def _detect_group_cycles(self) -> None:
+        visiting: set[str] = set()
+        visited: set[str] = set()
+
+        def walk(name: str, path: list[str]) -> None:
+            if name in visited:
+                return
+            if name in visiting:
+                cycle = [*path[path.index(name) :], name]
+                raise ValueError(
+                    "group cycle detected: " + " -> ".join(cycle)
+                )
+            visiting.add(name)
+            path.append(name)
+            group = self.groups.get(name)
+            if group is not None:
+                for member in group.members:
+                    assert isinstance(member, GroupMember)
+                    # Only descend into nested groups; model-leaf references
+                    # can't cycle.
+                    if member.name in self.groups:
+                        walk(member.name, path)
+            path.pop()
+            visiting.discard(name)
+            visited.add(name)
+
+        for group_name in self.groups:
+            walk(group_name, [])
 
 
 def json_schema() -> dict[str, Any]:

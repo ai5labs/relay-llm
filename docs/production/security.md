@@ -34,3 +34,162 @@ We do **not** treat as security issues:
 
 - The library not protecting you against prompt injection in user input — that is application-level.
 - Cost tracking returning wrong figures because a provider changed list pricing — file a normal bug.
+
+## `base_url` is a trust boundary
+
+`ModelEntry.base_url` decides where the provider credential gets shipped. A
+caller who can edit the YAML (or push an overlay) can otherwise redirect a real
+`OPENAI_API_KEY` to an attacker host on the first chat call. Relay validates
+the value at config load:
+
+- Scheme must be `http` or `https`.
+- `http://` is permitted **only** for loopback (`127.0.0.1`, `::1`,
+  `localhost`). Any other host requires `https://`.
+- Hosts that resolve to RFC1918 / link-local (incl. the
+  `169.254.169.254` cloud-metadata address) / CGNAT 100.64.0.0/10 /
+  ULA `fc00::/7` ranges are rejected unless the entry explicitly opts in:
+  `allow_private_hosts: true`.
+- `google/*` targets require `https://` unconditionally; the Gemini adapter
+  also sends the API key in the `x-goog-api-key` header rather than the
+  `?key=` query string, so credentials never land in proxy access logs.
+
+```yaml
+models:
+  vllm-self-hosted:
+    target: openai/llama-3
+    credential: $env.LOCAL_TOKEN
+    base_url: https://10.0.5.7/v1
+    allow_private_hosts: true   # required: internal sidecar address
+```
+
+The IP-literal check uses `socket.inet_aton` after `ipaddress.ip_address`,
+so non-dotted-quad forms the OS resolver still accepts (decimal
+`2852039166`, hex `0xa9fea9fe`, short-form `169.254.43518`) are caught.
+
+**Known limit — DNS-time exfiltration.** A hostname that resolves into a
+private range at request time (e.g. `internal.example.com` with an A
+record pointing at `10.0.0.5`) passes the sync validator. If you need
+DNS-pinning, layer it at the httpx transport. Auditing the catalog of
+allowed `base_url` hostnames at deploy time is the easier mitigation.
+
+## MCP stdio command allowlist
+
+`MCPManager.add_stdio(command=...)` only accepts binaries whose basename is in
+`MCP_STDIO_ALLOWED_COMMANDS` (`npx`, `uvx`, `python`, `python3`, `node`,
+`docker`, `deno`, `bun`). This mirrors the LiteLLM mitigation for
+CVE-2026-30623 — the upstream `mcp` SDK does no validation, so untrusted input
+to `add_stdio` would otherwise spawn arbitrary processes.
+
+`MCPServer.connect()` re-validates at spawn time so a deserialized config
+cannot bypass the allowlist. The opt-out is `allow_arbitrary=True`, intended
+only for tests or single-operator deployments where the command source is
+fully trusted — **never** wire this to untrusted input.
+
+MCP tool results are capped at `MCP_TOOL_RESULT_MAX_BYTES` (256 KB) with a
+truncation sentinel the LLM can reason about.
+
+LLM-returned tool arguments are validated against the declared
+`ToolDefinition.parameters` schema before dispatch — a malformed call
+surfaces as `ToolSchemaError` rather than reaching the MCP server.
+
+## Cache scoping in multi-tenant deployments
+
+A `Hub` shared across tenants must partition its cache or it will return
+tenant A's response to tenant B for an identical prompt. Two options, both
+supported by `relay.cache.cache_key`:
+
+1. **Pass `metadata.user_id` on every call.** Hub bakes this into the cache
+   key automatically when present.
+2. **Hash a tenant id into the scope.** Use a stable hash if `user_id` is
+   PII you don't want in cache keys.
+
+When a redactor mutates the request, Relay hashes the pre-redaction content
+into the cache key while caching the post-redaction response. This prevents
+two users with distinct PII (e.g. two different SSNs both replaced with
+`[REDACTED:ssn]`) from colliding on a single cached response.
+
+Cache hits run post-call guardrails before being returned, so a stale-but-
+now-blocked response will not bypass a policy tightened after caching.
+
+## Streaming guardrails and deadlines
+
+`hub.stream()` runs the same pre/post guardrails as `hub.chat()`:
+
+- Redactor mutates the request before the SSE socket opens.
+- `evaluate_pre` blocks before any provider call.
+- `evaluate_post` runs against the assembled `StreamEnd.response`; on
+  violation, the buffered text is replaced with a marker and a terminating
+  `StreamErrorEvent` is emitted — the caller never gets the blocked content
+  as a final response object.
+
+> **Limit of the streaming threat model.** Post-guardrails fire on the
+> *assembled* response, after individual `TextDelta` events have already
+> been yielded. A consumer that rendered each delta to a user has already
+> shown blocked content by the time the terminating `StreamErrorEvent`
+> arrives. Treat a trailing `StreamErrorEvent` as "discard rendered
+> output." If you need character-level filtering, layer a per-delta check
+> on the consumer side — Relay only guarantees terminal-state sanitization.
+
+`GlobalDefaults.stream_overall_timeout` (default 300 s) caps wall-clock time
+on a single streaming call. `httpx.Timeout` applies per read, so without
+this cap a slow-loris provider that emits one byte just inside the read
+deadline could keep a stream alive forever. When the deadline fires, Relay
+also calls `aclose()` on the underlying provider generator so the SSE
+socket is torn down promptly rather than waiting for GC.
+
+## `capture_messages="full"` and telemetry
+
+`observability.capture_messages="full"` ships the full prompt and response to
+whatever OTel exporter is configured (Datadog / Honeycomb / Langfuse). When
+combined with a hub-level redactor, OTel events are emitted from the
+post-redaction message list so exporters never receive PII the redactor was
+configured to scrub from the upstream provider call. **Still**, in regulated
+environments avoid `capture_messages="full"` with third-party exporters
+unless the threat model explicitly covers them.
+
+When `capture_messages="never"`, audit `error_message` is sanitized to
+`{error_type}: status={code}` and never carries `error.raw` content —
+provider 400s often echo the prompt back, which would otherwise defeat the
+never-capture promise.
+
+## `RelayError.raw` is scrubbed
+
+Provider-echoed error bodies attached to `RelayError.raw` are run through a
+secret scrubber on construction (`Authorization`, `Bearer`, `x-api-key`,
+`sk-…`, AWS access keys). `str(err)` includes a `<raw redacted>` marker so
+users don't reach for the attribute thinking it's safe. The opt-in escape
+hatch is `err.raw_unsafe()`.
+
+## Untrusted `messages` lists
+
+Set `hub.chat(..., trust_system=False)` (or attach
+`StripUserSystem()` as a guardrail) when `messages` originates from
+untrusted user input. Otherwise a user can ship
+`{"role": "system", "content": "ignore previous instructions"}` and (with
+Anthropic in particular) have it folded into the developer's own system
+prompt with equal authority.
+
+## `relay models inspect` redaction
+
+CLI inspection redacts `LiteralCredential.value` in both text and `--json`
+output, so anyone with shell access to the box running the command cannot
+read the production key off their terminal.
+
+## Audit-sink reliability
+
+Sink failures are logged (`relay.audit.audit_sink_failures` counter +
+`logger.warning("audit_sink_failed")`) instead of being swallowed. For
+environments where missing an audit row is itself a compliance violation,
+construct the hub with `Hub.from_yaml(..., strict_audit=True)` — sink
+exceptions then re-raise rather than getting absorbed.
+
+Note: under `strict_audit=True`, a sink that fails during success-path
+emission discards the otherwise-successful `ChatResponse` — the caller
+sees the sink's exception. This is the fail-closed behavior compliance
+regimes typically want, but means a flaky sink can take down working
+chat traffic. Use it only when "no audit row = abort the call" is the
+right policy.
+
+`CallbackSink` emits a `UserWarning` at construction when handed a plain
+sync callback (which would block the event loop and serialize concurrent
+emissions). Use `async def cb(event): ...` for production sinks.

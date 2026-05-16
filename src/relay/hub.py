@@ -19,6 +19,8 @@ The Hub composes:
 
 from __future__ import annotations
 
+import asyncio
+import contextlib
 import time
 from collections.abc import AsyncIterator, Mapping
 from pathlib import Path
@@ -26,13 +28,15 @@ from typing import TYPE_CHECKING, Any, Literal
 
 from relay._internal.circuit_breaker import CircuitBreaker
 from relay._internal.router import call_group
+from relay._internal.schema_validate import validate_tool_arguments
 from relay._internal.transport import HttpClientManager
-from relay.audit import AuditSink, build_event
+from relay.audit import AuditSink, _record_sink_failure, build_event
 from relay.cache import Cache, cache_key
 from relay.catalog._pricing import PricingResolver
 from relay.config import load as load_config
 from relay.config._schema import ModelEntry, RelayConfig
-from relay.errors import ConfigError
+from relay.errors import ConfigError, ToolSchemaError
+from relay.errors import TimeoutError as RelayTimeoutError
 from relay.guardrails import Guardrail, GuardrailError, evaluate_post, evaluate_pre
 from relay.providers import Provider, make_provider
 from relay.redaction import Redactor
@@ -48,6 +52,7 @@ from relay.types import (
     Cost,
     Message,
     StreamEnd,
+    StreamErrorEvent,
     StreamEvent,
 )
 
@@ -119,6 +124,7 @@ class Hub:
         redactor: Redactor | None = None,
         guardrails: list[Guardrail] | None = None,
         audit_sinks: list[AuditSink] | None = None,
+        strict_audit: bool = False,
     ) -> None:
         self._config = config
         self._clients = HttpClientManager(config.defaults)
@@ -134,6 +140,10 @@ class Hub:
         self._redactor: Redactor | None = redactor
         self._guardrails: list[Guardrail] = list(guardrails or [])
         self._audit_sinks: list[AuditSink] = list(audit_sinks or [])
+        self._strict_audit = strict_audit
+        """When True, an audit-sink emit/aclose error re-raises instead of
+        being logged and swallowed. Use in environments where missing an
+        audit row is itself a compliance violation."""
         from relay.batch import BatchManager
 
         self.batch = BatchManager(self)
@@ -151,6 +161,7 @@ class Hub:
         redactor: Redactor | None = None,
         guardrails: list[Guardrail] | None = None,
         audit_sinks: list[AuditSink] | None = None,
+        strict_audit: bool = False,
     ) -> Hub:
         """Load YAML config from one or more paths and build a Hub.
 
@@ -163,6 +174,7 @@ class Hub:
             redactor=redactor,
             guardrails=guardrails,
             audit_sinks=audit_sinks,
+            strict_audit=strict_audit,
         )
 
     @classmethod
@@ -174,6 +186,7 @@ class Hub:
         redactor: Redactor | None = None,
         guardrails: list[Guardrail] | None = None,
         audit_sinks: list[AuditSink] | None = None,
+        strict_audit: bool = False,
     ) -> Hub:
         return cls(
             config,
@@ -181,6 +194,7 @@ class Hub:
             redactor=redactor,
             guardrails=guardrails,
             audit_sinks=audit_sinks,
+            strict_audit=strict_audit,
         )
 
     # ------------------------------------------------------------------
@@ -202,7 +216,10 @@ class Hub:
         for sink in self._audit_sinks:
             try:
                 await sink.aclose()
-            except Exception:  # noqa: S112
+            except Exception as e:
+                _record_sink_failure(sink, e)
+                if self._strict_audit:
+                    raise
                 continue
 
     # ------------------------------------------------------------------
@@ -345,10 +362,17 @@ class Hub:
         alias: str,
         *,
         messages: list[Message] | list[Mapping[str, Any]],
+        trust_system: bool = True,
         **kwargs: Any,
     ) -> ChatResponse:
-        """Call a model or group by alias and return the assembled response."""
-        normalized_messages = _coerce_messages(messages)
+        """Call a model or group by alias and return the assembled response.
+
+        Set ``trust_system=False`` when ``messages`` originates from
+        untrusted user input. Any ``role="system"`` entry then raises
+        :class:`relay.errors.ConfigError` — set the developer's system
+        prompt in code instead of forwarding it through.
+        """
+        normalized_messages = _coerce_messages(messages, trust_system=trust_system)
         if alias in self._config.models:
             return await self._chat_one(
                 self._config.models[alias], messages=normalized_messages, **kwargs
@@ -377,14 +401,18 @@ class Hub:
         alias: str,
         *,
         messages: list[Message] | list[Mapping[str, Any]],
+        trust_system: bool = True,
         **kwargs: Any,
     ) -> AsyncIterator[StreamEvent]:
         """Stream events from a single model. Group streaming with fallback is v0.2.
 
         Returns an async iterator directly — callers use ``async for ev in
         hub.stream(...)`` without an ``await``.
+
+        ``trust_system=False`` rejects any ``role="system"`` entry; see
+        :meth:`chat` for the rationale.
         """
-        normalized_messages = _coerce_messages(messages)
+        normalized_messages = _coerce_messages(messages, trust_system=trust_system)
         if alias in self._config.groups:
             raise ConfigError(
                 f"{alias!r} is a group; group streaming with fallback is planned for v0.2. "
@@ -408,14 +436,20 @@ class Hub:
     ) -> ChatResponse:
         request = self._build_request(messages=messages, stream=False, **kwargs)
 
-        # Redaction (pre-call). Modifies the message list in place on the request.
+        # Redaction (pre-call). Mutates the request; we keep the pre-redaction
+        # messages around to fold into the cache key so two users whose
+        # distinct PII redacts to the same placeholder don't collide.
         redaction_count = 0
         redaction_kinds: tuple[str, ...] = ()
+        pre_redaction_messages: list[Message] | None = None
         if self._redactor is not None:
+            pre_redaction_messages = list(request.messages)
             result = self._redactor.redact(request.messages)
             request = request.model_copy(update={"messages": result.messages})
             redaction_count = result.redactions
             redaction_kinds = result.matched_kinds
+
+        user_id = _extract_user_id(kwargs)
 
         # Pre-call guardrails.
         violation = evaluate_pre(self._guardrails, request.messages)
@@ -430,16 +464,40 @@ class Hub:
                 duration_ms=None,
                 redaction_count=redaction_count,
                 redaction_kinds=redaction_kinds,
-                user_id=_extract_user_id(kwargs),
+                user_id=user_id,
             )
             raise err
 
         cached_resp: ChatResponse | None = None
         ck: str | None = None
         if self._cache is not None:
-            ck = cache_key(entry.target, request)
+            ck = cache_key(
+                entry.target,
+                request,
+                scope=user_id,
+                pre_redaction_messages=pre_redaction_messages,
+            )
             cached_resp = await self._cache.get(ck)
             if cached_resp is not None:
+                # Post-guardrails MUST run against the cached response: if a
+                # rule was tightened (new banned term, new safety policy)
+                # after the entry was cached, a stale-but-now-blocked
+                # response would otherwise leak. Cheap — no provider call.
+                cached_violation = evaluate_post(self._guardrails, cached_resp)
+                if cached_violation is not None:
+                    err = GuardrailError(cached_violation)
+                    await self._emit_audit(
+                        operation="chat",
+                        entry=entry,
+                        messages=request.messages,
+                        response=cached_resp,
+                        error=err,
+                        duration_ms=0.0,
+                        redaction_count=redaction_count,
+                        redaction_kinds=redaction_kinds,
+                        user_id=user_id,
+                    )
+                    raise err
                 await self._emit_audit(
                     operation="chat",
                     entry=entry,
@@ -449,13 +507,14 @@ class Hub:
                     duration_ms=0.0,
                     redaction_count=redaction_count,
                     redaction_kinds=redaction_kinds,
-                    user_id=_extract_user_id(kwargs),
+                    user_id=user_id,
                 )
                 return cached_resp
 
         provider = self._get_provider(entry.provider, api_style=entry.api_style)
         try:
             resp = await provider.chat(entry=entry, request=request, clients=self._clients)
+            _validate_response_tool_calls(resp, request.tools)
             priced = await self._apply_cost(resp, entry)
         except Exception as e:
             await self._emit_audit(
@@ -467,7 +526,7 @@ class Hub:
                 duration_ms=None,
                 redaction_count=redaction_count,
                 redaction_kinds=redaction_kinds,
-                user_id=_extract_user_id(kwargs),
+                user_id=user_id,
             )
             raise
 
@@ -484,7 +543,7 @@ class Hub:
                 duration_ms=priced.latency_ms,
                 redaction_count=redaction_count,
                 redaction_kinds=redaction_kinds,
-                user_id=_extract_user_id(kwargs),
+                user_id=user_id,
             )
             raise err
 
@@ -500,7 +559,7 @@ class Hub:
             duration_ms=priced.latency_ms,
             redaction_count=redaction_count,
             redaction_kinds=redaction_kinds,
-            user_id=_extract_user_id(kwargs),
+            user_id=user_id,
         )
         return priced
 
@@ -514,15 +573,97 @@ class Hub:
         request = self._build_request(messages=messages, stream=True, **kwargs)
         provider = self._get_provider(entry.provider, api_style=entry.api_style)
 
+        # Redaction (pre-call), mirroring _chat_one. Mutates the request so
+        # downstream provider never sees the pre-redaction content.
+        if self._redactor is not None:
+            result = self._redactor.redact(request.messages)
+            request = request.model_copy(update={"messages": result.messages})
+
+        # Pre-call guardrails — raise *before* opening the SSE socket so
+        # blocked prompts never reach the model.
+        pre_violation = evaluate_pre(self._guardrails, request.messages)
+        if pre_violation is not None:
+            raise GuardrailError(pre_violation)
+
+        # Wall-clock deadline. Per-entry timeout wins when explicitly set;
+        # otherwise fall back to the global stream_overall_timeout. A
+        # malicious slow-loris provider that emits one byte per N seconds
+        # can otherwise stall forever inside provider.stream's aiter_lines.
+        overall_deadline = (
+            entry.timeout
+            if entry.timeout is not None
+            else self._config.defaults.stream_overall_timeout
+        )
+
         async def gen() -> AsyncIterator[StreamEvent]:
-            async for ev in provider.stream(  # type: ignore[attr-defined]
+            # Manual wall-clock deadline implemented with per-iteration
+            # wait_for — asyncio.timeout would be cleaner but only landed in
+            # Python 3.11, and Relay supports 3.10. ``deadline`` is computed
+            # BEFORE constructing the inner iterator so any work the provider
+            # does inside ``stream(...)`` (typically the SSE connect) counts
+            # against the cap too — otherwise a hang during connection
+            # setup would escape the wall-clock guard.
+            deadline = time.monotonic() + overall_deadline
+            inner = provider.stream(  # type: ignore[attr-defined]
                 entry=entry, request=request, clients=self._clients
-            ):
-                if isinstance(ev, StreamEnd):
-                    priced = await self._apply_cost(ev.response, entry)
-                    yield StreamEnd(finish_reason=ev.finish_reason, response=priced)
-                else:
-                    yield ev
+            ).__aiter__()
+            try:
+                while True:
+                    remaining = deadline - time.monotonic()
+                    if remaining <= 0:
+                        raise RelayTimeoutError(
+                            f"stream exceeded overall deadline of {overall_deadline}s",
+                            provider=entry.provider,
+                            model=entry.model_id,
+                        )
+                    try:
+                        ev = await asyncio.wait_for(inner.__anext__(), timeout=remaining)
+                    except StopAsyncIteration:
+                        return
+                    except asyncio.TimeoutError as e:
+                        raise RelayTimeoutError(
+                            f"stream exceeded overall deadline of {overall_deadline}s "
+                            "(set defaults.stream_overall_timeout or per-model timeout)",
+                            provider=entry.provider,
+                            model=entry.model_id,
+                        ) from e
+
+                    if isinstance(ev, StreamEnd):
+                        _validate_response_tool_calls(ev.response, request.tools)
+                        priced = await self._apply_cost(ev.response, entry)
+                        # Post-call guardrails on the assembled response.
+                        # NOTE: any text deltas were already yielded to the
+                        # caller before this point — the final ``StreamEnd``
+                        # is sanitized but consumers must treat a trailing
+                        # ``StreamErrorEvent`` as "discard rendered output"
+                        # (see docs/production/security.md).
+                        post_violation = evaluate_post(self._guardrails, priced)
+                        if post_violation is not None:
+                            # Marker carries only the rule id — the
+                            # violation message itself often quotes the
+                            # blocked term back, defeating the redaction.
+                            priced = _strip_blocked_text(priced, post_violation.rule)
+                            yield StreamErrorEvent(
+                                error=post_violation.message,
+                                code=post_violation.rule,
+                            )
+                            yield StreamEnd(
+                                finish_reason="content_filter",
+                                response=priced,
+                            )
+                            return
+                        yield StreamEnd(finish_reason=ev.finish_reason, response=priced)
+                    else:
+                        yield ev
+            finally:
+                # ``wait_for`` cancels the ``__anext__`` task on timeout but
+                # leaves the underlying async generator (and its httpx SSE
+                # socket) hanging until GC. Explicitly close it so a
+                # slow-loris provider socket is torn down promptly.
+                aclose = getattr(inner, "aclose", None)
+                if aclose is not None:
+                    with contextlib.suppress(Exception):
+                        await aclose()
 
         return gen()
 
@@ -577,7 +718,10 @@ class Hub:
         for sink in self._audit_sinks:
             try:
                 await sink.emit(ev)
-            except Exception:  # noqa: S112
+            except Exception as e:
+                _record_sink_failure(sink, e)
+                if self._strict_audit:
+                    raise
                 continue
 
     def _get_provider(self, name: str, *, api_style: str | None = None) -> Provider:
@@ -660,6 +804,62 @@ class Hub:
         return getattr(row, key, None)
 
 
+def _validate_response_tool_calls(
+    response: ChatResponse, tools: list[Any] | None
+) -> None:
+    """Validate each tool_call's arguments against the originating tool schema.
+
+    Provider parsers don't enforce this — the model could return arguments
+    that violate the declared schema (extra fields, wrong types) and a
+    caller wiring ``tool_calls`` straight into ``subprocess`` would dispatch
+    garbage. Raising ToolSchemaError lets the caller fail closed.
+
+    Also rejects tool calls whose ``name`` was not in the declared tools
+    list — a hallucinated tool name with no schema would otherwise flow
+    straight through to the caller's dispatcher, where it could be confused
+    for a legitimate call.
+
+    No-op when the request carried no tools.
+    """
+    if not tools:
+        return
+    schema_by_name: dict[str, dict[str, Any]] = {}
+    for t in tools:
+        name = getattr(t, "name", None)
+        params = getattr(t, "parameters", None)
+        if name and isinstance(params, dict):
+            schema_by_name[name] = params
+    for choice in response.choices:
+        for tc in choice.tool_calls:
+            schema = schema_by_name.get(tc.name)
+            if schema is None:
+                raise ToolSchemaError(
+                    f"model called undeclared tool {tc.name!r}; "
+                    f"declared tools: {sorted(schema_by_name)}",
+                    raw={"tool_call": {"name": tc.name, "arguments": tc.arguments}},
+                )
+            validate_tool_arguments(tc.name, tc.arguments, schema)
+
+
+def _strip_blocked_text(response: ChatResponse, reason: str) -> ChatResponse:
+    """Replace the assistant text in every choice with a block marker.
+
+    Called when post-guardrails fire on a streamed response: the caller has
+    already received text deltas, but we still owe them a final response
+    object that doesn't carry the blocked content.
+    """
+    marker = f"[blocked by guardrail: {reason}]"
+    new_choices = []
+    for ch in response.choices:
+        new_message = ch.message.model_copy(update={"content": marker})
+        new_choices.append(
+            ch.model_copy(
+                update={"message": new_message, "finish_reason": "content_filter"}
+            )
+        )
+    return response.model_copy(update={"choices": new_choices})
+
+
 def _extract_user_id(kwargs: dict[str, Any]) -> str | None:
     md = kwargs.get("metadata") or {}
     if isinstance(md, dict):
@@ -671,17 +871,27 @@ def _extract_user_id(kwargs: dict[str, Any]) -> str | None:
 
 def _coerce_messages(
     messages: list[Message] | list[Mapping[str, Any]] | None,
+    *,
+    trust_system: bool = True,
 ) -> list[Message]:
     if messages is None:
         return []
     out: list[Message] = []
     for m in messages:
         if isinstance(m, Message):
-            out.append(m)
+            msg = m
         elif isinstance(m, Mapping):
-            out.append(Message.model_validate(m))
+            msg = Message.model_validate(m)
         else:
             raise ConfigError(f"invalid message type: {type(m).__name__}")
+        if not trust_system and msg.role == "system":
+            raise ConfigError(
+                "messages contain a role='system' entry but trust_system=False; "
+                "set the system prompt in code rather than forwarding it from "
+                "untrusted user input (or call hub.chat with trust_system=True "
+                "if the messages list is fully under your control)."
+            )
+        out.append(msg)
     return out
 
 

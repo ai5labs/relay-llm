@@ -103,6 +103,12 @@ def _cmd_models_inspect(args: argparse.Namespace) -> int:
         catalog.get(entry.inherit_from) if entry.inherit_from else None
     )
     out: dict[str, Any] = entry.model_dump(exclude_none=True)
+    # Never leak a literal credential value to stdout — anyone with shell
+    # access to the box running ``relay models inspect`` would otherwise
+    # read the production key off their terminal.
+    cred = out.get("credential")
+    if isinstance(cred, dict) and cred.get("type") == "literal":
+        cred["value"] = "<literal-credential redacted>"
     if row:
         out["catalog"] = {
             "context_window": row.context_window,

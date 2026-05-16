@@ -43,6 +43,7 @@ dependencies = [
     "pyyaml>=6.0",
     "orjson>=3.10",
     "typing-extensions>=4.12",
+    "jsonschema>=4.21",
 ]
 
 [project.optional-dependencies]
@@ -121,7 +122,7 @@ files = ["src"]
 disable_error_code = ["union-attr", "unused-ignore", "no-any-return"]
 
 [[tool.mypy.overrides]]
-module = ["yaml.*", "mcp.*"]
+module = ["yaml.*", "mcp.*", "jsonschema.*"]
 ignore_missing_imports = true
 
 [tool.pyright]

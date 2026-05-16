@@ -62,7 +62,7 @@ class CircuitBreaker:
 
     async def before(self, key: str) -> None:
         """Raise ``CircuitOpenError`` if the circuit for ``key`` is open."""
-        now = time.time()
+        now = time.monotonic()
         async with self._lock:
             st = self._states.get(key)
             if st is None:
@@ -87,7 +87,7 @@ class CircuitBreaker:
             st.half_open_in_flight = False
 
     async def on_failure(self, key: str) -> None:
-        now = time.time()
+        now = time.monotonic()
         async with self._lock:
             st = self._states.setdefault(key, _BreakerState())
             st.half_open_in_flight = False

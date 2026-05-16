@@ -68,7 +68,9 @@ async def test_gemini_basic_chat(env_key: None) -> None:
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_gemini_uses_key_query_param(env_key: None) -> None:
+async def test_gemini_uses_x_goog_api_key_header(env_key: None) -> None:
+    """The API key is sent in the x-goog-api-key header, never the query string
+    (query strings land in proxy/reverse-proxy access logs)."""
     route = respx.post(
         "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
     ).mock(
@@ -88,8 +90,9 @@ async def test_gemini_uses_key_query_param(env_key: None) -> None:
     hub = Hub.from_config(load_str(_yaml()))
     try:
         await hub.chat("m", messages=[{"role": "user", "content": "hi"}])
-        url = str(route.calls[0].request.url)
-        assert "key=g-fake" in url
+        req = route.calls[0].request
+        assert req.headers.get("x-goog-api-key") == "g-fake"
+        assert "key=" not in str(req.url)
     finally:
         await hub.aclose()
 
